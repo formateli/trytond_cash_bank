@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!-- This file is part of trytond-cash_bank module. The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<form>
+    <group col="4" colspan="4" id="cash_bank_group" yfill="1">
+        <label name="cash_bank_from"/>
+        <field name="cash_bank_from"/>
+        <label name="type_from"/>
+        <field name="type_from"/>
+        <label name="cash_bank_to"/>
+        <field name="cash_bank_to"/>
+        <label name="type_to"/>
+        <field name="type_to"/>
+    </group>
+    <label name="date"/>
+    <field name="date"/>
+    <label name="party"/>
+    <field name="party"/>
+    <label name="reference"/>
+    <field name="reference"/>
+    <newline />
+    <label name="description"/>
+    <field name="description" colspan="3"/>
+    <notebook colspan="4">
+        <page string="Documents" col="1" id="documents">
+            <field name="documents"/>
+        </page>
+        <page string="Info" id="info">
+            <label name="company"/>
+            <field name="company"/>
+            <label name="currency"/>
+            <field name="currency"/>
+            <newline />
+            <label name="receipt_from"/>
+            <field name="receipt_from"/>
+            <label name="receipt_to"/>
+            <field name="receipt_to"/>
+        </page>
+    </notebook>
+    <group col="2" colspan="2" id="states" yfill="1">
+        <label name="state"/>
+        <field name="state"/>
+        <group col="-1" colspan="2" id="buttons">
+            <button name="cancel" string="Cancel"
+                icon="tryton-cancel"/>
+            <button name="draft" string="Draft"/>
+            <button name="confirm" string="Confirm"
+                icon="tryton-ok"/>
+            <button name="post" string="Post"
+                icon="tryton-go-next"/>
+        </group>
+    </group>
+    <group col="2" colspan="2" id="amount" yfill="1">
+        <label name="cash" xalign="1.0" xexpand="1"/>
+        <field name="cash" xalign="1.0" xexpand="0"/>
+        <label name="total_documents" xalign="1.0" xexpand="1"/>
+        <field name="total_documents" xalign="1.0" xexpand="0"/>
+        <label name="total" xalign="1.0" xexpand="1"/>
+        <field name="total" xalign="1.0" xexpand="0"/>
+    </group>
+</form>
