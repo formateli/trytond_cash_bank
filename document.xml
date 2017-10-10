@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!-- This file is part of trytond-cash_bank module.
+The COPYRIGHT file at the top level of this repository
+contains the full copyright notices and license terms. -->
+<tryton>
+    <data>
+        <!-- document type -->
+
+        <record model="ir.ui.view" id="document_type_view_form">
+            <field name="model">cash_bank.document.type</field>
+            <field name="type">form</field>
+            <field name="name">document_type_form</field>
+        </record>
+        <record model="ir.ui.view" id="document_type_view_tree">
+            <field name="model">cash_bank.document.type</field>
+            <field name="type">tree</field>
+            <field name="name">document_type_tree</field>
+        </record>
+        <record model="ir.action.act_window" id="act_document_type_form">
+            <field name="name">Document Types</field>
+            <field name="res_model">cash_bank.document.type</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_document_type_form_view1">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="document_type_view_tree"/>
+            <field name="act_window" ref="act_document_type_form"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_document_type_form_view2">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="document_type_view_form"/>
+            <field name="act_window" ref="act_document_type_form"/>
+        </record>
+
+        <menuitem parent="menu_cash_bank_configuration" sequence="30"
+            action="act_document_type_form" id="menu_document_type_tree"/>
+
+        <record model="ir.model.access" id="access_document_type">
+            <field name="model" search="[('model', '=', 'cash_bank.document.type')]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_document_type_cash_bank_admin">
+            <field name="model" search="[('model', '=', 'cash_bank.document.type')]"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
+
+        <!-- Document -->
+
+        <record model="ir.ui.view" id="document_view_form">
+            <field name="model">cash_bank.document</field>
+            <field name="type">form</field>
+            <field name="name">document_form</field>
+        </record>
+        <record model="ir.ui.view" id="document_view_tree">
+            <field name="model">cash_bank.document</field>
+            <field name="type">tree</field>
+            <field name="name">document_tree</field>
+        </record>
+
+        <record model="ir.model.access" id="access_document">
+            <field name="model" search="[('model', '=', 'cash_bank.document')]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_document_group_cash_bank">
+            <field name="model" search="[('model', '=', 'cash_bank.document')]"/>
+            <field name="group" ref="group_cash_bank"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+    </data>
+</tryton>

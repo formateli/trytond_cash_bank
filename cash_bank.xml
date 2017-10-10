@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+<!-- This file is part of trytond-cash_bank module. 
+The COPYRIGHT file at the top level of this repository 
+contains the full copyright notices and license terms. -->
+<tryton>
+    <data>
+        <record model="res.group" id="group_cash_bank_admin">
+            <field name="name">Cash &amp; Bank Administration</field>
+        </record>
+        <record model="res.group" id="group_cash_bank">
+            <field name="name">Cash &amp; Bank</field>
+        </record>
+        <record model="res.user-res.group"
+            id="user_admin_group_cash_bank_admin">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+        <record model="res.user-res.group"
+            id="user_admin_group_cash_bank">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cash_bank"/>
+        </record>
+
+        <record model="ir.ui.icon" id="cash_bank_icon">
+            <field name="name">cash-bank</field>
+            <field name="path">icons/cash-bank.svg</field>
+        </record>
+        <menuitem name="Cash &amp; Bank" sequence="30" 
+            id="menu_cash_bank" parent="account.menu_account"
+            icon="cash-bank"/>
+        <record model="ir.ui.menu-res.group"
+            id="menu_cash_bank_group_cash_bank">
+            <field name="menu" ref="menu_cash_bank"/>
+            <field name="group" ref="group_cash_bank"/>
+        </record>
+
+        <record model="ir.sequence.type" id="sequence_type_cash_bank_receipt">
+            <field name="name">Cash and Bank Receipt</field>
+            <field name="code">cash_bank.receipt</field>
+        </record>
+        <record model="ir.sequence.type-res.group"
+            id="sequence_type_cash_bank_receipt_group_admin">
+            <field name="sequence_type" ref="sequence_type_cash_bank_receipt"/>
+            <field name="group" ref="res.group_admin"/>
+        </record>
+        <record model="ir.sequence.type-res.group"
+            id="sequence_type_cash_bank_receipt_group_cash_bank_admin">
+            <field name="sequence_type" ref="sequence_type_cash_bank_receipt"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <menuitem name="Configuration" parent="menu_cash_bank"
+            id="menu_cash_bank_configuration" sequence="10"
+            icon="tryton-preferences"/>
+        <record model="ir.ui.menu-res.group"
+            id="menu_cash_bank_configuration_group_cash_bank_admin">
+            <field name="menu" ref="menu_cash_bank_configuration"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <record model="ir.ui.view" id="cash_bank_view_form">
+            <field name="model">cash_bank.cash_bank</field>
+            <field name="type">form</field>
+            <field name="name">cash_bank_form</field>
+        </record>
+        <record model="ir.ui.view" id="cash_bank_view_tree">
+            <field name="model">cash_bank.cash_bank</field>
+            <field name="type">tree</field>
+            <field name="name">cash_bank_tree</field>
+        </record>
+        <record model="ir.action.act_window" id="act_cash_bank_form">
+            <field name="name">Cash &amp; Banks</field>
+            <field name="res_model">cash_bank.cash_bank</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_cash_bank_form_view1">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="cash_bank_view_tree"/>
+            <field name="act_window" ref="act_cash_bank_form"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_cash_bank_form_view2">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="cash_bank_view_form"/>
+            <field name="act_window" ref="act_cash_bank_form"/>
+        </record>
+
+        <menuitem parent="menu_cash_bank_configuration" sequence="20"
+            action="act_cash_bank_form" id="menu_cash_bank_tree"/>
+
+        <record model="ir.model.access" id="access_cash_bank">
+            <field name="model" search="[('model', '=', 'cash_bank.cash_bank')]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_cash_bank_admin">
+            <field name="model" search="[('model', '=', 'cash_bank.cash_bank')]"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
+        
+        <!-- receipt type -->
+
+        <record model="ir.ui.view" id="receipt_type_view_form">
+            <field name="model">cash_bank.receipt_type</field>
+            <field name="type">form</field>
+            <field name="name">receipt_type_form</field>
+        </record>
+        <record model="ir.ui.view" id="receipt_type_view_tree">
+            <field name="model">cash_bank.receipt_type</field>
+            <field name="type">tree</field>
+            <field name="name">receipt_type_tree</field>
+        </record>
+        <record model="ir.action.act_window" id="act_receipt_type_form">
+            <field name="name">Receipt type</field>
+            <field name="res_model">cash_bank.receipt_type</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_receipt_type_form_view1">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="receipt_type_view_tree"/>
+            <field name="act_window" ref="act_receipt_type_form"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_receipt_type_form_view2">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="receipt_type_view_form"/>
+            <field name="act_window" ref="act_receipt_type_form"/>
+        </record>
+
+        <menuitem parent="menu_cash_bank_configuration" sequence="25"
+            action="act_receipt_type_form" id="menu_receipt_type_tree"/>
+
+        <record model="ir.model.access" id="access_receipt_type">
+            <field name="model" search="[('model', '=', 'cash_bank.receipt_type')]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_receipt_type_group_admin">
+            <field name="model" search="[('model', '=', 'cash_bank.receipt_type')]"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+    </data>
+</tryton>
+

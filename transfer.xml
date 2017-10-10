@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!-- This file is part of trytond-cash_bank module.
+The COPYRIGHT file at the top level of this repository
+contains the full copyright notices and license terms. -->
+<tryton>
+    <data>
+        <!-- Transfer -->
+
+        <record model="ir.ui.view" id="transfer_view_form">
+            <field name="model">cash_bank.transfer</field>
+            <field name="type">form</field>
+            <field name="name">transfer_form</field>
+        </record>
+        <record model="ir.ui.view" id="transfer_view_tree">
+            <field name="model">cash_bank.transfer</field>
+            <field name="type">tree</field>
+            <field name="name">transfer_tree</field>
+        </record>
+        <record model="ir.action.act_window" id="act_transfer_form">
+            <field name="name">Transfer</field>
+            <field name="res_model">cash_bank.transfer</field>
+            <field name="search_value"></field>
+        </record>
+        <record model="ir.action.act_window.view"
+                id="act_transfer_form_view1">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="transfer_view_tree"/>
+            <field name="act_window" ref="act_transfer_form"/>
+        </record>
+        <record model="ir.action.act_window.view"
+                id="act_transfer_form_view2">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="transfer_view_form"/>
+            <field name="act_window" ref="act_transfer_form"/>
+        </record>
+
+        <record model="ir.action.act_window.domain" id="act_transfer_form_domain_draft">
+            <field name="name">Draft</field>
+            <field name="sequence" eval="10"/>
+            <field name="domain"
+                eval="[('state', '=', 'draft'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
+            <field name="act_window" ref="act_transfer_form"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_transfer_form_domain_confirmed">
+            <field name="name">Confirmed</field>
+            <field name="sequence" eval="20"/>
+            <field name="domain"
+                eval="[('state', '=', 'confirmed'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
+            <field name="act_window" ref="act_transfer_form"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_transfer_form_domain_cancel">
+            <field name="name">Cancel</field>
+            <field name="sequence" eval="40"/>
+            <field name="domain"
+                eval="[('state', '=', 'cancel'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
+            <field name="act_window" ref="act_transfer_form"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_transfer_form_domain_post">
+            <field name="name">Posted</field>
+            <field name="sequence" eval="50"/>
+            <field name="domain"
+                eval="[('state', '=', 'posted'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
+            <field name="act_window" ref="act_transfer_form"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_transfer_form_domain_all">
+            <field name="name">All</field>
+            <field name="sequence" eval="9999"/>
+            <field name="domain"
+                eval="[('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
+            <field name="act_window" ref="act_transfer_form"/>
+        </record>
+
+        <menuitem parent="menu_cash_bank" sequence="30"
+            action="act_transfer_form" id="menu_transfer_form"/>
+
+        <record model="ir.model.access" id="access_transfer">
+            <field name="model" search="[('model', '=', 'cash_bank.transfer')]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_transfer_group_cash_bank">
+            <field name="model" search="[('model', '=', 'cash_bank.transfer')]"/>
+            <field name="group" ref="group_cash_bank"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
+        <record model="ir.model.button" id="transfer_cancel_button">
+            <field name="name">cancel</field>
+            <field name="model" search="[('model', '=', 'cash_bank.transfer')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="transfer_cancel_button_group_cash_bank_admin">
+            <field name="button" ref="transfer_cancel_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+    </data>
+</tryton>

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- This file is part of trytond-pcw-purchase module. The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<tree>
+    <field name="cash_bank"/>
+    <field name="name"/>
+    <field name="type"/>
+    <field name="sequence"/>
+    <field name="active"/>
+</tree>
