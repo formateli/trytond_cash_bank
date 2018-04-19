@@ -32,36 +32,38 @@ STATES = [
 class Convertion(Workflow, ModelSQL, ModelView):
     "Cash/Bank Convertion from Document to Cash"
     __name__ = "cash_bank.convertion"
-    company = fields.Many2One('company.company', 'Company', required=True,
-        states={
-            'readonly': ((Eval('state') != 'draft') |
-                    Eval('documents', [0]) | Eval('lines', [0])
-                ),
-            },
-        domain=[
-            ('id', If(Eval('context', {}).contains('company'), '=', '!='),
-                Eval('context', {}).get('company', -1)),
-            ],
-        depends=_DEPENDS, select=True)
-    cash_bank = fields.Many2One(
-            'cash_bank.cash_bank', 'Cash/Bank', required=True,
-            domain=[
-                ('company', 'in',
-                    [Eval('context', {}).get('company', -1), None])
-            ], states=_STATES)
-    date = fields.Date('Date', required=True,
-        states=_STATES, depends=_DEPENDS)
-    reference = fields.Char('Reference', size=None,
-        states={
-            'readonly': Eval('state') == 'posted',
-        })
-    documents = fields.Many2Many('cash_bank.document-cash_bank.receipt',
-        'receipt', 'document', 'Documents',
-        domain=[
-            ('current_receipt.cash_bank', '=', 'cash_bank'),
-            ('converted', '=', False)
-        ],
-        states=_STATES)
-    total_documents = fields.Function(fields.Numeric('Total Documents',
-            digits=(16, Eval('currency_digits', 2))),
-            'get_total_detail')
+#    company = fields.Many2One('company.company', 'Company', required=True,
+#        states={
+#            'readonly': ((Eval('state') != 'draft') |
+#                    Eval('documents', [0]) | Eval('lines', [0])
+#                ),
+#            },
+#        domain=[
+#            ('id', If(Eval('context', {}).contains('company'), '=', '!='),
+#                Eval('context', {}).get('company', -1)),
+#            ],
+#        select=True)
+#    cash_bank = fields.Many2One(
+#            'cash_bank.cash_bank', 'Cash/Bank', required=True,
+#            domain=[
+#                ('company', 'in',
+#                    [Eval('context', {}).get('company', -1), None])
+#            ], states=_STATES)
+#    date = fields.Date('Date', required=True,
+#        states=_STATES)
+#    reference = fields.Char('Reference', size=None,
+#        states={
+#            'readonly': Eval('state') == 'posted',
+#        })
+#    documents = fields.Many2Many('cash_bank.document-cash_bank.receipt',
+#        'receipt', 'document', 'Documents',
+#        domain=[
+#            ('current_receipt.cash_bank', '=', 'cash_bank'),
+#            ('converted', '=', False)
+#        ],
+#        states=_STATES)
+#    total_documents = fields.Function(fields.Numeric('Total Documents',
+#            digits=(16, Eval('currency_digits', 2))),
+#            'get_total_detail')
+
+    state = fields.Selection(STATES, 'State', readonly=True, required=True)

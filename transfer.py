@@ -36,61 +36,58 @@ class Transfer(Workflow, ModelSQL, ModelView):
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
             ],
-        depends=_DEPENDS, select=True)
+        depends=['state'], select=True)
     date = fields.Date('Date', required=True,
-        states=_STATES, depends=_DEPENDS)
-    reference = fields.Char('Reference', size=None, states=_STATES)
-    description = fields.Char('Description', size=None, states=_STATES)
+        states=_STATES, depends=['state'])
+    reference = fields.Char('Reference', size=None)
+    description = fields.Char('Description', size=None)
     cash_bank_from = fields.Many2One(
             'cash_bank.cash_bank', 'From', required=True,
             domain=[
                 ('company', 'in',
                     [Eval('context', {}).get('company', -1), None])
-            ], states=_STATES)
+            ], states=_STATES, depends=['company', 'state'])
     type_from = fields.Many2One('cash_bank.receipt_type',
         'Type', required=True,
         domain=[
             If(
-                (Bool(Eval('cash_bank_from')),
+                Bool(Eval('cash_bank_from')),
                     [('cash_bank', '=', Eval('cash_bank_from'))], []
-                )
             ),
             ('type', '=', 'out')
         ],
-        states=_STATES, depends=_DEPENDS)
+        states=_STATES, depends=['state', 'cash_bank_from'])
     cash_bank_to = fields.Many2One('cash_bank.cash_bank', 'To',
         required=True,
         domain=[
             ('id',
             If(Bool(Eval('cash_bank_from')), '!=', '='),
-            If(
-                Bool(Eval('cash_bank_from')), Eval('cash_bank_from'), Eval(-1))
+            Eval('cash_bank_from', -1)
             )
-        ], states=_STATES)
+        ], states=_STATES, depends=['state', 'cash_bank_from'])
     type_to = fields.Many2One('cash_bank.receipt_type', 'Type', required=True,
         domain=[
             If(
-                (Bool(Eval('cash_bank_to')),
+                Bool(Eval('cash_bank_to')),
                     [('cash_bank', '=', Eval('cash_bank_to'))], []
-                )
             ),
             ('type', '=', 'in')
         ],
-        states=_STATES, depends=_DEPENDS)
+        states=_STATES, depends=['state', 'cash_bank_to'])
     currency = fields.Many2One('currency.currency', 'Currency', required=True,
         states={
             'readonly': (Eval('state') != 'draft') | Eval('documents', [0]),
             },
-        depends=['state'])
+        depends=['state', 'documents'])
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
     party = fields.Many2One('party.party', 'Party',
-        states=_STATES, depends=['party_required'])
+        states=_STATES, depends=['state'])
     party_required = fields.Function(fields.Boolean('Party Required'),
         'on_change_with_party_required')
     cash = fields.Numeric('Cash',
         digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
-        states={'readonly': Eval('state') != 'draft'}, depends=['state'])
+        states=_STATES, depends=['state', 'currency_digits'])
     documents = fields.Many2Many('cash_bank.document-cash_bank.receipt',
         'receipt', 'document', 'Documents',
         domain=[
@@ -114,12 +111,14 @@ class Transfer(Workflow, ModelSQL, ModelView):
                 ),
             ]
         ],
-        states=_STATES, depends=['document_allow'])
+        states=_STATES, depends=['type_from', 'cash_bank_from'])
     total_documents = fields.Function(fields.Numeric('Total Documents',
-            digits=(16, Eval('currency_digits', 2))),
+            digits=(16, Eval('currency_digits', 2)),
+            depends=['currency_digits']),
             'get_total_documents')
     total = fields.Function(fields.Numeric('Total',
-                digits=(16, Eval('currency_digits', 2))),
+            digits=(16, Eval('currency_digits', 2)),
+            depends=['currency_digits']),
             'get_total')
     receipt_from = fields.Many2One('cash_bank.receipt', 'Receipt From',
         readonly=True)
@@ -206,7 +205,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
             return self.currency.digits
         return 2
 
-    @fields.depends('type_from, type_to')
+    @fields.depends('type_from', 'type_to')
     def on_change_with_party_required(self, name=None):
         required = False
         if self.type_from:

@@ -19,8 +19,6 @@ _STATES_DET = {
     'readonly': Eval('receipt_state') != 'draft',
 }
 
-_DEPENDS = ['state']
-
 STATES = [
     ('draft', 'Draft'),
     ('confirmed', 'Confirmed'),
@@ -43,7 +41,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
             ],
-        depends=_DEPENDS, select=True)
+        depends=['state'], select=True)
     cash_bank = fields.Many2One(
             'cash_bank.cash_bank', 'Cash/Bank', required=True,
             domain=[
@@ -57,7 +55,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 [('cash_bank', '=', Eval('cash_bank'))], []
             ),
         ],
-        states=_STATES, depends=_DEPENDS)
+        states=_STATES, depends=['cash_bank'])
     type_type = fields.Function(fields.Char('Type of Cash/Bank type',
         size=None), 'on_change_with_type_type')
     currency = fields.Many2One('currency.currency', 'Currency', required=True,
@@ -73,14 +71,14 @@ class Receipt(Workflow, ModelSQL, ModelView):
     reference = fields.Char('Reference', size=None, states=_STATES)
     description = fields.Char('Description', size=None, states=_STATES)
     date = fields.Date('Date', required=True,
-        states=_STATES, depends=_DEPENDS)
+        states=_STATES)
     party = fields.Many2One('party.party', 'Party',
         states=_STATES, depends=['party_required'])
     party_required = fields.Function(fields.Boolean('Party Required'),
         'on_change_with_party_required')
     cash = fields.Numeric('Cash',
         digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
-        states=_STATES, depends=_DEPENDS)
+        states=_STATES)
     documents = fields.Many2Many('cash_bank.document-cash_bank.receipt',
         'receipt', 'document', 'Documents',
         domain=[
@@ -93,15 +91,43 @@ class Receipt(Workflow, ModelSQL, ModelView):
                             [('last_receipt.id', '=', Eval('id'))],
                             [('last_receipt.type.type', '=', 'out')]
                         ],
-                        [('convertion', '=', None)],
+                        ['OR',
+                            [('last_receipt.id', '=', Eval('id'))],
+                            [
+                                ('last_receipt.type.type', '=', 'in'),
+                                ('last_receipt.state', 'in',
+                                    ['confirmed', 'posted'])
+                            ]
+                        ],
                     ),
                     [('id', '=', -1)]
                 ),
             ]
         ],
-        states=_STATES, depends=['id', 'document_allow', 'type_type'])
+
+
+
+#        domain=[
+#           [('convertion', '=', None)],
+#            [
+#                If(Bool(Eval('type')),
+#                    If(Eval('type_type') == 'in',
+#                        ['OR',
+#                            [('last_receipt', '=', None)],
+#                            [('last_receipt.id', '=', Eval('id'))],
+#                            [('last_receipt.type.type', '=', 'out')]
+#                        ],
+#                        [('convertion', '=', None)],
+#                    ),
+#                    [('id', '=', -1)]
+#                ),
+#            ]
+#        ],
+        states=_STATES,
+        depends=['id', 'type', 'type_type'])
     total_documents = fields.Function(fields.Numeric('Total Documents',
-        digits=(16, Eval('currency_digits', 2))),
+        digits=(16, Eval('currency_digits', 2)),
+        depends=['currency_digits']),
         'get_total_detail')
     document_allow = fields.Function(fields.Boolean('Allow documents'),
         'on_change_with_document_allow')
@@ -109,13 +135,16 @@ class Receipt(Workflow, ModelSQL, ModelView):
         'Lines', states=_STATES,
         depends=['state', 'type'])
     total_lines = fields.Function(fields.Numeric('Total Lines',
-            digits=(16, Eval('currency_digits', 2))),
+            digits=(16, Eval('currency_digits', 2)),
+            depends=['currency_digits']),
             'get_total_detail')
     total = fields.Function(fields.Numeric('Total',
-                digits=(16, Eval('currency_digits', 2))),
+            digits=(16, Eval('currency_digits', 2)),
+            depends=['currency_digits']),
             'get_total')
     diff = fields.Function(fields.Numeric('Diff',
-            digits=(16, Eval('currency_digits', 2))),
+            digits=(16, Eval('currency_digits', 2)),
+            depends=['currency_digits']),
             'get_diff')
     move = fields.Many2One('account.move', 'Move', readonly=True,
         domain=[
@@ -274,7 +303,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
     def on_change_documents(self):
         self.total_documents = \
             self.get_total_detail('total_documents')
-
         self._set_total(
             self.total_documents, self.total_lines)
 
@@ -584,7 +612,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         if self.party:
             if self.amount:
                 self.account = self._get_party_account(self.amount)
-
         if self.invoice:
             if self.party:
                 if self.invoice.party != self.party:
@@ -700,9 +727,9 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         pool = Pool()
         MoveLine = pool.get('account.move.line')
         Currency = Pool().get('currency.currency')
-        zero = Decimal("0.0")
-        debit = Decimal("0.0")
-        credit = Decimal("0.0")
+        zero = Decimal('0.0')
+        debit = Decimal('0.0')
+        credit = Decimal('0.0')
         with Transaction().set_context(date=self.receipt.date):
             amount = Currency.compute(self.receipt.currency,
                 self.amount, self.receipt.company.currency)
@@ -742,7 +769,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
 
     def _get_party_account(self, amount):
         account = None
-        zero = Decimal("0.0")
+        zero = Decimal('0.0')
         if self.receipt.type.type == 'in':
             if amount > zero:
                 account = self.party.account_receivable

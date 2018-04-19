@@ -8,14 +8,11 @@ from trytond.model import ModelView, ModelSQL, fields, Check
 from trytond.pyson import Eval, If, Bool
 from decimal import Decimal
 
-__all__ = ['DocumentType', 'Document',
-    'DocumentReceipt', 'DocumentReceipt']
+__all__ = ['DocumentType', 'Document', 'DocumentReceipt']
 
 _STATES = {
     'readonly': If(Bool(Eval('last_receipt')), True, False),
     }
-
-_DEPENDS = ['last_receipt']
 
 
 class DocumentType(ModelSQL, ModelView):
@@ -33,20 +30,19 @@ class DocumentType(ModelSQL, ModelView):
 class Document(ModelSQL, ModelView):
     "Cash/Bank Document"
     __name__ = "cash_bank.document"
-    _rec_name = 'type.name'
+    #_rec_name = 'type.name'
     type = fields.Many2One('cash_bank.document.type', 'Type',
         required=True,
-        states=_STATES, depends=_DEPENDS)
+        states=_STATES)
     amount = fields.Numeric('Amount', required=True,
         states=_STATES,
         digits=(16, Eval('currency_digits', 2)),
-        depends=_DEPENDS)
-    date = fields.Date('Date',
-        states=_STATES, depends=_DEPENDS)
+        depends=['currency_digits'])
+    date = fields.Date('Date', states=_STATES)
     reference = fields.Char('Reference', size=None,
-        states=_STATES, depends=_DEPENDS)
+        states=_STATES)
     entity = fields.Char('Entity', size=None,
-        states=_STATES, depends=_DEPENDS)
+        states=_STATES)
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'get_currency_digits')
     last_receipt = fields.Many2One('cash_bank.receipt', 'Last Receipt',
