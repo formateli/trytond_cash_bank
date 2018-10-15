@@ -94,6 +94,36 @@ contains the full copyright notices and license terms. -->
             <field name="perm_delete" eval="True"/>
         </record>
 
+        <record model="ir.model.button" id="transfer_draft_button">
+            <field name="name">draft</field>
+            <field name="model" search="[('model', '=', 'cash_bank.transfer')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="transfer_draft_button_group_cash_bank_admin">
+            <field name="button" ref="transfer_draft_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <record model="ir.model.button" id="transfer_confirm_button">
+            <field name="name">confirm</field>
+            <field name="model" search="[('model', '=', 'cash_bank.transfer')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="transfer_confirm_button_group_cash_bank_admin">
+            <field name="button" ref="transfer_confirm_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <record model="ir.model.button" id="transfer_post_button">
+            <field name="name">post</field>
+            <field name="model" search="[('model', '=', 'cash_bank.transfer')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="transfer_post_button_group_cash_bank_admin">
+            <field name="button" ref="transfer_post_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
         <record model="ir.model.button" id="transfer_cancel_button">
             <field name="name">cancel</field>
             <field name="model" search="[('model', '=', 'cash_bank.transfer')]"/>
