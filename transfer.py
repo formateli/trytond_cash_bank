@@ -7,6 +7,8 @@ from trytond.pool import Pool
 from trytond.model import (
     sequence_ordered, Workflow, ModelView, ModelSQL, fields, Check)
 from trytond.pyson import Eval, If, Bool
+from trytond.i18n import gettext
+from trytond.exceptions import UserError
 from decimal import Decimal
 
 __all__ = ['Transfer']
@@ -130,12 +132,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
     def __setup__(cls):
         super(Transfer, cls).__setup__()
         cls._order[0] = ('id', 'DESC')
-        cls._error_messages.update({
-                'delete_cancel': ('Transfer "%s" must be cancelled before '
-                    'deletion.'),
-                'no_total': "Total must be greater than zero",
-                'party_required': "Party is required by transfer",
-                })
+
         cls._transitions |= set(
             (
                 ('draft', 'confirmed'),
@@ -144,6 +141,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
                 ('cancel', 'draft'),
             )
         )
+
         cls._buttons.update({
             'cancel': {
                 'invisible': ~Eval('state').in_(['confirmed']),
@@ -368,7 +366,12 @@ class Transfer(Workflow, ModelSQL, ModelView):
         cls.cancel(transfers)
         for transfer in transfers:
             if transfer.state != 'cancel':
-                cls.raise_user_error('delete_cancel', (transfer.rec_name,))
+                raise UserError(
+                    gettext('cash_bank.msg_delete_document_cash_bank',
+                        doc_name='Transfer',
+                        doc_number=receipt.rec_name,
+                        state='Draft or Cancelled'
+                    ))
         super(Transfer, cls).delete(transfers)
 
     @classmethod
@@ -383,9 +386,13 @@ class Transfer(Workflow, ModelSQL, ModelView):
     def confirm(cls, transfers):
         for transfer in transfers:
             if transfer.total <= 0:
-                cls.raise_user_error('no_total')
+                raise UserError(
+                    gettext('cash_bank.msg_no_totals_cash_bank'
+                    ))
             if transfer.party_required and not transfer.party:
-                cls.raise_user_error('party_required')
+                raise UserError(
+                    gettext('cash_bank.msg_party_required_cash_bank'
+                    ))
             transfer.create_receipts()
             cls.set_transfer([
                 transfer.receipt_from,

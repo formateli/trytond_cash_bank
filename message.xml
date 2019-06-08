@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<tryton>
+    <data group="1">
+        <record model="ir.message" id="msg_delete_document_cash_bank">
+            <field name="text">Document %(doc_name)s "%(doc_number)s" must be in "%(state)s" state for deletion.</field>
+        </record>
+        <record model="ir.message" id="msg_transfer_exists_cash_bank">
+            <field name="text">Receipt "%(receipt)s" can not be modified because it is part of Transfer "%(transfer)s".</field>
+        </record>
+        <record model="ir.message" id="msg_no_totals_cash_bank">
+            <field name="text">Total must be greater than zero.</field>
+        </record>
+        <record model="ir.message" id="msg_diff_total_lines_cash_bank">
+            <field name="text">Difference between "Total" and "Total Lines" must be zero.</field>
+        </record>
+        <record model="ir.message" id="msg_debit_credit_account_receipt_journal_cash_bank">
+            <field name="text">Please provide debit and credit account on receipt Payment Method "%(payment)s".</field>
+        </record>
+        <record model="ir.message" id="msg_party_required_cash_bank">
+            <field name="text">Party is required.</field>
+        </record>
+        <record model="ir.message" id="msg_amount_greater_invoice_amount_to_pay_cash_bank">
+            <field name="text">Amount "%(amount)s" is greater than the amount to pay of invoice.</field>
+        </record>
+    </data>
+</tryton>

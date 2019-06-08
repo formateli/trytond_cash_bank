@@ -7,6 +7,8 @@ from trytond.pool import Pool
 from trytond.model import (
     sequence_ordered, Workflow, ModelView, ModelSQL, fields, Check)
 from trytond.pyson import Eval, If, Bool
+from trytond.i18n import gettext
+from trytond.exceptions import UserError
 from decimal import Decimal
 
 __all__ = ['Receipt', 'Line']
@@ -150,20 +152,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
     def __setup__(cls):
         super(Receipt, cls).__setup__()
         cls._order[0] = ('id', 'DESC')
-        cls._error_messages.update({
-                'delete_cancel': ('Receipt "%s" must be cancelled before '
-                    'deletion.'),
-                'transfer_exists': ('Receipt "%s" can not be modified '
-                    'because it is part of Transfer "%s".'),
-                'no_total': "Total must be greater than zero",
-                'diff_total_lines': ("Difference between 'Total' "
-                    "and 'Total Lines' must be zero"),
-                'paid_invoice_draft_receipt': ('There are paid invoices on '
-                    'draft receipt.'),
-                'debit_credit_account_receipt_journal': ('Please provide '
-                    'debit and credit account on receipt Payment Method "%s".'),
-                'party_required': "Party is required by receipt",
-                })
+
         cls._transitions |= set(
             (
                 ('draft', 'confirmed'),
@@ -172,6 +161,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 ('cancel', 'draft'),
             )
         )
+
         cls._buttons.update({
             'cancel': {
                 'invisible': ~Eval('state').in_(['confirmed']),
@@ -376,8 +366,10 @@ class Receipt(Workflow, ModelSQL, ModelView):
             credit = amount
 
         if not account:
-            self.raise_user_error('debit_credit_account_receipt_journal',
-                (payment_method.rec_name,))
+            raise UserError(
+                gettext('cash_bank.msg_debit_credit_account_receipt_journal_cash_bank',
+                    payment=payment_method.rec_name
+                ))
 
         return MoveLine(
             journal=payment_method.journal,
@@ -445,7 +437,12 @@ class Receipt(Workflow, ModelSQL, ModelView):
         cls.cancel(receipts)
         for receipt in receipts:
             if receipt.state not in ['draft', 'cancel']:
-                cls.raise_user_error('delete_cancel', (receipt.rec_name,))
+                raise UserError(
+                    gettext('cash_bank.msg_delete_document_cash_bank',
+                        doc_name='Receipt',
+                        doc_number=receipt.rec_name,
+                        state='Draft or Cancelled'
+                    ))
             for doc in receipt.documents:
                 doc.set_previous_receipt()
                 doc.save()
@@ -463,11 +460,17 @@ class Receipt(Workflow, ModelSQL, ModelView):
     def confirm(cls, receipts):
         for receipt in receipts:
             if receipt.total <= 0:
-                cls.raise_user_error('no_total')
+                raise UserError(
+                    gettext('cash_bank.msg_no_totals_cash_bank'
+                    ))
             if receipt.diff != 0:
-                cls.raise_user_error('diff_total_lines')
+                raise UserError(
+                    gettext('cash_bank.msg_diff_total_lines_cash_bank'
+                    ))
             if receipt.type.party_required and not receipt.party:
-                cls.raise_user_error('party_required')
+                raise UserError(
+                    gettext('cash_bank.msg_party_required_cash_bank'
+                    ))
             move, payment_method, period = receipt._get_move()
             move.save()
             receipt_line_move = receipt._get_move_line(period)
@@ -506,9 +509,11 @@ class Receipt(Workflow, ModelSQL, ModelView):
         Move.post([r.move for r in receipts])
         for receipt in receipts:
             if not from_transfer and receipt.transfer:
-                cls.raise_user_error(
-                    'transfer_exists', (
-                        receipt.rec_name, receipt.transfer.rec_name))
+                raise UserError(
+                    gettext('cash_bank.msg_transfer_exists_cash_bank',
+                        receipt=receipt.rec_name,
+                        transfer=receipt.transfer.rec_name
+                    ))
             receipt.posted_by = Transaction().user
             receipt.save()
 
@@ -520,9 +525,11 @@ class Receipt(Workflow, ModelSQL, ModelView):
         Move.delete([r.move for r in receipts])
         for receipt in receipts:
             if not from_transfer and receipt.transfer:
-                cls.raise_user_error(
-                    'transfer_exists', (
-                        receipt.rec_name, receipt.transfer.rec_name))
+                raise UserError(
+                    gettext('cash_bank.msg_transfer_exists_cash_bank',
+                        receipt=receipt.rec_name,
+                        transfer=receipt.transfer.rec_name
+                    ))
             for doc in receipt.documents:
                 doc.last_receipt = None  # TODO move to previous receipt
                 doc.save()
@@ -568,10 +575,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     @classmethod
     def __setup__(cls):
         super(Line, cls).__setup__()
-        cls._error_messages.update({
-                'amount_greater_invoice_amount_to_pay': ('Amount "%s" is '
-                    'greater than the amount to pay of invoice.'),
-                })
         t = cls.__table__()
         cls._sql_constraints += [
             ('check_receipt_line_amount', Check(t, t.amount != 0),
@@ -676,8 +679,11 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                 amount = Lang.format(lang,
                     '%.' + str(self.receipt.currency.digits) + 'f',
                     self.amount, True)
-                self.raise_user_error('amount_greater_invoice_amount_to_pay',
-                        error_args=(amount,))
+
+                raise UserError(
+                    gettext('cash_bank.msg_amount_greater_invoice_amount_to_pay_cash_bank',
+                        amount=amount
+                    ))
 
             with Transaction().set_context(date=self.invoice.currency_date):
                 amount = Currency.compute(self.receipt.currency,
