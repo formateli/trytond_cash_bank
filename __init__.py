@@ -3,27 +3,27 @@
 # contains the full copyright notices and license terms.
 
 from trytond.pool import Pool
-from .configuration import *
-from .account import *
-from .cash_bank import *
-from .document import *
-from .receipt import *
-from .transfer import *
-from .convertion import *
+from . import configuration
+from . import account
+from . import cash_bank
+from . import document
+from . import receipt
+from . import transfer
+from . import convertion
 
 
 def register():
     Pool.register(
-        Configuration,
-        ConfigurationAccount,
-        Move,
-        CashBank,
-        ReceiptType,
-        DocumentType,
-        Document,
-        DocumentReceipt,
-        Receipt,
-        Line,
-        Transfer,
-        Convertion,
+        configuration.Configuration,
+        configuration.ConfigurationAccount,
+        account.Move,
+        cash_bank.CashBank,
+        cash_bank.ReceiptType,
+        document.DocumentType,
+        document.Document,
+        document.DocumentReceipt,
+        receipt.Receipt,
+        receipt.Line,
+        transfer.Transfer,
+        convertion.Convertion,
         module='cash_bank', type_='model')

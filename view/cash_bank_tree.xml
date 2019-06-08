@@ -4,7 +4,7 @@ this repository contains the full copyright notices and license terms. -->
 <tree>
     <field name="name"/>
     <field name="type"/>
-    <field name="journal"/>
+    <field name="payment_method"/>
     <field name="company"/>
 </tree>
 

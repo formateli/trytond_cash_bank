@@ -68,7 +68,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
     number = fields.Char('Number', size=None, readonly=True, select=True)
-    reference = fields.Char('Reference', size=None, states=_STATES)
+    reference = fields.Char('Reference', size=None)
     description = fields.Char('Description', size=None, states=_STATES)
     date = fields.Date('Date', required=True,
         states=_STATES)
@@ -104,25 +104,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 ),
             ]
         ],
-
-
-
-#        domain=[
-#           [('convertion', '=', None)],
-#            [
-#                If(Bool(Eval('type')),
-#                    If(Eval('type_type') == 'in',
-#                        ['OR',
-#                            [('last_receipt', '=', None)],
-#                            [('last_receipt.id', '=', Eval('id'))],
-#                            [('last_receipt.type.type', '=', 'out')]
-#                        ],
-#                        [('convertion', '=', None)],
-#                    ),
-#                    [('id', '=', -1)]
-#                ),
-#            ]
-#        ],
         states=_STATES,
         depends=['id', 'type', 'type_type'])
     total_documents = fields.Function(fields.Numeric('Total Documents',
@@ -180,7 +161,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 'paid_invoice_draft_receipt': ('There are paid invoices on '
                     'draft receipt.'),
                 'debit_credit_account_receipt_journal': ('Please provide '
-                    'debit and credit account on receipt journal "%s".'),
+                    'debit and credit account on receipt Payment Method "%s".'),
                 'party_required': "Party is required by receipt",
                 })
         cls._transitions |= set(
@@ -361,13 +342,13 @@ class Receipt(Workflow, ModelSQL, ModelView):
         period_id = Period.find(self.company.id, date=self.date)
         move = Move(
             period=period_id,
-            journal=self.type.cash_bank.journal,
+            journal=self.type.cash_bank.payment_method.journal,
             date=self.date,
             origin=self,
             company=self.company,
             description=self.description,
         )
-        return move, self.type.cash_bank.journal, period_id
+        return move, self.type.cash_bank.payment_method, period_id
 
     def _get_move_line(self, period):
         pool = Pool()
@@ -375,7 +356,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         Currency = pool.get('currency.currency')
         debit = Decimal(0)
         credit = Decimal(0)
-        journal = self.type.cash_bank.journal
+        payment_method = self.type.cash_bank.payment_method
 
         with Transaction().set_context(date=self.date):
             amount = Currency.compute(self.currency,
@@ -388,18 +369,18 @@ class Receipt(Workflow, ModelSQL, ModelView):
             second_currency = None
 
         if self.type.type == 'in':
-            account = journal.debit_account
+            account = payment_method.debit_account
             debit = amount
         else:
-            account = journal.credit_account
+            account = payment_method.credit_account
             credit = amount
 
         if not account:
             self.raise_user_error('debit_credit_account_receipt_journal',
-                (journal.rec_name,))
+                (payment_method.rec_name,))
 
         return MoveLine(
-            journal=journal,
+            journal=payment_method.journal,
             period=period,
             debit=debit,
             credit=credit,
@@ -487,14 +468,14 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 cls.raise_user_error('diff_total_lines')
             if receipt.type.party_required and not receipt.party:
                 cls.raise_user_error('party_required')
-            move, journal, period = receipt._get_move()
+            move, payment_method, period = receipt._get_move()
             move.save()
             receipt_line_move = receipt._get_move_line(period)
             receipt_line_move.move = move
             receipt_line_move.save()
             move_lines = [receipt_line_move]
             for line in receipt.lines:
-                move_line = line.get_move_line(journal, period)
+                move_line = line.get_move_line(payment_method, period)
                 move_line.move = move
                 move_line.save()
                 line.line_move = move_line
@@ -631,9 +612,8 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             elif self.amount:
                 self.account = self._get_party_account(self.amount)
         if self.invoice:
-            if self.amount and self.receipt and self.receipt.cash_bank.journal:
+            if self.amount and self.receipt and self.receipt.cash_bank.payment_method.journal:
                 invoice = self.invoice
-                journal = self.receipt.cash_bank.journal
                 with Transaction().set_context(date=invoice.currency_date):
                     amount_to_pay = Currency.compute(invoice.currency,
                         invoice.amount_to_pay, self.receipt.currency)
@@ -720,7 +700,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                 lines = reconcile_lines + [self.line_move]
                 MoveLine.reconcile(lines)
 
-    def get_move_line(self, journal, period):
+    def get_move_line(self, payment_method, period):
         '''
         Return the move line for the receipt line
         '''
@@ -742,21 +722,21 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
 
         if self.receipt.type.type == 'in':
             if amount > zero:
-                account = journal.credit_account
+                account = payment_method.credit_account
                 credit = amount
             else:
-                account = journal.debit_account
+                account = payment_method.debit_account
                 debit = abs(amount)
         else:
             if amount > zero:
-                account = journal.debit_account
+                account = payment_method.debit_account
                 debit = amount
             else:
-                account = journal.credit_account
+                account = payment_method.credit_account
                 credit = abs(amount)
 
         return MoveLine(
-            journal=journal,
+            journal=payment_method.journal,
             period=period,
             description=self.description,
             debit=debit,

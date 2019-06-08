@@ -51,7 +51,7 @@ contains the full copyright notices and license terms. -->
 
         <menuitem name="Configuration" parent="menu_cash_bank"
             id="menu_cash_bank_configuration" sequence="10"
-            icon="tryton-preferences"/>
+            icon="tryton-settings"/>
         <record model="ir.ui.menu-res.group"
             id="menu_cash_bank_configuration_group_cash_bank_admin">
             <field name="menu" ref="menu_cash_bank_configuration"/>

@@ -46,8 +46,8 @@ class CashBankTestCase(ModuleTestCase):
                     ('kind', '=', 'expense'),
                     ])
 
-            journal_cash_bank = self._get_journal(
-                'journal_cash', account_cash)
+            payment_method = self._get_payment_method(
+                company, 'journal_cash', account_cash)
     
             config = Config(
                 account_transfer=account_transfer)
@@ -64,7 +64,7 @@ class CashBankTestCase(ModuleTestCase):
             cash = CashBank(
                 name='Main Cashier',
                 type='cash',
-                journal=journal_cash_bank,
+                payment_method=payment_method,
                 receipt_types=self._get_receipt_types(
                     'Cashier', sequence)
             )
@@ -74,7 +74,7 @@ class CashBankTestCase(ModuleTestCase):
             bank = CashBank(
                 name='Main Bank',
                 type='bank',
-                journal=journal_cash_bank,
+                payment_method=payment_method,
                 receipt_types=self._get_receipt_types(
                     'Bank', sequence)
             )
@@ -113,7 +113,7 @@ class CashBankTestCase(ModuleTestCase):
             self.assertEqual(receipt.move.state, 'posted')
             self._check_line_move(
                 receipt.move,
-                journal_cash_bank.debit_account,
+                payment_method.debit_account,
                 receipt.total, Decimal(0))
 
             # Receipt Cash OUT
@@ -136,7 +136,7 @@ class CashBankTestCase(ModuleTestCase):
             Receipt.post([receipt,])
             self._check_line_move(
                 receipt.move,
-                journal_cash_bank.credit_account,
+                payment_method.credit_account,
                 Decimal(0), receipt.total)
 
             # 'out' receipts can not create documents
@@ -280,18 +280,24 @@ class CashBankTestCase(ModuleTestCase):
             res.append(rt)
         return res
 
-    def _get_journal(self, fs_id, account):
+    def _get_payment_method(self, company, fs_id, account):
         pool = Pool()
         ModelData = pool.get('ir.model.data')
         Journal = pool.get('account.journal')
+        PaymentMethod = pool.get('account.invoice.payment.method')
 
         journal = Journal(ModelData.get_id(
             'account', fs_id))
 
-        journal.credit_account = account
-        journal.debit_account = account
-        journal.save()
-        return journal
+        payment_method = PaymentMethod(
+            name=journal.name,
+            company=company,
+            journal=journal,
+            credit_account=account,
+            debit_account=account
+        )
+
+        return payment_method
 
     def _create_fiscalyear(self, company):
         pool = Pool()

@@ -25,11 +25,21 @@ class CashBank(ModelSQL, ModelView):
         ], select=True)
     type = fields.Selection([('cash', 'Cash'), ('bank', 'Bank')],
         'Type', required=True, translate=True)
-    journal = fields.Many2One('account.journal',
-        'Journal', required=True,
-        domain=[('type', '=', 'cash')])
+    payment_method = fields.Many2One('account.invoice.payment.method',
+        'Payment Method', required=True,
+        domain=[
+            ('company', '=', Eval('company'))
+        ], depends=['company'])
     receipt_types = fields.One2Many('cash_bank.receipt_type',
         'cash_bank', 'Receipt types')
+
+    @classmethod
+    def __register__(cls, module_name):
+        table = cls.__table_handler__(module_name)
+        # Migration from 4.8:
+        if table.column_exist('journal'):
+            table.drop_column('journal')
+        super(CashBank, cls).__register__(module_name)
 
     @staticmethod
     def default_company():
