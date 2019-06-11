@@ -553,7 +553,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     account = fields.Many2One('account.account', 'Account', required=True,
         domain=[
             ('company', '=', Eval('_parent_receipt', {}).get('company', -1)),
-            ('kind', '!=', 'view'),
             ],
         states=_STATES_DET, depends=['receipt_state'])
     description = fields.Char('Description', states=_STATES_DET,
