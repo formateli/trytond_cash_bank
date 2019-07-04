@@ -20,7 +20,6 @@ class Configuration(
     account_transfer = fields.MultiValue(fields.Many2One('account.account',
         'Account Transfer',
         domain=[
-            ('kind', '!=', 'view'),
             ('company', '=', Eval('context', {}).get('company', -1)),
         ]))
 
@@ -39,6 +38,5 @@ class ConfigurationAccount(ModelSQL, CompanyValueMixin):
     account_transfer = fields.Many2One('account.account',
         'Account Transfer',
         domain=[
-            ('kind', '!=', 'view'),
             ('company', '=', Eval('context', {}).get('company', -1)),
         ])

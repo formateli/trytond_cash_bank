@@ -34,16 +34,16 @@ class CashBankTestCase(ModuleTestCase):
             self._create_fiscalyear(company)
 
             account_transfer, = Account.search([
-                    ('kind', '=', 'expense'),
+                    ('name', '=', 'Main Expense'),
                     ])
             account_cash, = Account.search([
                     ('name', '=', 'Main Cash'),
                     ])
             account_revenue, = Account.search([
-                    ('kind', '=', 'revenue'),
+                    ('name', '=', 'Main Revenue'),
                     ])
             account_expense, = Account.search([
-                    ('kind', '=', 'expense'),
+                    ('name', '=', 'Main Expense'),
                     ])
 
             payment_method = self._get_payment_method(
@@ -87,15 +87,15 @@ class CashBankTestCase(ModuleTestCase):
             receipt = self._get_receipt(
                 company, cash, 'in', date)
 
-            receipt.cash = Decimal(100)
+            receipt.cash = Decimal('100.0')
             receipt.save()
 
             self.assertEqual(receipt.state, 'draft')
-            self.assertEqual(receipt.diff, Decimal(-100))
+            self.assertEqual(receipt.diff, Decimal('-100.0'))
 
             line = ReceiptLine(
                 receipt=receipt,
-                amount=Decimal(100),
+                amount=Decimal('100.0'),
                 account=account_revenue
             )
             
@@ -103,7 +103,7 @@ class CashBankTestCase(ModuleTestCase):
             receipt.save()
 
             self.assertEqual(len(receipt.lines), 1)
-            self.assertEqual(receipt.diff, Decimal(0))
+            self.assertEqual(receipt.diff, Decimal('0.0'))
 
             Receipt.confirm([receipt,])
             self.assertEqual(receipt.state, 'confirmed')
@@ -114,18 +114,18 @@ class CashBankTestCase(ModuleTestCase):
             self._check_line_move(
                 receipt.move,
                 payment_method.debit_account,
-                receipt.total, Decimal(0))
+                receipt.total, Decimal('0.0'))
 
             # Receipt Cash OUT
             receipt = self._get_receipt(
                 company, cash, 'out', date)
 
-            receipt.cash = Decimal(100)
+            receipt.cash = Decimal('100.0')
             receipt.save()
 
             line = ReceiptLine(
                 receipt=receipt,
-                amount=Decimal(100),
+                amount=Decimal('100.0'),
                 account=account_expense
             )
 
@@ -137,21 +137,21 @@ class CashBankTestCase(ModuleTestCase):
             self._check_line_move(
                 receipt.move,
                 payment_method.credit_account,
-                Decimal(0), receipt.total)
+                Decimal('0.0'), receipt.total)
 
             # 'out' receipts can not create documents
             receipt = self._get_receipt(
                 company, cash, 'out', date)
             with self.assertRaises(UserError):
-                receipt.cash = Decimal(10)
+                receipt.cash = Decimal('10.0')
                 receipt.save()
                 docs = [
                     self._get_document(
-                        cheque_type, Decimal(20), date, 'a'),
+                        cheque_type, Decimal('20.0'), date, 'a'),
                     self._get_document(
-                        cheque_type, Decimal(30), date, 'b'),
+                        cheque_type, Decimal('30.0'), date, 'b'),
                     self._get_document(
-                        cheque_type, Decimal(40), date, 'c'),
+                        cheque_type, Decimal('40.0'), date, 'c'),
                 ]
                 receipt.documents = docs
                 receipt.save()
@@ -161,23 +161,23 @@ class CashBankTestCase(ModuleTestCase):
 
             receipt = self._get_receipt(
                 company, cash, 'in', date)
-            receipt.cash = Decimal(10)
+            receipt.cash = Decimal('10.0')
 
             docs = [
                 self._get_document(
-                    cheque_type, Decimal(20), date, 'abc'),
+                    cheque_type, Decimal('20.0'), date, 'abc'),
                 self._get_document(
-                    cheque_type, Decimal(30), date, 'def'),
+                    cheque_type, Decimal('30.0'), date, 'def'),
                 self._get_document(
-                    cheque_type, Decimal(40), date, 'ghi'),
+                    cheque_type, Decimal('40.0'), date, 'ghi'),
             ]
             receipt.documents = docs
             receipt.save()
 
             self.assertEqual(len(receipt.documents), 3)
-            self.assertEqual(receipt.total_documents, Decimal(90))
-            self.assertEqual(receipt.total, Decimal(100))
-            self.assertEqual(receipt.diff, Decimal(-100))
+            self.assertEqual(receipt.total_documents, Decimal('90.0'))
+            self.assertEqual(receipt.total, Decimal('100.0'))
+            self.assertEqual(receipt.diff, Decimal('-100.0'))
 
             self._verify_document('abc', receipt.id)
             self._verify_document('def', receipt.id)
@@ -185,7 +185,7 @@ class CashBankTestCase(ModuleTestCase):
 
             line = ReceiptLine(
                 receipt=receipt,
-                amount=Decimal(100),
+                amount=Decimal('100.0'),
                 account=account_revenue
             )
             receipt.lines = [line,]

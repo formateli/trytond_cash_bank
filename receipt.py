@@ -185,23 +185,23 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
     @staticmethod
     def default_cash():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @staticmethod
     def default_total_lines():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @staticmethod
     def default_total_documents():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @staticmethod
     def default_total():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @staticmethod
     def default_diff():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @staticmethod
     def default_state():
@@ -266,7 +266,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @fields.depends('cash', 'total_documents', 'total_lines')
     def on_change_cash(self):
         if not self.cash:
-            self.cash = Decimal(0)
+            self.cash = Decimal('0.0')
         self._set_total(
             self.total_documents, self.total_lines)
 
@@ -306,7 +306,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
                     })]
 
     def _get_total_details(self, details):
-        result = Decimal(0)
+        result = Decimal('0.0')
         if details:
             for detail in details:
                 if detail.amount:
@@ -314,8 +314,8 @@ class Receipt(Workflow, ModelSQL, ModelView):
         return result
 
     def _set_total(self, total_documents, total_lines):
-        self.total = Decimal(0)
-        diff = Decimal(0)
+        self.total = Decimal('0.0')
+        diff = Decimal('0.0')
         if self.cash:
             self.total += self.cash
         if total_lines:
@@ -344,8 +344,8 @@ class Receipt(Workflow, ModelSQL, ModelView):
         pool = Pool()
         MoveLine = pool.get('account.move.line')
         Currency = pool.get('currency.currency')
-        debit = Decimal(0)
-        credit = Decimal(0)
+        debit = Decimal('0.0')
+        credit = Decimal('0.0')
         payment_method = self.type.cash_bank.payment_method
 
         with Transaction().set_context(date=self.date):
@@ -582,7 +582,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
 
     @staticmethod
     def default_amount():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @fields.depends('receipt', '_parent_receipt.state')
     def on_change_with_receipt_state(self, name=None):
@@ -601,6 +601,8 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                     self.invoice = None
             else:
                 self.invoice = None
+                self.account = None
+                self.amount = Decimal('0.0')
 
     @fields.depends('amount', 'party', 'account', 'invoice', 'receipt',
         '_parent_receipt.currency', '_parent_receipt.cash_bank')
@@ -633,7 +635,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             else:
                 self.invoice = None
 
-    @fields.depends('party', 'account', 'invoice', 'amount')
+    @fields.depends('party', 'account', 'invoice', 'amount', 'description')
     def on_change_invoice(self):
         if self.invoice:
             if not self.party:
@@ -641,6 +643,8 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             if not self.account:
                 self.account = self.invoice.account
             self.amount = self.invoice.amount_to_pay
+            if not self.description and self.invoice.reference:
+                self.description = self.invoice.reference
 
     def get_rec_name(self, name):
         return self.receipt.rec_name
