@@ -14,7 +14,7 @@ Configuration
 Defines the module configuration.
 
 - Account Transfer: Account used as transit account when transfers
-between Cash/Bank take place.
+  between Cash/Bank take place.
 
 
 Cash & Bank
@@ -25,8 +25,8 @@ Defines a Cash/Bank.
 - Name: Cash/Bank name (Ex: Bank of Panama, Main cashier, etc).
 - Company: Company for wich this Cash/Bank is defined.
 - Type: The Cash/Bank type ('Cash' or 'Bank').
-- Journal: The account journal used by this Cash/Bank.
-- Receipt types: Receipts types defined for Cash/Bank.
+- Payment Method: Account Payment Method defined for the Cash/Bank.
+- Receipt types: Receipts types defined for the Cash/Bank.
 
 
 Receipt Type
@@ -63,7 +63,7 @@ converted to cash as well.
 - Type: Document type.
 - Amount: Document amount.
 - Date: Document date.
-- Reference: Docuemnt reference. Usally the number of the physical document.
+- Reference: Document reference. Usally the number of the physical document.
 - Entity: Document entity. (Ex Bank name in case of cheque).
 
 
@@ -106,7 +106,7 @@ Transfer
 ********
 
 A transfer between two Cash/Bank.
-Two Receipts are created automatically for this matter.
+Two Receipts are created automatically for each transfer.
 It can involves cash and/or documents.
 
 - Company: Transfer company.

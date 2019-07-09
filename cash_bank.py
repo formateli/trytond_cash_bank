@@ -23,7 +23,10 @@ class CashBank(ModelSQL, ModelView):
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
         ], select=True)
-    type = fields.Selection([('cash', 'Cash'), ('bank', 'Bank')],
+    type = fields.Selection([
+            ('cash', 'Cash'),
+            ('bank', 'Bank')
+        ],
         'Type', required=True, translate=True)
     payment_method = fields.Many2One('account.invoice.payment.method',
         'Payment Method', required=True,
