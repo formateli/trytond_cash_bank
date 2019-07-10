@@ -13,6 +13,13 @@ from decimal import Decimal
 
 __all__ = ['Receipt', 'Line']
 
+STATES = [
+    ('draft', 'Draft'),
+    ('confirmed', 'Confirmed'),
+    ('posted', 'Posted'),
+    ('cancel', 'Canceled'),
+]
+
 _STATES = {
     'readonly': Eval('state') != 'draft',
 }
@@ -20,13 +27,6 @@ _STATES = {
 _STATES_DET = {
     'readonly': Eval('receipt_state') != 'draft',
 }
-
-STATES = [
-    ('draft', 'Draft'),
-    ('confirmed', 'Confirmed'),
-    ('posted', 'Posted'),
-    ('cancel', 'Canceled'),
-]
 
 
 class Receipt(Workflow, ModelSQL, ModelView):

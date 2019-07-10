@@ -61,7 +61,7 @@ class Document(ModelSQL, ModelView):
 
     @staticmethod
     def default_amount():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @staticmethod
     def default_currency_digits():

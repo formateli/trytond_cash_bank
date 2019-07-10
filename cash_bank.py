@@ -59,7 +59,10 @@ class ReceiptType(ModelSQL, ModelView):
                     [Eval('context', {}).get('company', -1), None])
             ])
     name = fields.Char('Name', required=True, translate=True)
-    type = fields.Selection([('in', 'IN'), ('out', 'OUT')],
+    type = fields.Selection([
+            ('in', 'IN'),
+            ('out', 'OUT')
+        ],
         'Type', required=True)
     sequence = fields.Many2One('ir.sequence', "Receipt Sequence",
         required=True,
