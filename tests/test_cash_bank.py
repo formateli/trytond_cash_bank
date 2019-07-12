@@ -1,6 +1,5 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
-
 import unittest
 import trytond.tests.test_tryton
 import datetime
@@ -10,6 +9,14 @@ from trytond.modules.company.tests import create_company, set_company
 from trytond.modules.account.tests import create_chart, get_fiscalyear
 from trytond.pool import Pool
 from trytond.exceptions import UserError
+
+__all__ = [
+    'create_cash_bank',
+    'create_sequence',
+    'create_payment_method',
+    'create_fiscalyear'
+]
+
 
 class CashBankTestCase(ModuleTestCase):
     'Test CashBank module'
@@ -31,7 +38,7 @@ class CashBankTestCase(ModuleTestCase):
         company = create_company()
         with set_company(company):
             create_chart(company)
-            self._create_fiscalyear(company)
+            create_fiscalyear(company)
 
             account_transfer, = Account.search([
                     ('name', '=', 'Main Expense'),
@@ -46,7 +53,7 @@ class CashBankTestCase(ModuleTestCase):
                     ('name', '=', 'Main Expense'),
                     ])
 
-            payment_method = self._get_payment_method(
+            payment_method = create_payment_method(
                 company, 'journal_cash', account_cash)
     
             config = Config(
@@ -56,29 +63,21 @@ class CashBankTestCase(ModuleTestCase):
             cheque_type = DocumentType(name='Cheque')
             cheque_type.save()
 
-            sequence = self._get_sequence(
+            sequence = create_sequence(
                 'Cash/Bank Sequence',
                 'cash_bank.receipt',
                 company)
 
-            cash = CashBank(
-                name='Main Cashier',
-                type='cash',
-                payment_method=payment_method,
-                receipt_types=self._get_receipt_types(
-                    'Cashier', sequence)
+            cash = create_cash_bank(
+                company, 'Main Cashier', 'cash',
+                payment_method, sequence
             )
-            cash.save()
             self.assertEqual(len(cash.receipt_types), 2)
 
-            bank = CashBank(
-                name='Main Bank',
-                type='bank',
-                payment_method=payment_method,
-                receipt_types=self._get_receipt_types(
-                    'Bank', sequence)
+            bank = create_cash_bank(
+                company, 'Main Bank', 'bank',
+                payment_method, sequence
             )
-            bank.save()
             self.assertEqual(len(bank.receipt_types), 2)
 
             date = datetime.date.today()
@@ -250,75 +249,91 @@ class CashBankTestCase(ModuleTestCase):
 
         return receipt
 
-    def _get_sequence(self, name, code, company, is_strict=False):
-        pool = Pool()
-        if is_strict:
-            Sequence = pool.get('ir.sequence.strict')
-        else:
-            Sequence = pool.get('ir.sequence')
-        seq = Sequence(
-            name=name,
-            code=code,
-            company=company,
-            type='incremental'
-        )
-        seq.save()
-        return seq
+def create_fiscalyear(company):
+    pool = Pool()
+    FiscalYear = pool.get('account.fiscalyear')
+    InvoiceSequence = pool.get(
+        'account.fiscalyear.invoice_sequence')
 
-    def _get_receipt_types(self, name, sequence):
-        pool = Pool()
-        ReceiptType = pool.get('cash_bank.receipt_type')
-        types = ['in', 'out']
+    invoice_seq = create_sequence(
+        'Invoice Sequence', 'account.invoice', company.id, True)
 
-        res = []
-        for t in types:
-            rt = ReceiptType(
-                name=name + ' ' + t,
-                type=t,
-                sequence=sequence
-            )
-            res.append(rt)
-        return res
-
-    def _get_payment_method(self, company, fs_id, account):
-        pool = Pool()
-        ModelData = pool.get('ir.model.data')
-        Journal = pool.get('account.journal')
-        PaymentMethod = pool.get('account.invoice.payment.method')
-
-        journal = Journal(ModelData.get_id(
-            'account', fs_id))
-
-        payment_method = PaymentMethod(
-            name=journal.name,
-            company=company,
-            journal=journal,
-            credit_account=account,
-            debit_account=account
-        )
-
-        return payment_method
-
-    def _create_fiscalyear(self, company):
-        pool = Pool()
-        FiscalYear = pool.get('account.fiscalyear')
-        InvoiceSequence = pool.get(
-            'account.fiscalyear.invoice_sequence')
-
-        invoice_seq = self._get_sequence(
-            'Invoice Sequence', 'account.invoice', company.id, True)
-
-        seq = InvoiceSequence()
-        seq.company = company
-        seq.out_invoice_sequence = invoice_seq
-        seq.out_credit_note_sequence = invoice_seq
-        seq.in_invoice_sequence = invoice_seq
-        seq.in_credit_note_sequence = invoice_seq
+    seq = InvoiceSequence()
+    seq.company = company
+    seq.out_invoice_sequence = invoice_seq
+    seq.out_credit_note_sequence = invoice_seq
+    seq.in_invoice_sequence = invoice_seq
+    seq.in_credit_note_sequence = invoice_seq
         
-        fy = get_fiscalyear(company)
-        fy.invoice_sequences = [seq,]
-        fy.save()
-        FiscalYear.create_period([fy,])
+    fy = get_fiscalyear(company)
+    fy.invoice_sequences = [seq,]
+    fy.save()
+    FiscalYear.create_period([fy,])
+
+
+def create_payment_method(company, fs_id, account):
+    pool = Pool()
+    ModelData = pool.get('ir.model.data')
+    Journal = pool.get('account.journal')
+    PaymentMethod = pool.get('account.invoice.payment.method')
+
+    journal = Journal(ModelData.get_id(
+        'account', fs_id))
+
+    payment_method = PaymentMethod(
+        name=journal.name,
+        company=company,
+        journal=journal,
+        credit_account=account,
+        debit_account=account
+    )
+
+    return payment_method
+
+
+def create_receipt_types(name, sequence):
+    pool = Pool()
+    ReceiptType = pool.get('cash_bank.receipt_type')
+    types = ['in', 'out']
+
+    res = []
+    for t in types:
+        rt = ReceiptType(
+            name=name + ' ' + t,
+            type=t,
+            sequence=sequence
+        )
+        res.append(rt)
+    return res
+
+
+def create_sequence(name, code, company, is_strict=False):
+    pool = Pool()
+    if is_strict:
+        Sequence = pool.get('ir.sequence.strict')
+    else:
+        Sequence = pool.get('ir.sequence')
+    seq = Sequence(
+        name=name,
+        code=code,
+        company=company,
+        type='incremental'
+    )
+    seq.save()
+    return seq
+
+
+def create_cash_bank(company, name, type_, payment_method, receipt_sequence):
+    CashBank = Pool().get('cash_bank.cash_bank')
+    cash = CashBank(
+        company=company,
+        name=name,
+        type=type_,
+        payment_method=payment_method,
+        receipt_types=create_receipt_types(name, receipt_sequence)
+    )
+    cash.save()
+    return cash
 
 
 def suite():

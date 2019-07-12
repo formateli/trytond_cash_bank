@@ -249,16 +249,16 @@ class Receipt(Workflow, ModelSQL, ModelView):
         if self.type:
             return self.type.party_required
 
-    @fields.depends('company', 'cash_bank', 'type')
+    @fields.depends()
     def on_change_company(self):
         self.cash_bank = None
         self.type = None
 
-    @fields.depends('type')
+    @fields.depends()
     def on_change_cash_bank(self):
         self.type = None
 
-    @fields.depends('type', 'cash_bank')
+    @fields.depends('type')
     def on_change_type(self):
         if self.type:
             self.cash_bank = self.type.cash_bank
