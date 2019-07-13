@@ -459,6 +459,11 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @Workflow.transition('confirmed')
     def confirm(cls, receipts):
         for receipt in receipts:
+            if not receipt.lines:
+                raise UserError(
+                    gettext('cash_bank.msg_receipt_no_lines',
+                    receipt=receipt.rec_name
+                    ))
             if receipt.diff != 0:
                 raise UserError(
                     gettext('cash_bank.msg_diff_total_lines_cash_bank'
