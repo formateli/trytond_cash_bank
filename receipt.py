@@ -459,10 +459,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @Workflow.transition('confirmed')
     def confirm(cls, receipts):
         for receipt in receipts:
-            if receipt.total <= 0:
-                raise UserError(
-                    gettext('cash_bank.msg_no_totals_cash_bank'
-                    ))
             if receipt.diff != 0:
                 raise UserError(
                     gettext('cash_bank.msg_diff_total_lines_cash_bank'
@@ -559,9 +555,9 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         depends=['receipt_state'])
     invoice = fields.Many2One('account.invoice', 'Invoice',
         domain=[
-            If(Bool(Eval('party')), [('party', '=', Eval('party'))], []),
-            If(Bool(Eval('account')), [('account', '=', Eval('account'))], []),
-            [('state', '=', 'posted')],
+                If(Bool(Eval('party')), [('party', '=', Eval('party'))], []),
+                If(Bool(Eval('account')), [('account', '=', Eval('account'))], []),
+                [('state', '=', 'posted')],
             ],
         states=_STATES_DET,
         depends=['party', 'account', 'receipt_state'])
