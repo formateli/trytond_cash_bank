@@ -202,6 +202,10 @@ class CashBankTestCase(ModuleTestCase):
             docs = Docs.search([])
             self.assertEqual(len(docs), 0)
 
+            #TODO test Transfer (specially with documents)
+
+            #TODO test Conversions
+
     def _verify_document(self, reference, receipt_id):
         pool = Pool()
         Document = pool.get('cash_bank.document')
@@ -335,7 +339,8 @@ def create_cash_bank(company, name, type_, payment_method, receipt_sequence):
         company=company,
         name=name,
         type=type_,
-        payment_method=payment_method,
+        journal_cash_bank=payment_method.journal,
+        account=payment_method.debit_account,
         receipt_types=create_receipt_types(name, receipt_sequence)
     )
     cash.save()

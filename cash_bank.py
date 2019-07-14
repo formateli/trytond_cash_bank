@@ -28,21 +28,45 @@ class CashBank(ModelSQL, ModelView):
             ('bank', 'Bank')
         ],
         'Type', required=True, translate=True)
-    payment_method = fields.Many2One('account.invoice.payment.method',
-        'Payment Method', required=True,
+
+    journal_cash_bank = fields.Many2One('account.journal', "Journal", required=True,
+        domain=[('type', '=', 'cash')])
+    account = fields.Many2One('account.account', "Account",
+        required=True,
         domain=[
-            ('company', '=', Eval('company'))
-        ], depends=['company'])
+            ('type', '!=', None),
+            ('closed', '!=', True),
+            ('company', '=', Eval('company')),
+            ],
+        depends=['company'])
     receipt_types = fields.One2Many('cash_bank.receipt_type',
         'cash_bank', 'Receipt types')
 
     @classmethod
     def __register__(cls, module_name):
+        super(CashBank, cls).__register__(module_name)
+        pool = Pool()
         table = cls.__table_handler__(module_name)
         # Migration from 4.8:
         if table.column_exist('journal'):
             table.drop_column('journal')
-        super(CashBank, cls).__register__(module_name)
+        # Migration from 5.2.1:
+        if table.column_exist('payment_method'):
+            PM = pool.get('account.invoice.payment.method')
+            cursor = Transaction().connection.cursor()
+            sql = "SELECT id, payment_method " \
+                "FROM cash_bank_cash_bank"
+            cursor.execute(sql)
+            records = cursor.fetchall()
+            cbs = []
+            for row in records:
+                cash_bank = cls(row[0])
+                payment_method = PM(row[1])
+                cash_bank.journal_cash_bank = payment_method.journal
+                cash_bank.account = payment_method.debit_account
+                cbs.append(cash_bank)
+            cls.save(cbs)
+            table.drop_column('payment_method')
 
     @staticmethod
     def default_company():

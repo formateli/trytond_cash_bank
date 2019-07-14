@@ -15,9 +15,6 @@ this repository contains the full copyright notices and license terms. -->
         <record model="ir.message" id="msg_diff_total_lines_cash_bank">
             <field name="text">Difference between "Total" and "Total Lines" must be zero.</field>
         </record>
-        <record model="ir.message" id="msg_debit_credit_account_receipt_journal_cash_bank">
-            <field name="text">Please provide debit and credit account on receipt Payment Method "%(payment)s".</field>
-        </record>
         <record model="ir.message" id="msg_party_required_cash_bank">
             <field name="text">Party is required.</field>
         </record>
