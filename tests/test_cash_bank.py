@@ -192,6 +192,12 @@ class CashBankTestCase(ModuleTestCase):
 
             Receipt.confirm([receipt,])
 
+            with self.assertRaises(UserError):
+                # Should be 'draft' state
+                Receipt.delete([receipt,])
+
+            Receipt.cancel([receipt,])
+            Receipt.draft([receipt,])
             Receipt.delete([receipt,])
             docs = Docs.search([])
             self.assertEqual(len(docs), 0)

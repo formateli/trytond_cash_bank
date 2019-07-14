@@ -140,6 +140,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
     state = fields.Selection(STATES, 'State', readonly=True, required=True)
     transfer = fields.Many2One('cash_bank.transfer', 'Transfer',
             readonly=True)
+    attachments = fields.One2Many('ir.attachment', 'resource', 'Attachments')
     logs = fields.One2Many('cash_bank.receipt.log_action', 'resource', 'Logs')
 
     @classmethod
@@ -473,26 +474,32 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
     @classmethod
     def delete(cls, receipts):
-        # Cancel before delete
-        cls.cancel(receipts)
+        pool = Pool()
+        Attachment = pool.get('ir.attachment')
+        
+        atts = []
         for receipt in receipts:
-            if receipt.state not in ['draft', 'cancel']:
+            if receipt.state not in ['draft']:
                 raise UserError(
                     gettext('cash_bank.msg_delete_document_cash_bank',
                         doc_name='Receipt',
                         doc_number=receipt.rec_name,
-                        state='Draft or Cancelled'
+                        state='Draft'
                     ))
             for doc in receipt.documents:
                 doc.set_previous_receipt()
                 doc.save()
+            for att in receipt.attachments:
+                atts.append(att)
+
+        Attachment.delete(atts)
         super(Receipt, cls).delete(receipts)
 
     @classmethod
     @ModelView.button
     @Workflow.transition('draft')
     def draft(cls, receipts):
-        pass
+        write_log('Draft', receipts)
 
     @classmethod
     @ModelView.button
@@ -699,8 +706,9 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         if default is None:
             default = {}
         default = default.copy()
-        default.setdefault('move', None)
-        default.setdefault('invoice', None)
+        default['move'] = None
+        default['invoice'] = None
+        default['attachments'] = None
         return super(Line, cls).copy(lines, default=default)
 
     def reconcile(self):

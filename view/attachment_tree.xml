@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- This file is part cash_bank module for Tryton.
+The COPYRIGHT file at the top level of this repository contains the full copyright notices and license terms. -->
+<tree>
+    <field name="name"/>
+    <field name="summary"/>
+    <field name="last_user"/>
+    <field name="last_modification" widget="date"/>
+    <field name="last_modification" widget="time" string="Time"/>
+</tree>
