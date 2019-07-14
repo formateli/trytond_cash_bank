@@ -1,17 +1,18 @@
 # This file is part of trytond-cash_bank module.
 # The COPYRIGHT file at the top level of this repository
 # contains the full copyright notices and license terms.
-
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import (
     sequence_ordered, Workflow, ModelView, ModelSQL, fields, Check)
 from trytond.pyson import Eval, If, Bool
+from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from decimal import Decimal
 
-__all__ = ['Receipt', 'Line']
+
+__all__ = ['Receipt', 'Line', 'ReceiptLog']
 
 STATES = [
     ('draft', 'Draft'),
@@ -137,16 +138,58 @@ class Receipt(Workflow, ModelSQL, ModelView):
     line_move = fields.Many2One('account.move.line', 'Account Move Line',
             readonly=True)
     state = fields.Selection(STATES, 'State', readonly=True, required=True)
-    made_by = fields.Many2One('res.user', 'Made by',
-            readonly=True)
-    confirmed_by = fields.Many2One('res.user', 'Confirmed by',
-            readonly=True)
-    posted_by = fields.Many2One('res.user', 'Posted by',
-            readonly=True)
-    canceled_by = fields.Many2One('res.user', 'Canceled by',
-            readonly=True)
     transfer = fields.Many2One('cash_bank.transfer', 'Transfer',
             readonly=True)
+    logs = fields.One2Many('cash_bank.receipt.log_action', 'resource', 'Logs')
+
+    @classmethod
+    def __register__(cls, module_name):
+        super(Receipt, cls).__register__(module_name)
+        table = cls.__table_handler__(module_name)
+        # Migration from 5.2.1:
+        if table.column_exist('made_by'):
+            cls._migrate_log()
+            table.drop_column('made_by')
+            table.drop_column('confirmed_by')
+            table.drop_column('posted_by')
+            table.drop_column('canceled_by')
+
+    @classmethod
+    def _migrate_log(cls):
+        def add_log(Log, User, receipt, user, action, logs, create=False):
+            if not user:
+                return
+            user = User(user)
+            if create:
+                date = receipt.create_date
+            else:
+                date = receipt.write_date
+            log = Log(
+                resource=receipt,
+                date=date,
+                user=user,
+                action=action
+            )
+            logs.append(log)
+            
+        pool = Pool()
+        Log = pool.get('cash_bank.receipt.log_action')
+        User = pool.get('res.user')
+
+        logs = []
+
+        cursor = Transaction().connection.cursor()
+        sql = "SELECT id, made_by, confirmed_by, canceled_by, posted_by " \
+            "FROM cash_bank_receipt"
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        for row in records:
+            rcp = cls(row[0])
+            add_log(Log, User, rcp, row[1], 'Created', logs, True)
+            add_log(Log, User, rcp, row[2], 'Confirmed', logs)
+            add_log(Log, User, rcp, row[4], 'Posted', logs)
+            add_log(Log, User, rcp, row[3], 'Cancelled', logs)
+        Log.save(logs)
 
     @classmethod
     def __setup__(cls):
@@ -384,12 +427,9 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
     @classmethod
     def create(cls, vlist):
-        vlist = [x.copy() for x in vlist]
-        for values in vlist:
-            if values.get('made_by') is None:
-                values['made_by'] = Transaction().user
         receipts = super(Receipt, cls).create(vlist)
         cls.set_document_receipt(receipts)
+        write_log('Created', receipts)
         return receipts
 
     @classmethod
@@ -493,7 +533,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
             receipt.move = move
             receipt.line_move = receipt_line_move
-            receipt.confirmed_by = Transaction().user
             receipt.save()
 
             for doc in receipt.documents:
@@ -501,6 +540,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 doc.save()
 
         cls.set_number(receipts)
+        write_log('Confirmed', receipts)
 
     @classmethod
     @ModelView.button
@@ -515,8 +555,8 @@ class Receipt(Workflow, ModelSQL, ModelView):
                         receipt=receipt.rec_name,
                         transfer=receipt.transfer.rec_name
                     ))
-            receipt.posted_by = Transaction().user
             receipt.save()
+        write_log('Posted', receipts)
 
     @classmethod
     @ModelView.button
@@ -534,8 +574,8 @@ class Receipt(Workflow, ModelSQL, ModelView):
             for doc in receipt.documents:
                 doc.last_receipt = None  # TODO move to previous receipt
                 doc.save()
-            receipt.canceled_by = Transaction().user
         cls.save(receipts)
+        write_log('Cancelled', receipts)
 
 
 class Line(sequence_ordered(), ModelSQL, ModelView):
@@ -771,3 +811,10 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             else:
                 account = self.party.account_receivable
         return account
+
+
+class ReceiptLog(LogActionMixin):
+    "Receipt Logs"
+    __name__ = "cash_bank.receipt.log_action" 
+    resource = fields.Many2One('cash_bank.receipt',
+        'Receipt', ondelete='CASCADE', select=True)

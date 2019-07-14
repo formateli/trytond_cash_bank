@@ -33,14 +33,8 @@ this repository contains the full copyright notices and license terms. -->
             <label name="move"/>
             <field name="move"/>
             <newline />
-            <label name="made_by"/>
-            <field name="made_by"/>
-            <label name="confirmed_by"/>
-            <field name="confirmed_by"/>
-            <label name="posted_by"/>
-            <field name="posted_by"/>
-            <label name="canceled_by"/>
-            <field name="canceled_by"/>
+            <field name="logs" colspan="4"
+                view_ids="log_action.log_view_tree,log_action.log_view_form"/>
         </page>
     </notebook>
     <group col="6" colspan="4" id="states_buttons" yfill="1">

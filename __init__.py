@@ -22,6 +22,7 @@ def register():
         document.DocumentType,
         document.Document,
         document.DocumentReceipt,
+        receipt.ReceiptLog,
         receipt.Receipt,
         receipt.Line,
         transfer.Transfer,
