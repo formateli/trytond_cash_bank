@@ -5,14 +5,16 @@
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import ModelView, ModelSQL, fields, Check
-from trytond.pyson import Eval, If, Bool
+from trytond.pyson import Eval, Bool
 from decimal import Decimal
 
 __all__ = ['DocumentType', 'Document', 'DocumentReceipt']
 
 _STATES = {
-    'readonly': If(Bool(Eval('last_receipt')), True, False),
+    'readonly': Bool(Eval('last_receipt')),
     }
+
+_DEPENDS = ['last_receipt']
 
 
 class DocumentType(ModelSQL, ModelView):
@@ -30,19 +32,17 @@ class DocumentType(ModelSQL, ModelView):
 class Document(ModelSQL, ModelView):
     "Cash/Bank Document"
     __name__ = "cash_bank.document"
-    #_rec_name = 'type.name'
     type = fields.Many2One('cash_bank.document.type', 'Type',
-        required=True,
-        states=_STATES)
+        required=True, states=_STATES, depends=_DEPENDS)
     amount = fields.Numeric('Amount', required=True,
         states=_STATES,
         digits=(16, Eval('currency_digits', 2)),
-        depends=['currency_digits'])
-    date = fields.Date('Date', states=_STATES)
+        depends=_DEPENDS + ['currency_digits'])
+    date = fields.Date('Date', states=_STATES, depends=_DEPENDS)
     reference = fields.Char('Reference', size=None,
-        states=_STATES)
+        states=_STATES, depends=_DEPENDS)
     entity = fields.Char('Entity', size=None,
-        states=_STATES)
+        states=_STATES, depends=_DEPENDS)
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'get_currency_digits')
     last_receipt = fields.Many2One('cash_bank.receipt', 'Last Receipt',
@@ -69,6 +69,15 @@ class Document(ModelSQL, ModelView):
 
     def get_currency_digits(self, name=None):
         return Document._get_currency_digits()
+
+    def get_rec_name(self, name):
+        if self.type:
+            return self.type.name
+        return str(self.id)
+
+    @classmethod
+    def search_rec_name(cls, name, clause):
+        return [('type.name',) + tuple(clause[1:])]
 
     @staticmethod
     def _get_currency_digits():

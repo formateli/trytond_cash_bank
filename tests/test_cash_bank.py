@@ -103,13 +103,34 @@ class CashBankTestCase(ModuleTestCase):
 
             self.assertEqual(len(receipt.lines), 1)
             self.assertEqual(receipt.diff, Decimal('0.0'))
+            self.assertEqual(receipt.state, 'draft')
+            self.assertEqual(receipt.move, None)
 
             Receipt.confirm([receipt,])
             self.assertEqual(receipt.state, 'confirmed')
+            self.assertEqual(receipt.move.state, 'draft')
+
+            Receipt.cancel([receipt,])
+            self.assertEqual(receipt.state, 'cancel')
+            self.assertEqual(receipt.move, None)
+
+            Receipt.draft([receipt,])
+            self.assertEqual(receipt.state, 'draft')
+            self.assertEqual(receipt.move, None)
+
+            Receipt.confirm([receipt,])
+            self.assertEqual(receipt.state, 'confirmed')
+            self.assertEqual(receipt.move.state, 'draft')
 
             Receipt.post([receipt,])
             self.assertEqual(receipt.state, 'posted')
             self.assertEqual(receipt.move.state, 'posted')
+
+            # Nothing change because 'posted' to 'cancel' not in cls._transitions
+            Receipt.cancel([receipt,])
+            self.assertEqual(receipt.state, 'posted')
+            self.assertEqual(receipt.move.state, 'posted')
+
             self._check_line_move(
                 receipt.move,
                 payment_method.debit_account,
@@ -155,6 +176,7 @@ class CashBankTestCase(ModuleTestCase):
                 receipt.documents = docs
                 receipt.save()
             Receipt.delete([receipt,])
+            Document.delete(Document.search([]))
 
             # Receipt IN with cash and documents
 
@@ -199,12 +221,99 @@ class CashBankTestCase(ModuleTestCase):
             Receipt.cancel([receipt,])
             Receipt.draft([receipt,])
             Receipt.delete([receipt,])
-            docs = Docs.search([])
+
+            docs = Docs.search([]) # cash_bank.document-cash_bank.receipt
             self.assertEqual(len(docs), 0)
 
-            #TODO test Transfer (specially with documents)
+            docs = Document.search([]) # cash_bank.document
+            self.assertEqual(len(docs), 3)
+
+            ########################
+            # Documents domain tests
+            ########################
+
+            # Ensure that if docs belongs to a receipt 'in'
+            # no other receipt 'in' can add them
+            receipt_1 = self._get_receipt(
+                company, cash, 'in', date)
+            receipt_1.cash = Decimal('10.0')
+            receipt_1.lines  = [
+                ReceiptLine(
+                    amount=Decimal('100.0'),
+                    account=account_expense
+                )]
+            receipt_1.documents = Document.search([])
+            receipt_1.save()
+            self._validate_domain_in(Receipt, Document, receipt_1)
+
+            # Same if receipt_1 is confirmed
+            Receipt.confirm([receipt_1])
+            self._validate_domain_in(Receipt, Document, receipt_1)
+
+            # Same if receipt_1 is canceled
+            Receipt.cancel([receipt_1])
+            self.assertEqual(receipt_1.state, 'cancel')
+            self.assertEqual(receipt_1.move, None)
+            self._validate_domain_in(Receipt, Document, receipt_1)
+
+            # Same if receipt_1 is draft
+            Receipt.draft([receipt_1])
+            self._validate_domain_in(Receipt, Document, receipt_1)
+
+            # Same if receipt_1 is confirmed
+            Receipt.confirm([receipt_1])
+            self._validate_domain_in(Receipt, Document, receipt_1)
+
+            # Same if receipt_1 is posted
+            Receipt.post([receipt_1])
+            self.assertEqual(receipt_1.state, 'posted')
+            self.assertEqual(receipt_1.move.state, 'posted')
+            self._validate_domain_in(Receipt, Document, receipt_1)
+
+            # Group of Receipts
+            receipt_grp_1 = self._get_receipt(
+                company, cash, 'in', date)
+            receipt_grp_1.cash = Decimal('10.0')
+            receipt_grp_2 = self._get_receipt(
+                company, cash, 'in', date)
+            receipt_grp_2.cash = Decimal('20.0')
+
+            Receipt.save([receipt_grp_1, receipt_grp_2])
+            self.assertEqual(receipt_grp_1.cash, Decimal('10.0'))
+            self.assertEqual(receipt_grp_2.cash, Decimal('20.0'))
+
+            receipt_grp_1.cash = Decimal('15.0')
+            receipt_grp_2.cash = Decimal('25.0')
+
+            Receipt.save([receipt_grp_1, receipt_grp_2])
+            self.assertEqual(receipt_grp_1.cash, Decimal('15.0'))
+            self.assertEqual(receipt_grp_2.cash, Decimal('25.0'))
+
+            # Transfer (specially with documents)
+
 
             #TODO test Conversions
+
+    def _validate_domain_in(self, Receipt, Document, receipt_1):
+        self._verify_document('abc', receipt_1.id)
+        self._verify_document('def', receipt_1.id)
+        self._verify_document('ghi', receipt_1.id)
+
+        receipt_2 = self._get_receipt(
+            receipt_1.company, receipt_1.cash_bank, 'in', receipt_1.date)
+        receipt_2.cash = Decimal('10.0')
+        receipt_2.save()
+        with self.assertRaises(UserError):
+            receipt_2.documents = Document.search([])
+            receipt_2.save()
+        receipt_2.documents = None
+        receipt_2.save()
+        Receipt.delete([receipt_2])
+
+        # Verify docs again
+        self._verify_document('abc', receipt_1.id)
+        self._verify_document('def', receipt_1.id)
+        self._verify_document('ghi', receipt_1.id)
 
     def _verify_document(self, reference, receipt_id):
         pool = Pool()

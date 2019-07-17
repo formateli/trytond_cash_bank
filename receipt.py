@@ -33,12 +33,9 @@ _STATES_DET = {
 class Receipt(Workflow, ModelSQL, ModelView):
     "Cash/Bank Receipt"
     __name__ = "cash_bank.receipt"
-    _rec_name = 'number'
     company = fields.Many2One('company.company', 'Company', required=True,
         states={
-            'readonly': ((Eval('state') != 'draft') |
-                    Eval('documents', [0]) | Eval('lines', [0])
-                ),
+            'readonly': True,
             },
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
@@ -63,9 +60,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         size=None), 'on_change_with_type_type')
     currency = fields.Many2One('currency.currency', 'Currency', required=True,
         states={
-            'readonly': ((Eval('state') != 'draft') |
-                Eval('documents', [0]) | Eval('lines', [0])
-            ),
+            'readonly': True,
         },
         depends=['state'])
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
@@ -279,7 +274,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         if self.type:
             return self.type.type
 
-    @fields.depends('type', 'documents', 'state')
+    @fields.depends('type')
     def on_change_with_document_allow(self, name=None):
         if self.type:
             if self.type.type == 'in':
@@ -342,10 +337,19 @@ class Receipt(Workflow, ModelSQL, ModelView):
     def get_diff(self, name=None):
         return self.total_lines - self.total
 
+    def get_rec_name(self, name):
+        if self.number:
+            return self.number
+        return str(self.id)
+
+    @classmethod
+    def search_rec_name(cls, name, clause):
+        return [('number',) + tuple(clause[1:])]
+
     @classmethod
     def view_attributes(cls):
         return super(Receipt, cls).view_attributes() + [
-            ('//page[@id="documents"]', 'states', {
+            ('//page[@name="documents"]', 'states', {
                     'invisible': ~Eval('document_allow'),
                     })]
 
@@ -422,11 +426,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
         cls.set_document_receipt(receipts)
         write_log('Created', receipts)
         return receipts
-
-    @classmethod
-    def write(cls, receipts, vlist):
-        super(Receipt, cls).write(receipts, vlist)
-        cls.set_document_receipt(receipts)
 
     @classmethod
     def set_document_receipt(cls, receipts):
@@ -552,7 +551,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
                         receipt=receipt.rec_name,
                         transfer=receipt.transfer.rec_name
                     ))
-            receipt.save()
         write_log('Posted', receipts)
 
     @classmethod
@@ -568,10 +566,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
                         receipt=receipt.rec_name,
                         transfer=receipt.transfer.rec_name
                     ))
-            for doc in receipt.documents:
-                doc.last_receipt = None  # TODO move to previous receipt
-                doc.save()
-        cls.save(receipts)
         write_log('Cancelled', receipts)
 
 

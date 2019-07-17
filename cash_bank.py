@@ -28,7 +28,6 @@ class CashBank(ModelSQL, ModelView):
             ('bank', 'Bank')
         ],
         'Type', required=True, translate=True)
-
     journal_cash_bank = fields.Many2One('account.journal', "Journal", required=True,
         domain=[('type', '=', 'cash')])
     account = fields.Many2One('account.account', "Account",

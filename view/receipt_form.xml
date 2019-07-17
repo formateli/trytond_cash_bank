@@ -22,8 +22,9 @@ this repository contains the full copyright notices and license terms. -->
             <field name="lines" colspan="4"
                 view_ids="cash_bank.receipt_line_view_tree"/>
         </page>
-        <page string="Documents" id="documents">
+        <page name="documents">
             <field name="documents" colspan="4"/>
+            <field name="document_allow" invisible="1" colspan="4"/>
         </page>
         <page name="attachments">
             <field name="attachments"
