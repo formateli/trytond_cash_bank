@@ -34,6 +34,7 @@ class CashBankTestCase(ModuleTestCase):
         DocumentType = pool.get('cash_bank.document.type')
         Document = pool.get('cash_bank.document')
         Docs = pool.get('cash_bank.document-cash_bank.receipt')
+        Transfer = pool.get('cash_bank.transfer')
 
         company = create_company()
         with set_company(company):
@@ -270,6 +271,8 @@ class CashBankTestCase(ModuleTestCase):
             self.assertEqual(receipt_1.move.state, 'posted')
             self._validate_domain_in(Receipt, Document, receipt_1)
 
+            last_docs_receipt_id = receipt_1.id
+
             # Group of Receipts
             receipt_grp_1 = self._get_receipt(
                 company, cash, 'in', date)
@@ -289,8 +292,79 @@ class CashBankTestCase(ModuleTestCase):
             self.assertEqual(receipt_grp_1.cash, Decimal('15.0'))
             self.assertEqual(receipt_grp_2.cash, Decimal('25.0'))
 
+            #####################################
             # Transfer (specially with documents)
+            #####################################
 
+            cash_2 = create_cash_bank(
+                company, 'Cashier 2', 'cash',
+                payment_method, sequence
+            )
+
+            with self.assertRaises(UserError):
+                # Raise document domain error because
+                # documents are not in cash_2
+                transfer = Transfer(
+                    company=company,
+                    date=date,
+                    cash_bank_from=cash_2,
+                    type_from=cash_2.receipt_types[1], # out
+                    cash_bank_to=cash,
+                    type_to=cash.receipt_types[0], # in
+                    documents=Document.search([])
+                )
+                transfer.save()
+
+            transfer = Transfer(
+                company=company,
+                date=date,
+                cash=Decimal('10.0'),
+                cash_bank_from=cash,
+                type_from=cash.receipt_types[1], # out
+                cash_bank_to=cash_2,
+                type_to=cash_2.receipt_types[0], # in
+                documents=Document.search([])
+            )
+            transfer.save()
+            self.assertEqual(transfer.total_documents, Decimal('90.0'))
+            self.assertEqual(transfer.total, Decimal('100.0'))
+            self.assertEqual(transfer.state, 'draft')
+            self.assertEqual(transfer.receipt_from, None)
+            self.assertEqual(transfer.receipt_to, None)
+
+            Transfer.confirm([transfer])
+            self.assertEqual(transfer.state, 'confirmed')
+            self.assertEqual(transfer.receipt_from.transfer, transfer)
+            self.assertEqual(transfer.receipt_to.transfer, transfer)
+            self.assertEqual(transfer.receipt_from.state, 'confirmed')
+            self.assertEqual(transfer.receipt_to.state, 'confirmed')
+
+            self._verify_document('abc', transfer.receipt_to.id)
+            self._verify_document('def', transfer.receipt_to.id)
+            self._verify_document('ghi', transfer.receipt_to.id)
+
+            #with self.assertRaises(UserError):
+            #    Receipt.post([transfer.receipt_from])
+
+            Transfer.cancel([transfer])
+            self.assertEqual(transfer.state, 'cancel')
+            self.assertEqual(transfer.receipt_from.transfer, transfer)
+            self.assertEqual(transfer.receipt_to.transfer, transfer)
+            self.assertEqual(transfer.receipt_from.state, 'cancel')
+            self.assertEqual(transfer.receipt_to.state, 'cancel')
+
+            self._verify_document('abc', transfer.receipt_to.id)
+            self._verify_document('def', transfer.receipt_to.id)
+            self._verify_document('ghi', transfer.receipt_to.id)
+
+            Transfer.draft([transfer])
+            self.assertEqual(transfer.state, 'draft')
+            self.assertEqual(transfer.receipt_from, None)
+            self.assertEqual(transfer.receipt_to, None)
+
+            self._verify_document('abc', last_docs_receipt_id)
+            self._verify_document('def', last_docs_receipt_id)
+            self._verify_document('ghi', last_docs_receipt_id)
 
             #TODO test Conversions
 

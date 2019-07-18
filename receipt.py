@@ -556,7 +556,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @classmethod
     @ModelView.button
     @Workflow.transition('cancel')
-    def cancel(cls, receipts, from_transfer=False):
+    def cancel(cls, receipts, from_transfer=True):
         Move = Pool().get('account.move')
         Move.delete([r.move for r in receipts])
         for receipt in receipts:

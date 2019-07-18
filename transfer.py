@@ -11,7 +11,7 @@ from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from decimal import Decimal
 
-__all__ = ['Transfer']
+__all__ = ['Transfer', 'DocumentTransfer']
 
 _STATES = {
     'readonly': Eval('state') != 'draft',
@@ -32,88 +32,95 @@ class Transfer(Workflow, ModelSQL, ModelView):
     __name__ = "cash_bank.transfer"
     company = fields.Many2One('company.company', 'Company', required=True,
         states={
-            'readonly': (Eval('state') != 'draft') | Eval('documents', [0]),
+            'readonly': True,
             },
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
-            ],
-        depends=['state'], select=True)
+            ], select=True)
     date = fields.Date('Date', required=True,
-        states=_STATES, depends=['state'])
+        states=_STATES, depends=_DEPENDS)
     reference = fields.Char('Reference', size=None)
     description = fields.Char('Description', size=None)
-    cash_bank_from = fields.Many2One(
-            'cash_bank.cash_bank', 'From', required=True,
+    cash_bank_from = fields.Many2One('cash_bank.cash_bank',
+            'From', required=True,
             domain=[
-                ('company', 'in',
-                    [Eval('context', {}).get('company', -1), None])
-            ], states=_STATES, depends=['company', 'state'])
+                ('company', '=', Eval('company')),
+            ], states=_STATES, depends=_DEPENDS + ['company'])
     type_from = fields.Many2One('cash_bank.receipt_type',
         'Type', required=True,
         domain=[
             If(
                 Bool(Eval('cash_bank_from')),
-                    [('cash_bank', '=', Eval('cash_bank_from'))], []
+                [('cash_bank', '=', Eval('cash_bank_from'))],
+                [('cash_bank', '=', -1)]
             ),
             ('type', '=', 'out')
-        ],
-        states=_STATES, depends=['state', 'cash_bank_from'])
-    cash_bank_to = fields.Many2One('cash_bank.cash_bank', 'To',
-        required=True,
-        domain=[
-            ('id',
-            If(Bool(Eval('cash_bank_from')), '!=', '='),
-            Eval('cash_bank_from', -1)
-            )
-        ], states=_STATES, depends=['state', 'cash_bank_from'])
-    type_to = fields.Many2One('cash_bank.receipt_type', 'Type', required=True,
+        ], states=_STATES, depends=_DEPENDS + ['cash_bank_from'])
+    cash_bank_to = fields.Many2One('cash_bank.cash_bank',
+            'To', required=True,
+            domain=[
+                ('company', '=', Eval('company')),
+                If(
+                    Bool(Eval('cash_bank_from')),
+                    [('id', '!=', Eval('cash_bank_from'))],
+                    [('id', '=', -1)]
+                ),
+            ], states=_STATES, depends=_DEPENDS + ['company', 'cash_bank_from'])
+    type_to = fields.Many2One('cash_bank.receipt_type',
+        'Type', required=True,
         domain=[
             If(
                 Bool(Eval('cash_bank_to')),
-                    [('cash_bank', '=', Eval('cash_bank_to'))], []
+                [('cash_bank', '=', Eval('cash_bank_to'))],
+                [('cash_bank', '=', -1)]
             ),
             ('type', '=', 'in')
-        ],
-        states=_STATES, depends=['state', 'cash_bank_to'])
+        ], states=_STATES, depends=_DEPENDS + ['cash_bank_to'])
     currency = fields.Many2One('currency.currency', 'Currency', required=True,
         states={
-            'readonly': (Eval('state') != 'draft') | Eval('documents', [0]),
+            'readonly': True,
             },
         depends=['state', 'documents'])
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
     party = fields.Many2One('party.party', 'Party',
-        states=_STATES, depends=['state'])
+        states=_STATES, depends=_DEPENDS)
     party_required = fields.Function(fields.Boolean('Party Required'),
         'on_change_with_party_required')
     cash = fields.Numeric('Cash',
-        digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
-        states=_STATES, depends=['state', 'currency_digits'])
-    documents = fields.Many2Many('cash_bank.document-cash_bank.receipt',
-        'receipt', 'document', 'Documents',
+        digits=(16, Eval('currency_digits', 2)),
+        states=_STATES, depends=_DEPENDS + ['currency_digits'])
+    documents = fields.Many2Many('cash_bank.document-cash_bank.transfer',
+        'transfer', 'document', 'Documents',
         domain=[
             [('convertion', '=', None)],
             [
                 If(Bool(Eval('type_from')),
                     [
-                        [
-                            ('last_receipt.cash_bank.id',
-                                '=', Eval('cash_bank_from')
-                            )
-                        ],
-                        ['OR',
+                        If (Eval('state') != 'posted',
                             [
-                                ('last_receipt.type.type', '=', 'in'),
-                                ('last_receipt.state', '!=', 'draft')
-                            ]
-                        ]
+                                If (Eval('state') == 'draft',
+                                    [
+                                        ('last_receipt.cash_bank.id',
+                                            '=', Eval('cash_bank_from')
+                                        )
+                                    ],
+                                    [
+                                        ('last_receipt.cash_bank.id',
+                                            '=', Eval('cash_bank_to')
+                                        )
+                                    ]
+                                )
+                            ],
+                            [('id', '!=', -1)]
+                        )
                     ],
                     [('id', '=', -1)]
                 ),
             ]
-        ],
-        states=_STATES, depends=['type_from', 'cash_bank_from'])
+        ], states=_STATES,
+        depends=_DEPENDS + ['type_from', 'cash_bank_from', 'cash_bank_to'])
     total_documents = fields.Function(fields.Numeric('Total Documents',
             digits=(16, Eval('currency_digits', 2)),
             depends=['currency_digits']),
@@ -291,24 +298,18 @@ class Transfer(Workflow, ModelSQL, ModelView):
         line.amount = amount
         return line
 
-    def _get_doc(self, receipt, ids):
+    def _get_doc(self, receipt, docs):
         Docs = Pool().get('cash_bank.document')
-        docs = []
-        for id_ in ids:
-            doc = Docs.search(['id', '=', id_])[0]
+        for doc in docs:
             doc.last_receipt = receipt
-            doc.save()
-            docs.append(doc)
+        Docs.save(docs)
         return docs
 
     def _create_receipt(self, cash_bank, type_, trasnfer_account, docs):
         receipt = self._new_receipt()
         receipt.cash_bank = cash_bank
         receipt.type = type_
-        receipt.save()
-        print(receipt.id)
-        documents = self._get_doc(receipt, [doc.id for doc in docs])
-        receipt.documents = documents
+        receipt.documents = self._get_doc(receipt, docs)
         receipt.save()
         receipt.lines = [
             self._create_line(
@@ -318,7 +319,6 @@ class Transfer(Workflow, ModelSQL, ModelView):
         return receipt
 
     def create_receipts(self):
-        print("CREATE RECEIPTS")
         pool = Pool()
         Config = pool.get('cash_bank.configuration')
         Receipt = pool.get('cash_bank.receipt')
@@ -326,34 +326,16 @@ class Transfer(Workflow, ModelSQL, ModelView):
         config = Config(1)
         transfer_account = config.account_transfer
 
-        print("receipt 1")
-
-        docs = []
-        for doc in self.documents:
-            docs.append(doc)
-
         receipt_from = self._create_receipt(
-            self.cash_bank_from, self.type_from, transfer_account, docs)
-        print(receipt_from)
+            self.cash_bank_from, self.type_from, transfer_account, self.documents)
         Receipt.confirm([receipt_from])
-        print("confirm 1")
 
         receipt_to = self._create_receipt(
             self.cash_bank_to, self.type_to, transfer_account, self.documents)
-        print(receipt_to)
-
         Receipt.confirm([receipt_to])
 
         self.receipt_from = receipt_from
         self.receipt_to = receipt_to
-
-    @classmethod
-    def cancel_receipt(cls, receipts):
-        Receipt = Pool().get('cash_bank.receipt')
-        for receipt in receipts:
-            receipt.transfer = None
-            receipt.save()
-        Receipt.cancel(receipts)
 
     @classmethod
     def set_transfer(cls, receipts, transfer):
@@ -377,8 +359,17 @@ class Transfer(Workflow, ModelSQL, ModelView):
     @classmethod
     @ModelView.button
     @Workflow.transition('draft')
-    def draft(cls, receipts):
-        pass
+    def draft(cls, transfers):
+        Receipt = Pool().get('cash_bank.receipt')
+        for transfer in transfers:
+            receipt_from = transfer.receipt_from
+            receipt_to = transfer.receipt_to
+            transfer.receipt_from = None
+            transfer.receipt_to = None
+            Receipt.draft([receipt_from, receipt_to])
+            Receipt.delete([receipt_to])
+            Receipt.delete([receipt_from])
+        cls.save(transfers)
 
     @classmethod
     @ModelView.button
@@ -395,10 +386,9 @@ class Transfer(Workflow, ModelSQL, ModelView):
                     ))
             transfer.create_receipts()
             cls.set_transfer([
-                transfer.receipt_from,
-                transfer.receipt_to
+                    transfer.receipt_from,
+                    transfer.receipt_to
                 ], transfer)
-        cls.save(transfers)
 
     @classmethod
     @ModelView.button
@@ -416,14 +406,18 @@ class Transfer(Workflow, ModelSQL, ModelView):
     @ModelView.button
     @Workflow.transition('cancel')
     def cancel(cls, transfers):
+        Receipt = Pool().get('cash_bank.receipt')
         for transfer in transfers:
-            for doc in transfer.documents:
-                doc.current_cash_bank = transfer.cash_bank_from
-                doc.save()
-            cls.cancel_receipt(
-                [
-                    transfer.receipt_from,
-                    transfer.receipt_to
-                ]
-            )
-        cls.save(transfers)
+            Receipt.cancel([
+                transfer.receipt_from,
+                transfer.receipt_to
+            ], from_transfer=True)
+
+
+class DocumentTransfer(ModelSQL):
+    'Transfer - Document'
+    __name__ = 'cash_bank.document-cash_bank.transfer'
+    document = fields.Many2One('cash_bank.document', 'Document',
+        ondelete='CASCADE', select=True, required=True)
+    transfer = fields.Many2One('cash_bank.transfer', 'Transfer',
+        ondelete='CASCADE', select=True, required=True)

@@ -26,5 +26,6 @@ def register():
         receipt.Receipt,
         receipt.Line,
         transfer.Transfer,
+        transfer.DocumentTransfer,
         convertion.Convertion,
         module='cash_bank', type_='model')

@@ -90,12 +90,25 @@ class Document(ModelSQL, ModelView):
 
     def set_previous_receipt(self):
         Docs = Pool().get('cash_bank.document-cash_bank.receipt')
-        docs = Docs.search(
-            [('document', '=', self.id)], order=[('id', 'ASC')])
+
+        cur_receipt = None
+        if hasattr(self, 'last_receipt'):
+            cur_receipt = self.last_receipt
+
+        domain = [
+            ('document', '=', self.id)
+        ]
+        if cur_receipt:
+            domain.append(
+                ('receipt', '!=', cur_receipt.id)
+            )
+
+        docs = Docs.search(domain, order=[('id', 'DESC')])
+
         if not docs:
             self.last_receipt = None
         else:
-            self.last_receipt = docs[-1].receipt
+            self.last_receipt = docs[0].receipt
 
 
 class DocumentReceipt(ModelSQL):
