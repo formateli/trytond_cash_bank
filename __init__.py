@@ -16,6 +16,7 @@ def register():
     Pool.register(
         configuration.Configuration,
         configuration.ConfigurationAccount,
+        configuration.ConfigurationSequences,
         account.Move,
         cash_bank.CashBank,
         cash_bank.ReceiptType,
@@ -28,4 +29,5 @@ def register():
         transfer.Transfer,
         transfer.DocumentTransfer,
         convertion.Convertion,
+        convertion.DocumentConvertion,
         module='cash_bank', type_='model')

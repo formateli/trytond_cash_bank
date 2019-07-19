@@ -1,11 +1,9 @@
 # This file is part of trytond-cash_bank module.
 # The COPYRIGHT file at the top level of this repository
 # contains the full copyright notices and license terms.
-
 from trytond.transaction import Transaction
 from trytond.pool import Pool
-from trytond.model import (
-    sequence_ordered, Workflow, ModelView, ModelSQL, fields, Check)
+from trytond.model import Workflow, ModelView, ModelSQL, fields
 from trytond.pyson import Eval, If, Bool, Or
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
@@ -102,31 +100,29 @@ class Transfer(Workflow, ModelSQL, ModelView):
     documents = fields.Many2Many('cash_bank.document-cash_bank.transfer',
         'transfer', 'document', 'Documents',
         domain=[
-            [('convertion', '=', None)],
-            [
-                If(Bool(Eval('type_from')),
-                    [
-                        If (Eval('state') != 'posted',
-                            [
-                                If (Eval('state') == 'draft',
-                                    [
-                                        ('last_receipt.cash_bank.id',
-                                            '=', Eval('cash_bank_from')
-                                        )
-                                    ],
-                                    [
-                                        ('last_receipt.cash_bank.id',
-                                            '=', Eval('cash_bank_to')
-                                        )
-                                    ]
-                                )
-                            ],
-                            [('id', '!=', -1)]
-                        )
-                    ],
-                    [('id', '=', -1)]
-                ),
-            ]
+            If(Bool(Eval('type_from')),
+                [
+                    If (Eval('state') != 'posted',
+                        [
+                            ('convertion', '=', None),
+                            If (Eval('state') == 'draft',
+                                [
+                                    ('last_receipt.cash_bank.id',
+                                        '=', Eval('cash_bank_from')
+                                    ),
+                                ],
+                                [
+                                    ('last_receipt.cash_bank.id',
+                                        '=', Eval('cash_bank_to')
+                                    )
+                                ]
+                            )
+                        ],
+                        [('id', '!=', -1)]
+                    )
+                ],
+                [('id', '=', -1)]
+            ),
         ], states=_STATES,
         depends=_DEPENDS + ['type_from', 'cash_bank_from', 'cash_bank_to'])
     total_documents = fields.Function(fields.Numeric('Total Documents',
@@ -353,14 +349,13 @@ class Transfer(Workflow, ModelSQL, ModelView):
 
     @classmethod
     def delete(cls, transfers):
-        cls.cancel(transfers)
         for transfer in transfers:
-            if transfer.state != 'cancel':
+            if transfer.state != 'draft':
                 raise UserError(
                     gettext('cash_bank.msg_delete_document_cash_bank',
                         doc_name='Transfer',
-                        doc_number=receipt.rec_name,
-                        state='Draft or Cancelled'
+                        doc_number=transfer.rec_name,
+                        state='Draft'
                     ))
         super(Transfer, cls).delete(transfers)
 

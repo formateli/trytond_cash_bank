@@ -2,6 +2,10 @@
 <!-- This file is part of trytond-cash_bank module. The COPYRIGHT file at the top level of
 this repository contains the full copyright notices and license terms. -->
 <form>
+    <separator string="Account" id="accounts" colspan="4" />
     <label name="account_transfer"/>
     <field name="account_transfer"/>
+    <separator string="Sequences" id="sequences" colspan="4" />
+    <label name="convertion_seq"/>
+    <field name="convertion_seq"/>
 </form>

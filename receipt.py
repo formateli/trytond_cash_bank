@@ -80,30 +80,33 @@ class Receipt(Workflow, ModelSQL, ModelView):
     documents = fields.Many2Many('cash_bank.document-cash_bank.receipt',
         'receipt', 'document', 'Documents',
         domain=[
-            [('convertion', '=', None)],
-            [
-                If(Bool(Eval('type')),
-                    If(Eval('type_type') == 'in',
-                        ['OR',
-                            [('last_receipt', '=', None)],
-                            [('last_receipt.id', '=', Eval('id'))],
-                            [('last_receipt.type.type', '=', 'out')]
-                        ],
-                        ['OR',
-                            [('last_receipt.id', '=', Eval('id'))],
-                            [
-                                ('last_receipt.type.type', '=', 'in'),
-                                ('last_receipt.state', 'in',
-                                    ['confirmed', 'posted'])
-                            ]
-                        ],
+            If(Eval('state') != 'posted',
+                [
+                    [('convertion', '=', None)],
+                    If(Bool(Eval('type')),
+                        If(Eval('type_type') == 'in',
+                            ['OR',
+                                [('last_receipt', '=', None)],
+                                [('last_receipt.id', '=', Eval('id'))],
+                                [('last_receipt.type.type', '=', 'out')]
+                            ],
+                            ['OR',
+                                [('last_receipt.id', '=', Eval('id'))],
+                                [
+                                    ('last_receipt.type.type', '=', 'in'),
+                                    ('last_receipt.state', 'in',
+                                        ['confirmed', 'posted'])
+                                ]
+                            ],
+                        ),
+                        [('id', '=', -1)]
                     ),
-                    [('id', '=', -1)]
-                ),
-            ]
+                ],
+                [('id', '!=', -1)]
+            )
         ],
         states=_STATES,
-        depends=['id', 'type', 'type_type'])
+        depends=['id', 'type', 'type_type', 'state'])
     total_documents = fields.Function(fields.Numeric('Total Documents',
         digits=(16, Eval('currency_digits', 2)),
         depends=['currency_digits']),
@@ -428,6 +431,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
     @classmethod
     def validate(cls, receipts):
+        super(Receipt, cls).validate(receipts)
         cls.set_document_receipt(receipts)
 
     @classmethod

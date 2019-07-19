@@ -80,7 +80,7 @@ contains the full copyright notices and license terms. -->
 
         <record model="ir.model.access" id="access_transfer">
             <field name="model" search="[('model', '=', 'cash_bank.transfer')]"/>
-            <field name="perm_read" eval="False"/>
+            <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>

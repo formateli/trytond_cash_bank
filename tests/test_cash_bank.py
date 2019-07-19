@@ -36,6 +36,7 @@ class CashBankTestCase(ModuleTestCase):
         Document = pool.get('cash_bank.document')
         Docs = pool.get('cash_bank.document-cash_bank.receipt')
         Transfer = pool.get('cash_bank.transfer')
+        Convertion = pool.get('cash_bank.convertion')
 
         transaction = Transaction()
 
@@ -71,6 +72,13 @@ class CashBankTestCase(ModuleTestCase):
                 'Cash/Bank Sequence',
                 'cash_bank.receipt',
                 company)
+            sequence_convertion = create_sequence(
+                'Cash/Bank Convertion',
+                'cash_bank.convertion',
+                company)
+
+            config.convertion_seq = sequence_convertion
+            config.save()
 
             cash = create_cash_bank(
                 company, 'Main Cashier', 'cash',
@@ -421,7 +429,29 @@ class CashBankTestCase(ModuleTestCase):
             self._verify_document('def', transfer.receipt_to.id)
             self._verify_document('ghi', transfer.receipt_to.id)
 
-            #TODO test Convertions
+            # Convertions
+
+            with self.assertRaises(UserError):
+                #Documents are in cash_2
+                convertion = Convertion(
+                    cash_bank=cash,
+                    date=date,
+                    documents=Document.search([])
+                )
+                convertion.save()
+
+            convertion = Convertion(
+                cash_bank=cash_2,
+                date=date,
+                documents=Document.search([])
+            )
+            convertion.save()
+
+            Convertion.confirm([convertion])
+            self.assertEqual(convertion.state, 'confirmed')
+            docs = Document.search([])
+            for doc in docs:
+                self.assertEqual(doc.convertion.id, convertion.id)
 
     def _validate_domain_in(self, Receipt, Document, receipt_1):
         self._verify_document('abc', receipt_1.id)
