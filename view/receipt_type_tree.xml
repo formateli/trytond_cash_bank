@@ -5,6 +5,5 @@ this repository contains the full copyright notices and license terms. -->
     <field name="cash_bank"/>
     <field name="name"/>
     <field name="type"/>
-    <field name="sequence"/>
     <field name="active"/>
 </tree>

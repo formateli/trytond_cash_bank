@@ -453,6 +453,18 @@ class CashBankTestCase(ModuleTestCase):
             for doc in docs:
                 self.assertEqual(doc.convertion.id, convertion.id)
 
+            Convertion.cancel([convertion])
+            self.assertEqual(convertion.state, 'cancel')
+            docs = Document.search([])
+            for doc in docs:
+                self.assertEqual(doc.convertion.id, convertion.id)
+
+            Convertion.draft([convertion])
+            self.assertEqual(convertion.state, 'draft')
+            docs = Document.search([])
+            for doc in docs:
+                self.assertEqual(doc.convertion, None)
+
     def _validate_domain_in(self, Receipt, Document, receipt_1):
         self._verify_document('abc', receipt_1.id)
         self._verify_document('def', receipt_1.id)

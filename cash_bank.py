@@ -93,8 +93,6 @@ class ReceiptType(ModelSQL, ModelView):
             ('company', 'in', [Eval('context', {}).get('company', -1), None]),
             ('code', '=', 'cash_bank.receipt'),
         ])
-    document_convert = fields.Boolean('Convert documents',
-        help='Automatically convert documents to cash')
     party_required = fields.Boolean('Party Required')
     active = fields.Boolean('Active')
 
