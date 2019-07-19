@@ -6,7 +6,7 @@ from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import (
     sequence_ordered, Workflow, ModelView, ModelSQL, fields, Check)
-from trytond.pyson import Eval, If, Bool
+from trytond.pyson import Eval, If, Bool, Or
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from decimal import Decimal
@@ -43,10 +43,12 @@ class Transfer(Workflow, ModelSQL, ModelView):
     reference = fields.Char('Reference', size=None)
     description = fields.Char('Description', size=None)
     cash_bank_from = fields.Many2One('cash_bank.cash_bank',
-            'From', required=True,
-            domain=[
-                ('company', '=', Eval('company')),
-            ], states=_STATES, depends=_DEPENDS + ['company'])
+        'From', required=True,
+        domain=[
+            ('company', '=', Eval('company')),
+        ], states={
+            'readonly': Or(Eval('state') != 'draft', Eval('documents')),
+        }, depends=_DEPENDS + ['company', 'documents'])
     type_from = fields.Many2One('cash_bank.receipt_type',
         'Type', required=True,
         domain=[
@@ -56,17 +58,21 @@ class Transfer(Workflow, ModelSQL, ModelView):
                 [('cash_bank', '=', -1)]
             ),
             ('type', '=', 'out')
-        ], states=_STATES, depends=_DEPENDS + ['cash_bank_from'])
+        ], states={
+            'readonly': Or(Eval('state') != 'draft', Eval('documents')),
+        }, depends=_DEPENDS + ['cash_bank_from', 'documents'])
     cash_bank_to = fields.Many2One('cash_bank.cash_bank',
-            'To', required=True,
-            domain=[
-                ('company', '=', Eval('company')),
-                If(
-                    Bool(Eval('cash_bank_from')),
-                    [('id', '!=', Eval('cash_bank_from'))],
-                    [('id', '=', -1)]
-                ),
-            ], states=_STATES, depends=_DEPENDS + ['company', 'cash_bank_from'])
+        'To', required=True,
+        domain=[
+            ('company', '=', Eval('company')),
+            If(
+                Bool(Eval('cash_bank_from')),
+                [('id', '!=', Eval('cash_bank_from'))],
+                [('id', '=', -1)]
+            ),
+        ], states={
+            'readonly': Or(Eval('state') != 'draft', Eval('documents')),
+        }, depends=_DEPENDS + ['company', 'cash_bank_from', 'documents'])
     type_to = fields.Many2One('cash_bank.receipt_type',
         'Type', required=True,
         domain=[
@@ -76,7 +82,9 @@ class Transfer(Workflow, ModelSQL, ModelView):
                 [('cash_bank', '=', -1)]
             ),
             ('type', '=', 'in')
-        ], states=_STATES, depends=_DEPENDS + ['cash_bank_to'])
+        ], states={
+            'readonly': Or(Eval('state') != 'draft', Eval('documents')),
+        }, depends=_DEPENDS + ['cash_bank_to', 'documents'])
     currency = fields.Many2One('currency.currency', 'Currency', required=True,
         states={
             'readonly': True,
@@ -173,15 +181,15 @@ class Transfer(Workflow, ModelSQL, ModelView):
 
     @staticmethod
     def default_cash():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @staticmethod
     def default_total_documents():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @staticmethod
     def default_total():
-        return Decimal(0)
+        return Decimal('0.0')
 
     @staticmethod
     def default_state():
@@ -251,7 +259,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
     @fields.depends('cash', 'total_documents')
     def on_change_cash(self):
         if not self.cash:
-            self.cash = Decimal(0)
+            self.cash = Decimal('0.0')
         self._set_total()
 
     @fields.depends('documents', 'cash', 'total_documents')
@@ -260,7 +268,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
         self._set_total()
 
     def get_total_documents(self, name=None):
-        total = Decimal(0)
+        total = Decimal('0.0')
         if self.documents:
             for doc in self.documents:
                 if doc.amount:
@@ -272,7 +280,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
         return total
 
     def _set_total(self):
-        self.total = Decimal(0)
+        self.total = Decimal('0.0')
         if self.cash:
             self.total += self.cash
         if self.total_documents:

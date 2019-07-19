@@ -21,8 +21,8 @@ class DocumentType(ModelSQL, ModelView):
     "Cash/Bank Document Type"
     __name__ = "cash_bank.document.type"
     name = fields.Char('Name', required=True, translate=True)
-    active = fields.Boolean('Active')
     description = fields.Text('Description', size=None)
+    active = fields.Boolean('Active')
 
     @staticmethod
     def default_active():

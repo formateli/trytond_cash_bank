@@ -423,9 +423,12 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @classmethod
     def create(cls, vlist):
         receipts = super(Receipt, cls).create(vlist)
-        cls.set_document_receipt(receipts)
         write_log('Created', receipts)
         return receipts
+
+    @classmethod
+    def validate(cls, receipts):
+        cls.set_document_receipt(receipts)
 
     @classmethod
     def set_document_receipt(cls, receipts):

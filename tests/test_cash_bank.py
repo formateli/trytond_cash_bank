@@ -8,6 +8,7 @@ from trytond.tests.test_tryton import ModuleTestCase, with_transaction
 from trytond.modules.company.tests import create_company, set_company
 from trytond.modules.account.tests import create_chart, get_fiscalyear
 from trytond.pool import Pool
+from trytond.transaction import Transaction
 from trytond.exceptions import UserError
 
 __all__ = [
@@ -35,6 +36,8 @@ class CashBankTestCase(ModuleTestCase):
         Document = pool.get('cash_bank.document')
         Docs = pool.get('cash_bank.document-cash_bank.receipt')
         Transfer = pool.get('cash_bank.transfer')
+
+        transaction = Transaction()
 
         company = create_company()
         with set_company(company):
@@ -228,10 +231,35 @@ class CashBankTestCase(ModuleTestCase):
 
             docs = Document.search([]) # cash_bank.document
             self.assertEqual(len(docs), 3)
+            self._verify_document('abc', None)
+            self._verify_document('def', None)
+            self._verify_document('ghi', None)
 
             ########################
             # Documents domain tests
             ########################
+
+            receipt_1 = self._get_receipt(
+                company, cash, 'in', date)
+            receipt_1.cash = Decimal('10.0')
+            receipt_1.lines  = [
+                ReceiptLine(
+                    amount=Decimal('100.0'),
+                    account=account_expense
+                )]
+            receipt_1.documents = Document.search([])
+            receipt_1.save()
+            self._verify_document('abc', receipt_1.id)
+            self._verify_document('def', receipt_1.id)
+            self._verify_document('ghi', receipt_1.id)
+
+            # if documents are detached then returns to a previous receipt
+            receipt_1.documents = [Document.search([])[0]]
+            receipt_1.save()
+            self._verify_document('abc', receipt_1.id)
+            self._verify_document('def', None)
+            self._verify_document('ghi', None)
+            Receipt.delete([receipt_1])
 
             # Ensure that if docs belongs to a receipt 'in'
             # no other receipt 'in' can add them
@@ -343,8 +371,12 @@ class CashBankTestCase(ModuleTestCase):
             self._verify_document('def', transfer.receipt_to.id)
             self._verify_document('ghi', transfer.receipt_to.id)
 
-            #with self.assertRaises(UserError):
-            #    Receipt.post([transfer.receipt_from])
+            transaction.commit()
+
+            with self.assertRaises(UserError):
+                # Cannot because it is in a Transfer
+                Receipt.post([transfer.receipt_from])
+            transaction.rollback()
 
             Transfer.cancel([transfer])
             self.assertEqual(transfer.state, 'cancel')
@@ -362,11 +394,34 @@ class CashBankTestCase(ModuleTestCase):
             self.assertEqual(transfer.receipt_from, None)
             self.assertEqual(transfer.receipt_to, None)
 
+            # Documents go back to the origin receipt
             self._verify_document('abc', last_docs_receipt_id)
             self._verify_document('def', last_docs_receipt_id)
             self._verify_document('ghi', last_docs_receipt_id)
 
-            #TODO test Conversions
+            Transfer.confirm([transfer])
+            self.assertEqual(transfer.state, 'confirmed')
+            self.assertEqual(transfer.receipt_from.transfer, transfer)
+            self.assertEqual(transfer.receipt_to.transfer, transfer)
+            self.assertEqual(transfer.receipt_from.state, 'confirmed')
+            self.assertEqual(transfer.receipt_to.state, 'confirmed')
+
+            self._verify_document('abc', transfer.receipt_to.id)
+            self._verify_document('def', transfer.receipt_to.id)
+            self._verify_document('ghi', transfer.receipt_to.id)
+
+            Transfer.post([transfer])
+            self.assertEqual(transfer.state, 'posted')
+            self.assertEqual(transfer.receipt_from.transfer, transfer)
+            self.assertEqual(transfer.receipt_to.transfer, transfer)
+            self.assertEqual(transfer.receipt_from.state, 'posted')
+            self.assertEqual(transfer.receipt_to.state, 'posted')
+
+            self._verify_document('abc', transfer.receipt_to.id)
+            self._verify_document('def', transfer.receipt_to.id)
+            self._verify_document('ghi', transfer.receipt_to.id)
+
+            #TODO test Convertions
 
     def _validate_domain_in(self, Receipt, Document, receipt_1):
         self._verify_document('abc', receipt_1.id)
@@ -401,8 +456,12 @@ class CashBankTestCase(ModuleTestCase):
         docs = Docs.search(
             [('document', '=', doc.id)], order=[('id', 'ASC')])
 
-        self.assertEqual(doc.last_receipt.id, receipt_id)
-        self.assertEqual(receipt_id, docs[-1].receipt.id)
+        if receipt_id is None:
+            self.assertEqual(doc.last_receipt, receipt_id)
+            self.assertEqual(docs, [])
+        else:
+            self.assertEqual(doc.last_receipt.id, receipt_id)
+            self.assertEqual(receipt_id, docs[-1].receipt.id)
 
     def _get_document(self, type_, amount, date, reference):
         Document = Pool().get('cash_bank.document')
