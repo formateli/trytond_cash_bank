@@ -39,6 +39,7 @@ class Convertion(Workflow, ModelSQL, ModelView):
         'Cash', required=True,
         domain=[
             ('company', '=', Eval('company')),
+            ('type', '=', 'cash'),
         ], states={
             'readonly': Or(Eval('state') != 'draft', Eval('documents')),
         }, depends=_DEPENDS + ['company', 'documents'])
@@ -57,7 +58,6 @@ class Convertion(Workflow, ModelSQL, ModelView):
         domain=[
             ('last_receipt', '!=', None),
             ('last_receipt.cash_bank.id', '=', Eval('cash_bank')),
-            ('last_receipt.cash_bank.type', '=', 'cash'),
             If(Eval('state') == 'draft',
                 [
                     ('convertion', '=', None),

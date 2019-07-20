@@ -58,6 +58,7 @@ contains the full copyright notices and license terms. -->
             <field name="domain"
                 eval="[('state', '=', 'draft'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
                 pyson="1"/>
+            <field name="count" eval="True"/>
             <field name="act_window" ref="act_convertion_form"/>
         </record>
         <record model="ir.action.act_window.domain" id="act_convertion_form_domain_confirmed">
@@ -66,6 +67,7 @@ contains the full copyright notices and license terms. -->
             <field name="domain"
                 eval="[('state', '=', 'confirmed'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
                 pyson="1"/>
+            <field name="count" eval="True"/>
             <field name="act_window" ref="act_convertion_form"/>
         </record>
         <record model="ir.action.act_window.domain" id="act_convertion_form_domain_cancel">
@@ -74,6 +76,7 @@ contains the full copyright notices and license terms. -->
             <field name="domain"
                 eval="[('state', '=', 'cancel'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
                 pyson="1"/>
+            <field name="count" eval="True"/>
             <field name="act_window" ref="act_convertion_form"/>
         </record>
         <record model="ir.action.act_window.domain" id="act_convertion_form_domain_all">

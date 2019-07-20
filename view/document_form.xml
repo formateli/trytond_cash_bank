@@ -12,6 +12,9 @@ this repository contains the full copyright notices and license terms. -->
     <field name="entity"/>
     <label name="amount"/>
     <field name="amount"/>
+    <newline/>
     <label name="last_receipt"/>
     <field name="last_receipt"/>
+    <label name="convertion"/>
+    <field name="convertion"/>
 </form>

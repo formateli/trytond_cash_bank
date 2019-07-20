@@ -30,6 +30,10 @@ this repository contains the full copyright notices and license terms. -->
             <field name="company"/>
             <label name="currency"/>
             <field name="currency"/>
+            <label name="receipt_from"/>
+            <field name="receipt_from"/>
+            <label name="receipt_to"/>
+            <field name="receipt_to"/>
         </page>
     </notebook>
     <group col="2" colspan="2" id="states" yfill="1">

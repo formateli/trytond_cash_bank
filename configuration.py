@@ -57,9 +57,8 @@ class ConfigurationSequences(ModelSQL, CompanyValueMixin):
     'Configuration Sequences'
     __name__ = 'cash_bank.configuration.sequences'
     convertion_seq = fields.Many2One(
-        'ir.sequence', "Cash and Bank Convertion Sequence", required=True,
+        'ir.sequence', "Cash and Bank Convertion Sequence",
         domain=[
-            ('company', 'in',
-                [Eval('context', {}).get('company', -1), None]),
+            ('company', 'in', [Eval('company', -1), None]),
             ('code', '=', 'cash_bank.convertion'),
-        ])
+        ], depends=['company'])
