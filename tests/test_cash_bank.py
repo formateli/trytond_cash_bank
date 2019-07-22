@@ -10,11 +10,12 @@ from trytond.modules.account.tests import create_chart, get_fiscalyear
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.exceptions import UserError
+from trytond.model.modelsql import SQLConstraintError
 
 __all__ = [
     'create_cash_bank',
     'create_sequence',
-    'create_payment_method',
+    'create_journal',
     'create_fiscalyear'
 ]
 
@@ -58,8 +59,7 @@ class CashBankTestCase(ModuleTestCase):
                     ('name', '=', 'Main Expense'),
                     ])
 
-            payment_method = create_payment_method(
-                company, 'journal_cash', account_cash)
+            journal = create_journal(company, 'journal_cash')
     
             config = Config(
                 account_transfer=account_transfer)
@@ -82,13 +82,23 @@ class CashBankTestCase(ModuleTestCase):
 
             cash = create_cash_bank(
                 company, 'Main Cashier', 'cash',
-                payment_method, sequence
+                journal, account_cash, sequence
             )
             self.assertEqual(len(cash.receipt_types), 2)
 
+            transaction.commit()
+
+            with self.assertRaises(SQLConstraintError):
+                # Must be a diferent account
+                bank = create_cash_bank(
+                    company, 'Main Bank', 'bank',
+                    journal, account_cash, sequence
+                )
+            transaction.rollback()
+
             bank = create_cash_bank(
                 company, 'Main Bank', 'bank',
-                payment_method, sequence
+                journal, account_revenue, sequence
             )
             self.assertEqual(len(bank.receipt_types), 2)
 
@@ -143,11 +153,6 @@ class CashBankTestCase(ModuleTestCase):
             self.assertEqual(receipt.state, 'posted')
             self.assertEqual(receipt.move.state, 'posted')
 
-            self._check_line_move(
-                receipt.move,
-                payment_method.debit_account,
-                receipt.total, Decimal('0.0'))
-
             # Receipt Cash OUT
             receipt = self._get_receipt(
                 company, cash, 'out', date)
@@ -166,10 +171,6 @@ class CashBankTestCase(ModuleTestCase):
 
             Receipt.confirm([receipt,])
             Receipt.post([receipt,])
-            self._check_line_move(
-                receipt.move,
-                payment_method.credit_account,
-                Decimal('0.0'), receipt.total)
 
             # 'out' receipts can not create documents
             receipt = self._get_receipt(
@@ -334,7 +335,7 @@ class CashBankTestCase(ModuleTestCase):
 
             cash_2 = create_cash_bank(
                 company, 'Cashier 2', 'cash',
-                payment_method, sequence
+                journal, account_expense, sequence
             )
 
             with self.assertRaises(UserError):
@@ -515,15 +516,6 @@ class CashBankTestCase(ModuleTestCase):
         )
         return doc
 
-    def _check_line_move(self, move, account_ref, debit, credit):
-        for line in move.lines:
-            if line.account == account_ref:
-                self.assertEqual(line.debit, debit)
-                self.assertEqual(line.credit, credit)
-            else:
-                self.assertEqual(line.debit, credit)
-                self.assertEqual(line.credit, debit)                
-
     def _get_receipt(
             self, company, cash_bank, receipt_type, date):
         pool = Pool()
@@ -565,24 +557,13 @@ def create_fiscalyear(company):
     FiscalYear.create_period([fy,])
 
 
-def create_payment_method(company, fs_id, account):
+def create_journal(company, fs_id):
     pool = Pool()
     ModelData = pool.get('ir.model.data')
     Journal = pool.get('account.journal')
-    PaymentMethod = pool.get('account.invoice.payment.method')
-
     journal = Journal(ModelData.get_id(
         'account', fs_id))
-
-    payment_method = PaymentMethod(
-        name=journal.name,
-        company=company,
-        journal=journal,
-        credit_account=account,
-        debit_account=account
-    )
-
-    return payment_method
+    return journal
 
 
 def create_receipt_types(name, sequence):
@@ -617,14 +598,14 @@ def create_sequence(name, code, company, is_strict=False):
     return seq
 
 
-def create_cash_bank(company, name, type_, payment_method, receipt_sequence):
+def create_cash_bank(company, name, type_, journal, account, receipt_sequence):
     CashBank = Pool().get('cash_bank.cash_bank')
     cash = CashBank(
         company=company,
         name=name,
         type=type_,
-        journal_cash_bank=payment_method.journal,
-        account=payment_method.debit_account,
+        journal_cash_bank=journal,
+        account=account,
         receipt_types=create_receipt_types(name, receipt_sequence)
     )
     cash.save()

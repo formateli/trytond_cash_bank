@@ -4,7 +4,7 @@
 
 from trytond.transaction import Transaction
 from trytond.pool import Pool
-from trytond.model import ModelView, ModelSQL, fields
+from trytond.model import ModelView, ModelSQL, fields, Unique
 from trytond.pyson import Eval, If
 
 __all__ = [
@@ -40,6 +40,16 @@ class CashBank(ModelSQL, ModelView):
         depends=['company'])
     receipt_types = fields.One2Many('cash_bank.receipt_type',
         'cash_bank', 'Receipt types')
+
+    @classmethod
+    def __setup__(cls):
+        super(CashBank, cls).__setup__()
+        t = cls.__table__()
+        cls._sql_constraints += [
+            ('cash_bank_account_uniq', 
+                Unique(t, t.account),
+                'Account can not be shared between Cash/Bank.'),
+        ]
 
     @classmethod
     def __register__(cls, module_name):

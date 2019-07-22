@@ -8,6 +8,6 @@ try:
 except ImportError:
     from .test_cash_bank import (
         suite, create_cash_bank, create_sequence,
-        create_payment_method, create_fiscalyear)
+        create_journal, create_fiscalyear)
 
 __all__ = ['suite']
