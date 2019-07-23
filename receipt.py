@@ -50,9 +50,9 @@ class Receipt(Workflow, ModelSQL, ModelView):
             ], states=_STATES)
     type = fields.Many2One('cash_bank.receipt_type', 'Type', required=True,
         domain=[
-            If(
-                Bool(Eval('cash_bank')),
-                [('cash_bank', '=', Eval('cash_bank'))], []
+            If(Bool(Eval('cash_bank')),
+                [('cash_bank', '=', Eval('cash_bank'))],
+                [('id', '=', -1)]
             ),
         ],
         states=_STATES, depends=['cash_bank'])
@@ -277,7 +277,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         if self.type:
             return self.type.type
 
-    @fields.depends('type')
+    @fields.depends('type', 'documents', 'state')
     def on_change_with_document_allow(self, name=None):
         if self.type:
             if self.type.type == 'in':
