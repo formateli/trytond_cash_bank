@@ -21,8 +21,7 @@ this repository contains the full copyright notices and license terms. -->
         <field name="last_receipt"/>
         <label name="convertion"/>
         <field name="convertion"/>
-        <newline/>
-        <field name="logs" colspan="6"
-            view_ids="log_action.log_view_tree,log_action.log_view_form"/>
     </group>
+    <field name="logs" colspan="4"
+        view_ids="log_action.log_view_tree,log_action.log_view_form"/>
 </form>

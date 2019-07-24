@@ -21,6 +21,37 @@ this repository contains the full copyright notices and license terms. -->
         <page string="Lines" id="lines">
             <field name="lines" colspan="4"
                 view_ids="cash_bank.receipt_line_view_tree"/>
+            <group col="6" colspan="4" id="states_buttons" yfill="1">
+                <group col="4" colspan="4" id="states" yfill="1">
+                    <group col="2" colspan="2" id="state" yfill="1">
+                        <label name="state"/>
+                        <field name="state"/>
+                    </group>
+                    <group col="2" colspan="2" id="amount_1" yfill="1">
+                        <label name="total_lines" xalign="1.0" xexpand="1"/>
+                        <field name="total_lines" xalign="1.0" xexpand="0"/>
+                        <label name="diff" xalign="1.0" xexpand="1"/>
+                        <field name="diff" xalign="1.0" xexpand="0"/>
+                    </group>
+                    <group col="-1" colspan="4" id="buttons">
+                        <button name="cancel" string="Cancel"
+                            icon="tryton-cancel"/>
+                        <button name="draft" string="Draft"/>
+                        <button name="confirm" string="Confirm"
+                            icon="tryton-ok"/>
+                        <button name="post" string="Post"
+                            icon="tryton-forward"/>
+                    </group>
+                </group>
+                <group col="2" colspan="2" id="amount_2" yfill="1">
+                    <label name="cash" xalign="1.0" xexpand="1"/>
+                    <field name="cash" xalign="1.0" xexpand="0"/>
+                    <label name="total_documents" xalign="1.0" xexpand="1"/>
+                    <field name="total_documents" xalign="1.0" xexpand="0"/>
+                    <label name="total" xalign="1.0" xexpand="1"/>
+                    <field name="total" xalign="1.0" xexpand="0"/>
+                </group>
+            </group>
         </page>
         <page name="documents">
             <field name="documents" colspan="4"/>
@@ -42,35 +73,4 @@ this repository contains the full copyright notices and license terms. -->
                 view_ids="log_action.log_view_tree,log_action.log_view_form"/>
         </page>
     </notebook>
-    <group col="6" colspan="4" id="states_buttons" yfill="1">
-        <group col="4" colspan="4" id="states" yfill="1">
-            <group col="2" colspan="2" id="state" yfill="1">
-                <label name="state"/>
-                <field name="state"/>
-            </group>
-            <group col="2" colspan="2" id="amount_1" yfill="1">
-                <label name="total_lines" xalign="1.0" xexpand="1"/>
-                <field name="total_lines" xalign="1.0" xexpand="0"/>
-                <label name="diff" xalign="1.0" xexpand="1"/>
-                <field name="diff" xalign="1.0" xexpand="0"/>
-            </group>
-            <group col="-1" colspan="4" id="buttons">
-                <button name="cancel" string="Cancel"
-                    icon="tryton-cancel"/>
-                <button name="draft" string="Draft"/>
-                <button name="confirm" string="Confirm"
-                    icon="tryton-ok"/>
-                <button name="post" string="Post"
-                    icon="tryton-forward"/>
-            </group>
-        </group>
-        <group col="2" colspan="2" id="amount_2" yfill="1">
-            <label name="cash" xalign="1.0" xexpand="1"/>
-            <field name="cash" xalign="1.0" xexpand="0"/>
-            <label name="total_documents" xalign="1.0" xexpand="1"/>
-            <field name="total_documents" xalign="1.0" xexpand="0"/>
-            <label name="total" xalign="1.0" xexpand="1"/>
-            <field name="total" xalign="1.0" xexpand="0"/>
-        </group>
-    </group>
 </form>

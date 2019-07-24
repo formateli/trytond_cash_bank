@@ -380,13 +380,6 @@ class CashBankTestCase(ModuleTestCase):
             self._verify_document('def', transfer.receipt_to.id)
             self._verify_document('ghi', transfer.receipt_to.id)
 
-            transaction.commit()
-
-            with self.assertRaises(UserError):
-                # Cannot because it is in a Transfer
-                Receipt.post([transfer.receipt_from])
-            transaction.rollback()
-
             Transfer.cancel([transfer])
             self.assertEqual(transfer.state, 'cancel')
             self.assertEqual(transfer.receipt_from.transfer, transfer)

@@ -9,9 +9,6 @@ this repository contains the full copyright notices and license terms. -->
         <record model="ir.message" id="msg_receipt_no_lines">
             <field name="text">Receipt %(receipt)s has no lines.</field>
         </record>
-        <record model="ir.message" id="msg_transfer_exists_cash_bank">
-            <field name="text">Receipt "%(receipt)s" can not be modified because it is part of Transfer "%(transfer)s".</field>
-        </record>
         <record model="ir.message" id="msg_diff_total_lines_cash_bank">
             <field name="text">Difference between "Total" and "Total Lines" must be zero.</field>
         </record>

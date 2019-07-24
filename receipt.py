@@ -207,12 +207,14 @@ class Receipt(Workflow, ModelSQL, ModelView):
         cls._buttons.update({
             'cancel': {
                 'invisible': ~Eval('state').in_(['confirmed']),
+                'readonly': Bool(Eval('transfer')),
                 },
             'confirm': {
                 'invisible': ~Eval('state').in_(['draft']),
                 },
             'post': {
                 'invisible': ~Eval('state').in_(['confirmed']),
+                'readonly': Bool(Eval('transfer')),
                 },
             'draft': {
                 'invisible': ~Eval('state').in_(['cancel']),
@@ -552,31 +554,17 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @classmethod
     @ModelView.button
     @Workflow.transition('posted')
-    def post(cls, receipts, from_transfer=False):
+    def post(cls, receipts):
         Move = Pool().get('account.move')
         Move.post([r.move for r in receipts])
-        for receipt in receipts:
-            if not from_transfer and receipt.transfer:
-                raise UserError(
-                    gettext('cash_bank.msg_transfer_exists_cash_bank',
-                        receipt=receipt.rec_name,
-                        transfer=receipt.transfer.rec_name
-                    ))
         write_log('Posted', receipts)
 
     @classmethod
     @ModelView.button
     @Workflow.transition('cancel')
-    def cancel(cls, receipts, from_transfer=True):
+    def cancel(cls, receipts):
         Move = Pool().get('account.move')
         Move.delete([r.move for r in receipts])
-        for receipt in receipts:
-            if not from_transfer and receipt.transfer:
-                raise UserError(
-                    gettext('cash_bank.msg_transfer_exists_cash_bank',
-                        receipt=receipt.rec_name,
-                        transfer=receipt.transfer.rec_name
-                    ))
         write_log('Cancelled', receipts)
 
 

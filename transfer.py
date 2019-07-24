@@ -401,6 +401,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
                     transfer.receipt_from,
                     transfer.receipt_to
                 ], transfer)
+        cls.save(transfers) # Update receipts values
         write_log('Confirmed', transfers)
 
     @classmethod
@@ -408,12 +409,13 @@ class Transfer(Workflow, ModelSQL, ModelView):
     @Workflow.transition('posted')
     def post(cls, transfers):
         Receipt = Pool().get('cash_bank.receipt')
+        rcps = []
         for transfer in transfers:
-            Receipt.post([
-                transfer.receipt_from,
-                transfer.receipt_to
-            ], from_transfer=True)
-        cls.save(transfers)
+            rcps += [
+                    transfer.receipt_from,
+                    transfer.receipt_to
+                ]
+        Receipt.post(rcps)
         write_log('Posted', transfers)
 
     @classmethod
@@ -421,11 +423,13 @@ class Transfer(Workflow, ModelSQL, ModelView):
     @Workflow.transition('cancel')
     def cancel(cls, transfers):
         Receipt = Pool().get('cash_bank.receipt')
+        rcps = []
         for transfer in transfers:
-            Receipt.cancel([
-                transfer.receipt_from,
-                transfer.receipt_to
-            ], from_transfer=True)
+            rcps += [
+                    transfer.receipt_from,
+                    transfer.receipt_to
+                ]
+        Receipt.cancel(rcps)
         write_log('Cancelled', transfers)
 
 
