@@ -50,6 +50,24 @@ contains the full copyright notices and license terms. -->
             <field name="perm_delete" eval="True"/>
         </record>
 
+        <!-- Logs -->
+
+        <record model="ir.model.access" id="access_group_document_log">
+            <field name="model" search="[('model', '=', 'cash_bank.document.log_action')]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_group_document_log_admin">
+            <field name="model" search="[('model', '=', 'cash_bank.document.log_action')]"/>
+            <field name="group" ref="res.group_admin"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
 
         <!-- Document -->
 

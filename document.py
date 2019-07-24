@@ -1,14 +1,19 @@
 # This file is part of trytond-cash_bank module.
 # The COPYRIGHT file at the top level of this repository
 # contains the full copyright notices and license terms.
-
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import ModelView, ModelSQL, fields, Check
 from trytond.pyson import Eval, Bool
+from trytond.modules.log_action import LogActionMixin, write_log
 from decimal import Decimal
 
-__all__ = ['DocumentType', 'Document', 'DocumentReceipt']
+__all__ = [
+        'DocumentType',
+        'Document',
+        'DocumentReceipt',
+        'DocumentLog'
+    ]
 
 _STATES = {
     'readonly': Bool(Eval('last_receipt')),
@@ -39,6 +44,8 @@ class Document(ModelSQL, ModelView):
         digits=(16, Eval('currency_digits', 2)),
         depends=_DEPENDS + ['currency_digits'])
     date = fields.Date('Date', states=_STATES, depends=_DEPENDS)
+    party = fields.Many2One('party.party', 'Party',
+        states=_STATES, depends=_DEPENDS)
     reference = fields.Char('Reference', size=None,
         states=_STATES, depends=_DEPENDS)
     entity = fields.Char('Entity', size=None,
@@ -49,6 +56,7 @@ class Document(ModelSQL, ModelView):
         readonly=True)
     convertion = fields.Many2One('cash_bank.convertion', 'Convertion',
         readonly=True)
+    logs = fields.One2Many('cash_bank.document.log_action', 'resource', 'Logs')
 
     @classmethod
     def __setup__(cls):
@@ -105,10 +113,20 @@ class Document(ModelSQL, ModelView):
 
         docs = Docs.search(domain, order=[('id', 'DESC')])
 
+        lg = 'Returned to Receipt: '
         if not docs:
             self.last_receipt = None
+            lg += 'None'
         else:
             self.last_receipt = docs[0].receipt
+            lg += self.last_receipt.rec_name
+        write_log(lg, [self])
+
+    @classmethod
+    def create(cls, vlist):
+        documents = super(Document, cls).create(vlist)
+        write_log('Created', documents)
+        return documents
 
 
 class DocumentReceipt(ModelSQL):
@@ -118,3 +136,10 @@ class DocumentReceipt(ModelSQL):
         ondelete='CASCADE', select=True, required=True)
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
         ondelete='CASCADE', select=True, required=True)
+
+
+class DocumentLog(LogActionMixin):
+    "Document Logs"
+    __name__ = "cash_bank.document.log_action" 
+    resource = fields.Many2One('cash_bank.document',
+        'Document', ondelete='CASCADE', select=True)

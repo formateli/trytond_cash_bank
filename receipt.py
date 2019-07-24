@@ -443,10 +443,15 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
         Document = Pool().get('cash_bank.document')
 
+        lasts = {}
         for receipt in receipts:
             for doc in receipt.documents:
-                doc.last_receipt = receipt
-                doc.save()
+                if doc.last_receipt != receipt:
+                    doc.last_receipt = receipt
+                    doc.save()
+                    if receipt.rec_name not in lasts:
+                        lasts[receipt.rec_name] = []
+                    lasts[receipt.rec_name].append(doc)
 
             # Verify if any document have been deleted from list
             # so last_receipt must be updated
@@ -456,6 +461,9 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 if not doc_exists(doc.id, receipt.documents):
                     doc.set_previous_receipt()
                     doc.save()
+
+        for key, value in lasts.items():
+            write_log('Asigned to Receipt: ' + key, value)
 
     @classmethod
     def set_number(cls, receipts):
@@ -537,10 +545,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
             receipt.move = move
             receipt.line_move = receipt_line_move
             receipt.save()
-
-            for doc in receipt.documents:
-                doc.last_receipt = receipt
-                doc.save()
 
         cls.set_number(receipts)
         write_log('Confirmed', receipts)

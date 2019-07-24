@@ -20,6 +20,8 @@ this repository contains the full copyright notices and license terms. -->
             <field name="company"/>
             <label name="currency"/>
             <field name="currency"/>
+            <field name="logs" colspan="4"
+                view_ids="log_action.log_view_tree,log_action.log_view_form"/>
         </page>
     </notebook>
     <group col="2" colspan="2" id="states" yfill="1">

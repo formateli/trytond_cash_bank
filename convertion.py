@@ -5,11 +5,12 @@ from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import  Workflow, ModelView, ModelSQL, fields
 from trytond.pyson import Eval, If, Bool, Or
+from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from decimal import Decimal
 
-__all__ = ['Convertion', 'DocumentConvertion']
+__all__ = ['Convertion', 'DocumentConvertion', 'ConvertionLog']
 
 _STATES = {
     'readonly': Eval('state') != 'draft',
@@ -74,6 +75,7 @@ class Convertion(Workflow, ModelSQL, ModelView):
             depends=['currency_digits']),
             'get_total_documents')
     state = fields.Selection(STATES, 'State', readonly=True, required=True)
+    logs = fields.One2Many('cash_bank.convertion.log_action', 'resource', 'Logs')
 
     @classmethod
     def __setup__(cls):
@@ -172,7 +174,15 @@ class Convertion(Workflow, ModelSQL, ModelView):
         cls.save(convertions)
 
     @classmethod
+    def create(cls, vlist):
+        convertions = super(Convertion, cls).create(vlist)
+        write_log('Created', convertions)
+        return convertions
+
+    @classmethod
     def delete(cls, convertions):
+        Document = Pool().get('cash_bank.document')
+        docs = []
         for convertion in convertions:
             if convertion.state != 'draft':
                 raise UserError(
@@ -181,6 +191,13 @@ class Convertion(Workflow, ModelSQL, ModelView):
                         doc_number=convertion.rec_name,
                         state='Draft'
                     ))
+            for doc in convertion.documents:
+                doc.convertion = None
+                docs.append(doc)
+                write_log(
+                    'Convertion ' + convertion.rec_name + ' deleted.',
+                    [doc])
+        Document.save(docs)
         super(Convertion, cls).delete(convertions)
 
     @classmethod
@@ -193,7 +210,11 @@ class Convertion(Workflow, ModelSQL, ModelView):
             for doc in convertion.documents:
                 doc.convertion = None
                 docs.append(doc)
+                write_log(
+                    'Convertion ' + convertion.rec_name + ' to Draft.',
+                    [doc])
         Document.save(docs)
+        write_log('Draft', convertions)
 
     @classmethod
     @ModelView.button
@@ -204,15 +225,19 @@ class Convertion(Workflow, ModelSQL, ModelView):
         for convertion in convertions:
             for doc in convertion.documents:
                 doc.convertion = convertion
+                write_log(
+                    'Convertion ' + convertion.rec_name + ' confirmed.',
+                    [doc])
                 docs.append(doc)
         Document.save(docs)
         cls.set_number(convertions)
+        write_log('Confirmed', convertions)
 
     @classmethod
     @ModelView.button
     @Workflow.transition('cancel')
     def cancel(cls, convertions):
-        pass
+        write_log('Cancelled', convertions)
 
 
 class DocumentConvertion(ModelSQL):
@@ -222,3 +247,10 @@ class DocumentConvertion(ModelSQL):
         ondelete='CASCADE', select=True, required=True)
     convertion = fields.Many2One('cash_bank.convertion', 'Convertion',
         ondelete='CASCADE', select=True, required=True)
+
+
+class ConvertionLog(LogActionMixin):
+    "Convertion Logs"
+    __name__ = "cash_bank.convertion.log_action" 
+    resource = fields.Many2One('cash_bank.convertion',
+        'Receipt', ondelete='CASCADE', select=True)

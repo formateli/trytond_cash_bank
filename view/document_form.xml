@@ -2,19 +2,27 @@
 <!-- This file is part of trytond-cash_bank module. The COPYRIGHT file at the top level of
 this repository contains the full copyright notices and license terms. -->
 <form>
-    <label name="type"/>
-    <field name="type"/>
-    <label name="date"/>
-    <field name="date"/>
-    <label name="reference"/>
-    <field name="reference"/>
-    <label name="entity"/>
-    <field name="entity"/>
-    <label name="amount"/>
-    <field name="amount"/>
-    <newline/>
-    <label name="last_receipt"/>
-    <field name="last_receipt"/>
-    <label name="convertion"/>
-    <field name="convertion"/>
+    <group col="6" id="data">
+        <label name="type"/>
+        <field name="type"/>
+        <label name="date"/>
+        <field name="date"/>
+        <label name="party"/>
+        <field name="party"/>
+        <label name="reference"/>
+        <field name="reference"/>
+        <label name="entity"/>
+        <field name="entity"/>
+        <newline/>
+        <label name="amount"/>
+        <field name="amount"/>
+        <newline/>
+        <label name="last_receipt"/>
+        <field name="last_receipt"/>
+        <label name="convertion"/>
+        <field name="convertion"/>
+        <newline/>
+        <field name="logs" colspan="6"
+            view_ids="log_action.log_view_tree,log_action.log_view_form"/>
+    </group>
 </form>

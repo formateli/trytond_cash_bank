@@ -5,11 +5,12 @@ from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import Workflow, ModelView, ModelSQL, fields
 from trytond.pyson import Eval, If, Bool, Or
+from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from decimal import Decimal
 
-__all__ = ['Transfer', 'DocumentTransfer']
+__all__ = ['Transfer', 'DocumentTransfer', 'TransferLog']
 
 _STATES = {
     'readonly': Eval('state') != 'draft',
@@ -138,6 +139,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
     receipt_to = fields.Many2One('cash_bank.receipt', 'Receipt To',
         readonly=True)
     state = fields.Selection(STATES, 'State', readonly=True, required=True)
+    logs = fields.One2Many('cash_bank.transfer.log_action', 'resource', 'Logs')
 
     @classmethod
     def __setup__(cls):
@@ -348,6 +350,12 @@ class Transfer(Workflow, ModelSQL, ModelView):
             receipt.save()
 
     @classmethod
+    def create(cls, vlist):
+        transfers = super(Transfer, cls).create(vlist)
+        write_log('Created', transfers)
+        return transfers
+
+    @classmethod
     def delete(cls, transfers):
         for transfer in transfers:
             if transfer.state != 'draft':
@@ -373,6 +381,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
             Receipt.delete([receipt_to])
             Receipt.delete([receipt_from])
         cls.save(transfers)
+        write_log('Draft', transfers)
 
     @classmethod
     @ModelView.button
@@ -392,6 +401,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
                     transfer.receipt_from,
                     transfer.receipt_to
                 ], transfer)
+        write_log('Confirmed', transfers)
 
     @classmethod
     @ModelView.button
@@ -404,6 +414,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
                 transfer.receipt_to
             ], from_transfer=True)
         cls.save(transfers)
+        write_log('Posted', transfers)
 
     @classmethod
     @ModelView.button
@@ -415,6 +426,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
                 transfer.receipt_from,
                 transfer.receipt_to
             ], from_transfer=True)
+        write_log('Cancelled', transfers)
 
 
 class DocumentTransfer(ModelSQL):
@@ -424,3 +436,10 @@ class DocumentTransfer(ModelSQL):
         ondelete='CASCADE', select=True, required=True)
     transfer = fields.Many2One('cash_bank.transfer', 'Transfer',
         ondelete='CASCADE', select=True, required=True)
+
+
+class TransferLog(LogActionMixin):
+    "Transfer Logs"
+    __name__ = "cash_bank.transfer.log_action" 
+    resource = fields.Many2One('cash_bank.transfer',
+        'Receipt', ondelete='CASCADE', select=True)
