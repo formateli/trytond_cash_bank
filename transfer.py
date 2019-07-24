@@ -91,10 +91,6 @@ class Transfer(Workflow, ModelSQL, ModelView):
         depends=['state', 'documents'])
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
-    party = fields.Many2One('party.party', 'Party',
-        states=_STATES, depends=_DEPENDS)
-    party_required = fields.Function(fields.Boolean('Party Required'),
-        'on_change_with_party_required')
     cash = fields.Numeric('Cash',
         digits=(16, Eval('currency_digits', 2)),
         states=_STATES, depends=_DEPENDS + ['currency_digits'])
@@ -140,6 +136,13 @@ class Transfer(Workflow, ModelSQL, ModelView):
         readonly=True)
     state = fields.Selection(STATES, 'State', readonly=True, required=True)
     logs = fields.One2Many('cash_bank.transfer.log_action', 'resource', 'Logs')
+
+    @classmethod
+    def __register__(cls, module_name):
+        super(Transfer, cls).__register__(module_name)
+        table = cls.__table_handler__(module_name)
+        if table.column_exist('party'):
+            table.drop_column('party')
 
     @classmethod
     def __setup__(cls):
@@ -216,16 +219,6 @@ class Transfer(Workflow, ModelSQL, ModelView):
             return self.currency.digits
         return 2
 
-    @fields.depends('type_from', 'type_to')
-    def on_change_with_party_required(self, name=None):
-        required = False
-        if self.type_from:
-            required = self.type_from.party_required
-        if not required:
-            if self.type_to:
-                required = self.type_to.party_required
-        return required
-
     @fields.depends('cash_bank_from', 'type_from',
         'cash_bank_to', 'type_to')
     def on_change_company(self):
@@ -284,13 +277,18 @@ class Transfer(Workflow, ModelSQL, ModelView):
         if self.total_documents:
             self.total += self.total_documents
 
-    def _new_receipt(self):
+    def _new_receipt(self, cash_bank, type_):
         Receipt = Pool().get('cash_bank.receipt')
+        party = None
+        if type_.party_required:
+            party = self.company.party
         return Receipt(
             company=self.company,
             currency=self.currency,
             date=self.date,
-            party=self.party,
+            cash_bank=cash_bank,
+            type=type_,
+            party=party,
             reference=self.reference,
             description=self.description,
             cash=self.cash
@@ -312,9 +310,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
         return docs
 
     def _create_receipt(self, cash_bank, type_, trasnfer_account, docs):
-        receipt = self._new_receipt()
-        receipt.cash_bank = cash_bank
-        receipt.type = type_
+        receipt = self._new_receipt(cash_bank, type_)
         receipt.documents = self._get_doc(receipt, docs)
         receipt.save()
         receipt.lines = [
@@ -391,10 +387,6 @@ class Transfer(Workflow, ModelSQL, ModelView):
             if transfer.total <= 0:
                 raise UserError(
                     gettext('cash_bank.msg_no_totals_cash_bank'
-                    ))
-            if transfer.party_required and not transfer.party:
-                raise UserError(
-                    gettext('cash_bank.msg_party_required_cash_bank'
                     ))
             transfer.create_receipts()
             cls.set_transfer([

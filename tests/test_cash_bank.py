@@ -39,6 +39,8 @@ class CashBankTestCase(ModuleTestCase):
         Transfer = pool.get('cash_bank.transfer')
         Convertion = pool.get('cash_bank.convertion')
 
+        party = self._create_party('Party test', None)
+
         transaction = Transaction()
 
         company = create_company()
@@ -155,7 +157,7 @@ class CashBankTestCase(ModuleTestCase):
 
             # Receipt Cash OUT
             receipt = self._get_receipt(
-                company, cash, 'out', date)
+                company, cash, 'out', date, party)
 
             receipt.cash = Decimal('100.0')
             receipt.save()
@@ -510,7 +512,7 @@ class CashBankTestCase(ModuleTestCase):
         return doc
 
     def _get_receipt(
-            self, company, cash_bank, receipt_type, date):
+            self, company, cash_bank, receipt_type, date, party=None):
         pool = Pool()
         Receipt = pool.get('cash_bank.receipt')
         ReceiptType = pool.get('cash_bank.receipt_type')
@@ -524,9 +526,26 @@ class CashBankTestCase(ModuleTestCase):
             cash_bank=cash_bank,
             type=type_,
             date=date,
+            party=party,
         )
 
         return receipt
+
+    @classmethod
+    def _create_party(cls, name, account):
+        pool = Pool()
+        Party = pool.get('party.party')
+        Address = pool.get('party.address')
+        addr = Address(
+            name=name,
+        )
+        party = Party(
+            name=name,
+            account_receivable=account,
+            addresses=[addr,],
+        )
+        party.save()
+        return party
 
 def create_fiscalyear(company):
     pool = Pool()
@@ -566,10 +585,14 @@ def create_receipt_types(name, sequence):
 
     res = []
     for t in types:
+        pr = None
+        if t == 'out':
+            pr = True
         rt = ReceiptType(
             name=name + ' ' + t,
             type=t,
-            sequence=sequence
+            sequence=sequence,
+            party_required=pr
         )
         res.append(rt)
     return res

@@ -451,9 +451,13 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 if doc.last_receipt != receipt:
                     doc.last_receipt = receipt
                     doc.save()
-                    if receipt.rec_name not in lasts:
-                        lasts[receipt.rec_name] = []
-                    lasts[receipt.rec_name].append(doc)
+                    if receipt.transfer and \
+                            receipt.transfer.state in ['confirmed', 'post']:
+                        pass
+                    else:
+                        if receipt.rec_name not in lasts:
+                            lasts[receipt.rec_name] = []
+                        lasts[receipt.rec_name].append(doc)
 
             # Verify if any document have been deleted from list
             # so last_receipt must be updated
