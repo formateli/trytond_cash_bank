@@ -16,7 +16,6 @@ __all__ = [
 class CashBank(ModelSQL, ModelView):
     "Cash and Bank"
     __name__ = "cash_bank.cash_bank"
-
     name = fields.Char('Name', required=True)
     company = fields.Many2One('company.company', 'Company', required=True,
         domain=[
