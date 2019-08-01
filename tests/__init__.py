@@ -3,11 +3,11 @@
 
 try:
     from trytond.modules.cash_bank.tests.test_cash_bank import (
-        suite, create_cash_bank, create_sequence,
+        suite, create_cash_bank, create_receipt, create_sequence,
         create_payment_method, create_fiscalyear)
 except ImportError:
     from .test_cash_bank import (
-        suite, create_cash_bank, create_sequence,
+        suite, create_cash_bank, create_receipt, create_sequence,
         create_journal, create_fiscalyear)
 
 __all__ = ['suite']

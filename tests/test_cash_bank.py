@@ -14,6 +14,7 @@ from trytond.model.modelsql import SQLConstraintError
 
 __all__ = [
     'create_cash_bank',
+    'create_receipt',
     'create_sequence',
     'create_journal',
     'create_fiscalyear'
@@ -107,7 +108,7 @@ class CashBankTestCase(ModuleTestCase):
             date = datetime.date.today()
 
             # Receipt Cash IN
-            receipt = self._get_receipt(
+            receipt = create_receipt(
                 company, cash, 'in', date)
 
             receipt.cash = Decimal('100.0')
@@ -156,7 +157,7 @@ class CashBankTestCase(ModuleTestCase):
             self.assertEqual(receipt.move.state, 'posted')
 
             # Receipt Cash OUT
-            receipt = self._get_receipt(
+            receipt = create_receipt(
                 company, cash, 'out', date, party)
 
             receipt.cash = Decimal('100.0')
@@ -175,7 +176,7 @@ class CashBankTestCase(ModuleTestCase):
             Receipt.post([receipt,])
 
             # 'out' receipts can not create documents
-            receipt = self._get_receipt(
+            receipt = create_receipt(
                 company, cash, 'out', date)
             with self.assertRaises(UserError):
                 receipt.cash = Decimal('10.0')
@@ -195,7 +196,7 @@ class CashBankTestCase(ModuleTestCase):
 
             # Receipt IN with cash and documents
 
-            receipt = self._get_receipt(
+            receipt = create_receipt(
                 company, cash, 'in', date)
             receipt.cash = Decimal('10.0')
 
@@ -250,7 +251,7 @@ class CashBankTestCase(ModuleTestCase):
             # Documents domain tests
             ########################
 
-            receipt_1 = self._get_receipt(
+            receipt_1 = create_receipt(
                 company, cash, 'in', date)
             receipt_1.cash = Decimal('10.0')
             receipt_1.lines  = [
@@ -274,7 +275,7 @@ class CashBankTestCase(ModuleTestCase):
 
             # Ensure that if docs belongs to a receipt 'in'
             # no other receipt 'in' can add them
-            receipt_1 = self._get_receipt(
+            receipt_1 = create_receipt(
                 company, cash, 'in', date)
             receipt_1.cash = Decimal('10.0')
             receipt_1.lines  = [
@@ -313,10 +314,10 @@ class CashBankTestCase(ModuleTestCase):
             last_docs_receipt_id = receipt_1.id
 
             # Group of Receipts
-            receipt_grp_1 = self._get_receipt(
+            receipt_grp_1 = create_receipt(
                 company, cash, 'in', date)
             receipt_grp_1.cash = Decimal('10.0')
-            receipt_grp_2 = self._get_receipt(
+            receipt_grp_2 = create_receipt(
                 company, cash, 'in', date)
             receipt_grp_2.cash = Decimal('20.0')
 
@@ -466,7 +467,7 @@ class CashBankTestCase(ModuleTestCase):
         self._verify_document('def', receipt_1.id)
         self._verify_document('ghi', receipt_1.id)
 
-        receipt_2 = self._get_receipt(
+        receipt_2 = create_receipt(
             receipt_1.company, receipt_1.cash_bank, 'in', receipt_1.date)
         receipt_2.cash = Decimal('10.0')
         receipt_2.save()
@@ -510,26 +511,6 @@ class CashBankTestCase(ModuleTestCase):
             reference=reference
         )
         return doc
-
-    def _get_receipt(
-            self, company, cash_bank, receipt_type, date, party=None):
-        pool = Pool()
-        Receipt = pool.get('cash_bank.receipt')
-        ReceiptType = pool.get('cash_bank.receipt_type')
-    
-        type_ = ReceiptType.search([
-            ('cash_bank', '=', cash_bank.id),
-            ('type', '=', receipt_type)])[0]
-
-        receipt = Receipt(
-            company=company,
-            cash_bank=cash_bank,
-            type=type_,
-            date=date,
-            party=party,
-        )
-
-        return receipt
 
     @classmethod
     def _create_party(cls, name, account):
@@ -614,7 +595,8 @@ def create_sequence(name, code, company, is_strict=False):
     return seq
 
 
-def create_cash_bank(company, name, type_, journal, account, receipt_sequence):
+def create_cash_bank(
+        company, name, type_, journal, account, receipt_sequence):
     CashBank = Pool().get('cash_bank.cash_bank')
     cash = CashBank(
         company=company,
@@ -626,6 +608,26 @@ def create_cash_bank(company, name, type_, journal, account, receipt_sequence):
     )
     cash.save()
     return cash
+
+
+def create_receipt(
+        company, cash_bank, receipt_type, date, party=None):
+    pool = Pool()
+    Receipt = pool.get('cash_bank.receipt')
+    ReceiptType = pool.get('cash_bank.receipt_type')
+    
+    type_ = ReceiptType.search([
+        ('cash_bank', '=', cash_bank.id),
+        ('type', '=', receipt_type)])[0]
+
+    receipt = Receipt(
+        company=company,
+        cash_bank=cash_bank,
+        type=type_,
+        date=date,
+        party=party,
+    )
+    return receipt
 
 
 def suite():
