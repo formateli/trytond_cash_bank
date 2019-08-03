@@ -576,7 +576,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
 class Line(sequence_ordered(), ModelSQL, ModelView):
     'Cash/Bank Receipt Line'
     __name__ = 'cash_bank.receipt.line'
-
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
         required=True, ondelete='CASCADE',
         states=_STATES_DET)
@@ -589,15 +588,21 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     account = fields.Many2One('account.account', 'Account', required=True,
         domain=[
             ('company', '=', Eval('_parent_receipt', {}).get('company', -1)),
-            ],
+        ],
         states=_STATES_DET, depends=['receipt_state'])
     description = fields.Char('Description', states=_STATES_DET,
         depends=['receipt_state'])
     invoice = fields.Many2One('account.invoice', 'Invoice',
         domain=[
-                If(Bool(Eval('party')), [('party', '=', Eval('party'))], []),
-                If(Bool(Eval('account')), [('account', '=', Eval('account'))], []),
-                [('state', '=', 'posted')],
+                ('state', '=', 'posted'),
+                If(Bool(Eval('party')),
+                    [('party', '=', Eval('party'))],
+                    [('party', '!=', -1)],
+                ),
+                If(Bool(Eval('account')),
+                    [('account', '=', Eval('account'))],
+                    [('account', '!=', -1)],
+                ),
             ],
         states=_STATES_DET,
         depends=['party', 'account', 'receipt_state'])
