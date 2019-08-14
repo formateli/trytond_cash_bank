@@ -415,6 +415,12 @@ class Receipt(Workflow, ModelSQL, ModelView):
         else:
             credit = amount
 
+        description = self.description
+        if self.reference:
+            if description:
+                description += ' / '
+            description += self.reference
+
         return MoveLine(
             period=period,
             debit=debit,
@@ -422,7 +428,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
             account=self.cash_bank.account,
             second_currency=second_currency,
             amount_second_currency=amount_second_currency,
-            description=self.reference,
+            description=description,
             )
 
     @classmethod
