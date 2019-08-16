@@ -7,10 +7,6 @@ this repository contains the full copyright notices and license terms. -->
     <field name="type"/>
     <field name="number"/>
     <field name="party"/>
-    <field name="cash"/>
-    <field name="total_documents"/>
-    <field name="total_lines"/>
     <field name="total"/>
-    <field name="diff"/>
 </tree>
 

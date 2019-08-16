@@ -139,7 +139,8 @@ class Receipt(Workflow, ModelSQL, ModelView):
     transfer = fields.Many2One('cash_bank.transfer', 'Transfer',
             readonly=True)
     attachments = fields.One2Many('ir.attachment', 'resource', 'Attachments')
-    logs = fields.One2Many('cash_bank.receipt.log_action', 'resource', 'Logs')
+    logs = fields.One2Many('cash_bank.receipt.log_action', 'resource', 'Logs',
+        readonly=True)
 
     @classmethod
     def __register__(cls, module_name):
