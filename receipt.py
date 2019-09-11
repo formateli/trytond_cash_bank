@@ -586,7 +586,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
         required=True, ondelete='CASCADE',
         states=_STATES_DET)
-    number = fields.Char('Number', states=_STATES_DET)
     amount = fields.Numeric('Amount', required=True,
         digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
         states=_STATES_DET, depends=['receipt_state'])
@@ -618,6 +617,14 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     receipt_state = fields.Function(
         fields.Selection(STATES, 'Receipt State'),
         'on_change_with_receipt_state')
+
+    @classmethod
+    def __register__(cls, module_name):
+        super(Line, cls).__register__(module_name)
+        table = cls.__table_handler__(module_name)
+        # Migration 5.2.2:
+        if table.column_exist('number'):
+            table.drop_column('number')
 
     @classmethod
     def __setup__(cls):

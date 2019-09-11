@@ -4,10 +4,8 @@ this repository contains the full copyright notices and license terms. -->
 <form>
     <label name="receipt"/>
     <field name="receipt" colspan="3"/>
-    <label name="number"/>
-    <field name="number"/>
     <label name="description"/>
-    <field name="description"/>
+    <field name="description" colspan="3"/>
     <label name="party"/>
     <field name="party"/>
     <label name="invoice"/>
