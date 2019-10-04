@@ -194,7 +194,10 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @classmethod
     def __setup__(cls):
         super(Receipt, cls).__setup__()
-        cls._order[0] = ('id', 'DESC')
+        cls._order = [
+                ('date', 'DESC'),
+                ('number', 'DESC'),
+            ]
 
         cls._transitions |= set(
             (
@@ -594,6 +597,8 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     account = fields.Many2One('account.account', 'Account', required=True,
         domain=[
             ('company', '=', Eval('_parent_receipt', {}).get('company', -1)),
+            ('type', '!=', None),
+            ('closed', '!=', True),
         ],
         states=_STATES_DET, depends=['receipt_state'])
     description = fields.Char('Description', states=_STATES_DET,
