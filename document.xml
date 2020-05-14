@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
-<!-- This file is part of trytond-cash_bank module.
-The COPYRIGHT file at the top level of this repository
-contains the full copyright notices and license terms. -->
+<!-- The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
 <tryton>
     <data>
         <!-- document type -->
@@ -44,6 +43,24 @@ contains the full copyright notices and license terms. -->
         <record model="ir.model.access" id="access_document_type_cash_bank_admin">
             <field name="model" search="[('model', '=', 'cash_bank.document.type')]"/>
             <field name="group" ref="group_cash_bank_admin"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
+        <!-- Logs -->
+
+        <record model="ir.model.access" id="access_group_document_log">
+            <field name="model" search="[('model', '=', 'cash_bank.document.log_action')]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_group_document_log_admin">
+            <field name="model" search="[('model', '=', 'cash_bank.document.log_action')]"/>
+            <field name="group" ref="res.group_admin"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>

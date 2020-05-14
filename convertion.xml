@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+<!-- The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
+<tryton>
+    <data>
+        <!-- Sequence -->
+
+        <record model="ir.sequence.type" id="sequence_type_cash_bank_convertion">
+            <field name="name">Cash and Bank Convertion</field>
+            <field name="code">cash_bank.convertion</field>
+        </record>
+        <record model="ir.sequence.type-res.group"
+            id="sequence_type_cash_bank_convertion_group_admin">
+            <field name="sequence_type" ref="sequence_type_cash_bank_convertion"/>
+            <field name="group" ref="res.group_admin"/>
+        </record>
+        <record model="ir.sequence.type-res.group"
+            id="sequence_type_cash_bank_convertion_group_cash_bank_admin">
+            <field name="sequence_type" ref="sequence_type_cash_bank_convertion"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <!-- Logs -->
+
+        <record model="ir.model.access" id="access_group_convertion_log">
+            <field name="model" search="[('model', '=', 'cash_bank.convertion.log_action')]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_group_convertion_log_admin">
+            <field name="model" search="[('model', '=', 'cash_bank.convertion.log_action')]"/>
+            <field name="group" ref="res.group_admin"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
+        <!-- Convertion -->
+
+        <record model="ir.ui.view" id="convertion_view_form">
+            <field name="model">cash_bank.convertion</field>
+            <field name="type">form</field>
+            <field name="name">convertion_form</field>
+        </record>
+        <record model="ir.ui.view" id="convertion_view_tree">
+            <field name="model">cash_bank.convertion</field>
+            <field name="type">tree</field>
+            <field name="name">convertion_tree</field>
+        </record>
+        <record model="ir.action.act_window" id="act_convertion_form">
+            <field name="name">Convert Documents to Cash</field>
+            <field name="res_model">cash_bank.convertion</field>
+            <field name="search_value"></field>
+        </record>
+        <record model="ir.action.act_window.view"
+                id="act_convertion_form_view1">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="convertion_view_tree"/>
+            <field name="act_window" ref="act_convertion_form"/>
+        </record>
+        <record model="ir.action.act_window.view"
+                id="act_convertion_form_view2">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="convertion_view_form"/>
+            <field name="act_window" ref="act_convertion_form"/>
+        </record>
+
+        <record model="ir.action.act_window.domain" id="act_convertion_form_domain_draft">
+            <field name="name">Draft</field>
+            <field name="sequence" eval="10"/>
+            <field name="domain"
+                eval="[('state', '=', 'draft'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
+            <field name="count" eval="True"/>
+            <field name="act_window" ref="act_convertion_form"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_convertion_form_domain_confirmed">
+            <field name="name">Confirmed</field>
+            <field name="sequence" eval="20"/>
+            <field name="domain"
+                eval="[('state', '=', 'confirmed'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
+            <field name="count" eval="True"/>
+            <field name="act_window" ref="act_convertion_form"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_convertion_form_domain_cancel">
+            <field name="name">Cancel</field>
+            <field name="sequence" eval="40"/>
+            <field name="domain"
+                eval="[('state', '=', 'cancel'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
+            <field name="count" eval="True"/>
+            <field name="act_window" ref="act_convertion_form"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_convertion_form_domain_all">
+            <field name="name">All</field>
+            <field name="sequence" eval="9999"/>
+            <field name="domain"
+                eval="[('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
+            <field name="act_window" ref="act_convertion_form"/>
+        </record>
+
+        <menuitem parent="menu_cash_bank" sequence="40"
+            action="act_convertion_form" id="menu_convertion_form"/>
+
+        <record model="ir.model.access" id="access_convertion">
+            <field name="model" search="[('model', '=', 'cash_bank.convertion')]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_convertion_group_cash_bank">
+            <field name="model" search="[('model', '=', 'cash_bank.convertion')]"/>
+            <field name="group" ref="group_cash_bank"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
+        <record model="ir.model.button" id="convertion_draft_button">
+            <field name="name">draft</field>
+            <field name="model" search="[('model', '=', 'cash_bank.convertion')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="convertion_draft_button_group_cash_bank_admin">
+            <field name="button" ref="convertion_draft_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <record model="ir.model.button" id="convertion_confirm_button">
+            <field name="name">confirm</field>
+            <field name="model" search="[('model', '=', 'cash_bank.convertion')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="convertion_confirm_button_group_cash_bank_admin">
+            <field name="button" ref="convertion_confirm_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <record model="ir.model.button" id="convertion_cancel_button">
+            <field name="name">cancel</field>
+            <field name="model" search="[('model', '=', 'cash_bank.convertion')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="convertion_cancel_button_group_cash_bank_admin">
+            <field name="button" ref="convertion_cancel_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+    </data>
+</tryton>

@@ -1,9 +1,51 @@
 <?xml version="1.0"?>
-<!-- This file is part of trytond-cash_bank module.
-The COPYRIGHT file at the top level of this repository
-contains the full copyright notices and license terms. -->
+<!-- The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms.. -->
 <tryton>
     <data>
+        <!-- Sequence -->
+
+        <record model="ir.sequence.type" id="sequence_type_cash_bank_receipt">
+            <field name="name">Cash and Bank Receipt</field>
+            <field name="code">cash_bank.receipt</field>
+        </record>
+        <record model="ir.sequence.type-res.group"
+            id="sequence_type_cash_bank_receipt_group_admin">
+            <field name="sequence_type" ref="sequence_type_cash_bank_receipt"/>
+            <field name="group" ref="res.group_admin"/>
+        </record>
+        <record model="ir.sequence.type-res.group"
+            id="sequence_type_cash_bank_receipt_group_cash_bank_admin">
+            <field name="sequence_type" ref="sequence_type_cash_bank_receipt"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <!-- Attachment -->
+
+        <record model="ir.ui.view" id="attachment_view_tree">
+            <field name="model">ir.attachment</field>
+            <field name="type">tree</field>
+            <field name="name">attachment_tree</field>
+        </record>
+
+        <!-- Logs -->
+
+        <record model="ir.model.access" id="access_group_receipt_log">
+            <field name="model" search="[('model', '=', 'cash_bank.receipt.log_action')]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_group_receipt_log_admin">
+            <field name="model" search="[('model', '=', 'cash_bank.receipt.log_action')]"/>
+            <field name="group" ref="res.group_admin"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
         <!-- Receipt -->
 
         <record model="ir.ui.view" id="receipt_view_form">
@@ -40,6 +82,7 @@ contains the full copyright notices and license terms. -->
             <field name="domain"
                 eval="[('state', '=', 'draft'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
                 pyson="1"/>
+            <field name="count" eval="True"/>
             <field name="act_window" ref="act_receipt_form"/>
         </record>
         <record model="ir.action.act_window.domain" id="act_receipt_form_domain_confirmed">
@@ -48,6 +91,7 @@ contains the full copyright notices and license terms. -->
             <field name="domain"
                 eval="[('state', '=', 'confirmed'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
                 pyson="1"/>
+            <field name="count" eval="True"/>
             <field name="act_window" ref="act_receipt_form"/>
         </record>
         <record model="ir.action.act_window.domain" id="act_receipt_form_domain_cancel">
@@ -56,6 +100,7 @@ contains the full copyright notices and license terms. -->
             <field name="domain"
                 eval="[('state', '=', 'cancel'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
                 pyson="1"/>
+            <field name="count" eval="True"/>
             <field name="act_window" ref="act_receipt_form"/>
         </record>
         <record model="ir.action.act_window.domain" id="act_receipt_form_domain_post">
@@ -64,6 +109,7 @@ contains the full copyright notices and license terms. -->
             <field name="domain"
                 eval="[('state', '=', 'posted'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
                 pyson="1"/>
+            <field name="count" eval="True"/>
             <field name="act_window" ref="act_receipt_form"/>
         </record>
         <record model="ir.action.act_window.domain" id="act_receipt_form_domain_all">
@@ -119,6 +165,36 @@ contains the full copyright notices and license terms. -->
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_delete" eval="True"/>
+        </record>
+
+        <record model="ir.model.button" id="receipt_draft_button">
+            <field name="name">draft</field>
+            <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="receipt_draft_button_group_cash_bank_admin">
+            <field name="button" ref="receipt_draft_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <record model="ir.model.button" id="receipt_confirm_button">
+            <field name="name">confirm</field>
+            <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="receipt_confirm_button_group_cash_bank_admin">
+            <field name="button" ref="receipt_confirm_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+
+        <record model="ir.model.button" id="receipt_post_button">
+            <field name="name">post</field>
+            <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="receipt_post_button_group_cash_bank_admin">
+            <field name="button" ref="receipt_post_button"/>
+            <field name="group" ref="group_cash_bank_admin"/>
         </record>
 
         <record model="ir.model.button" id="receipt_cancel_button">

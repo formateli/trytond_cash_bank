@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<!-- This file is part of trytond-pcw-purchase module. The COPYRIGHT file at the top level of
-this repository contains the full copyright notices and license terms. -->
+<!-- The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
 <form>
     <label name="name"/>
     <field name="name"/>
@@ -8,8 +8,10 @@ this repository contains the full copyright notices and license terms. -->
     <field name="company"/>
     <label name="type"/>
     <field name="type"/>
-    <label name="journal"/>
-    <field name="journal"/>
+    <label name="journal_cash_bank"/>
+    <field name="journal_cash_bank"/>
+    <label name="account"/>
+    <field name="account"/>
     <notebook colspan="4">
         <page string="Receipt Types" id="receipt_types">
             <field name="receipt_types" colspan="4"

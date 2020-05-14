@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
-<!-- This file is part of trytond-cash_bank module. 
-The COPYRIGHT file at the top level of this repository 
-contains the full copyright notices and license terms. -->
+<!-- The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
 <tryton>
     <data>
         <record model="res.group" id="group_cash_bank_admin">
@@ -25,7 +24,7 @@ contains the full copyright notices and license terms. -->
             <field name="name">cash-bank</field>
             <field name="path">icons/cash-bank.svg</field>
         </record>
-        <menuitem name="Cash &amp; Bank" sequence="30" 
+        <menuitem name="Cash &amp; Bank" sequence="30"
             id="menu_cash_bank" parent="account.menu_account"
             icon="cash-bank"/>
         <record model="ir.ui.menu-res.group"
@@ -34,24 +33,9 @@ contains the full copyright notices and license terms. -->
             <field name="group" ref="group_cash_bank"/>
         </record>
 
-        <record model="ir.sequence.type" id="sequence_type_cash_bank_receipt">
-            <field name="name">Cash and Bank Receipt</field>
-            <field name="code">cash_bank.receipt</field>
-        </record>
-        <record model="ir.sequence.type-res.group"
-            id="sequence_type_cash_bank_receipt_group_admin">
-            <field name="sequence_type" ref="sequence_type_cash_bank_receipt"/>
-            <field name="group" ref="res.group_admin"/>
-        </record>
-        <record model="ir.sequence.type-res.group"
-            id="sequence_type_cash_bank_receipt_group_cash_bank_admin">
-            <field name="sequence_type" ref="sequence_type_cash_bank_receipt"/>
-            <field name="group" ref="group_cash_bank_admin"/>
-        </record>
-
         <menuitem name="Configuration" parent="menu_cash_bank"
             id="menu_cash_bank_configuration" sequence="10"
-            icon="tryton-preferences"/>
+            icon="tryton-settings"/>
         <record model="ir.ui.menu-res.group"
             id="menu_cash_bank_configuration_group_cash_bank_admin">
             <field name="menu" ref="menu_cash_bank_configuration"/>
@@ -102,7 +86,7 @@ contains the full copyright notices and license terms. -->
             <field name="perm_delete" eval="True"/>
         </record>
 
-        
+
         <!-- receipt type -->
 
         <record model="ir.ui.view" id="receipt_type_view_form">
@@ -135,7 +119,7 @@ contains the full copyright notices and license terms. -->
 
         <record model="ir.model.access" id="access_receipt_type">
             <field name="model" search="[('model', '=', 'cash_bank.receipt_type')]"/>
-            <field name="perm_read" eval="False"/>
+            <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>
