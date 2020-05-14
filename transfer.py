@@ -1,6 +1,5 @@
-# This file is part of trytond-cash_bank module.
-# The COPYRIGHT file at the top level of this repository
-# contains the full copyright notices and license terms.
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import Workflow, ModelView, ModelSQL, fields
@@ -99,10 +98,10 @@ class Transfer(Workflow, ModelSQL, ModelView):
         domain=[
             If(Bool(Eval('type_from')),
                 [
-                    If (Eval('state') != 'posted',
+                    If(Eval('state') != 'posted',
                         [
                             ('convertion', '=', None),
-                            If (Eval('state') == 'draft',
+                            If(Eval('state') == 'draft',
                                 [
                                     ('last_receipt.cash_bank.id',
                                         '=', Eval('cash_bank_from')
@@ -156,7 +155,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
                 ('confirmed', 'cancel'),
                 ('cancel', 'draft'),
             )
-        )
+            )
 
         cls._buttons.update({
             'cancel': {
@@ -316,7 +315,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
         receipt.lines = [
             self._create_line(
                 type_, receipt.total, trasnfer_account),
-        ]
+            ]
         receipt.save()
         return receipt
 
@@ -328,8 +327,10 @@ class Transfer(Workflow, ModelSQL, ModelView):
         config = Config(1)
         transfer_account = config.account_transfer
 
-        receipt_from = self._create_receipt(
-            self.cash_bank_from, self.type_from, transfer_account, self.documents)
+        receipt_from = self._create_receipt(self.cash_bank_from,
+                                            self.type_from,
+                                            transfer_account,
+                                            self.documents)
         Receipt.confirm([receipt_from])
 
         receipt_to = self._create_receipt(
@@ -390,10 +391,11 @@ class Transfer(Workflow, ModelSQL, ModelView):
                     ))
             transfer.create_receipts()
             cls.set_transfer([
-                    transfer.receipt_from,
-                    transfer.receipt_to
-                ], transfer)
-        cls.save(transfers) # Update receipts values
+                transfer.receipt_from,
+                transfer.receipt_to
+                ],
+                transfer)
+        cls.save(transfers)  # Update receipts values
         write_log('Confirmed', transfers)
 
     @classmethod
@@ -404,8 +406,8 @@ class Transfer(Workflow, ModelSQL, ModelView):
         rcps = []
         for transfer in transfers:
             rcps += [
-                    transfer.receipt_from,
-                    transfer.receipt_to
+                transfer.receipt_from,
+                transfer.receipt_to
                 ]
         Receipt.post(rcps)
         write_log('Posted', transfers)
@@ -418,8 +420,8 @@ class Transfer(Workflow, ModelSQL, ModelView):
         rcps = []
         for transfer in transfers:
             rcps += [
-                    transfer.receipt_from,
-                    transfer.receipt_to
+                transfer.receipt_from,
+                transfer.receipt_to
                 ]
         Receipt.cancel(rcps)
         write_log('Cancelled', transfers)
@@ -436,6 +438,6 @@ class DocumentTransfer(ModelSQL):
 
 class TransferLog(LogActionMixin):
     "Transfer Logs"
-    __name__ = "cash_bank.transfer.log_action" 
+    __name__ = "cash_bank.transfer.log_action"
     resource = fields.Many2One('cash_bank.transfer',
         'Receipt', ondelete='CASCADE', select=True)

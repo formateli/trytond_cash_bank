@@ -1,6 +1,5 @@
-# This file is part of trytond-cash_bank module.
-# The COPYRIGHT file at the top level of this repository
-# contains the full copyright notices and license terms.
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 from trytond.pyson import Eval
 from trytond.pool import Pool
 from trytond.model import (
@@ -12,7 +11,7 @@ __all__ = [
         'Configuration',
         'ConfigurationAccount',
         'ConfigurationSequences'
-    ]
+        ]
 
 
 class Configuration(
@@ -23,14 +22,14 @@ class Configuration(
         'Account Transfer',
         domain=[
             ('company', '=', Eval('context', {}).get('company', -1)),
-        ]))
+            ]))
     convertion_seq = fields.MultiValue(fields.Many2One(
         'ir.sequence', "Cash and Bank Convertion Sequence", required=True,
         domain=[
             ('company', 'in',
                 [Eval('context', {}).get('company', -1), None]),
             ('code', '=', 'cash_bank.convertion'),
-        ]))
+            ]))
 
     @classmethod
     def multivalue_model(cls, field):
@@ -50,7 +49,7 @@ class ConfigurationAccount(ModelSQL, CompanyValueMixin):
         'Account Transfer',
         domain=[
             ('company', '=', Eval('context', {}).get('company', -1)),
-        ])
+            ])
 
 
 class ConfigurationSequences(ModelSQL, CompanyValueMixin):
@@ -61,4 +60,4 @@ class ConfigurationSequences(ModelSQL, CompanyValueMixin):
         domain=[
             ('company', 'in', [Eval('company', -1), None]),
             ('code', '=', 'cash_bank.convertion'),
-        ], depends=['company'])
+            ], depends=['company'])

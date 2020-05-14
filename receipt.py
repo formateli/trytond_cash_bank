@@ -1,6 +1,5 @@
-# This file is part of trytond-cash_bank module.
-# The COPYRIGHT file at the top level of this repository
-# contains the full copyright notices and license terms.
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import (
@@ -19,11 +18,11 @@ STATES = [
     ('confirmed', 'Confirmed'),
     ('posted', 'Posted'),
     ('cancel', 'Canceled'),
-]
+    ]
 
 _STATES = {
     'readonly': Eval('state') != 'draft',
-}
+    }
 
 _STATES_DET = {
     'readonly': Eval('receipt_state') != 'draft',
@@ -53,15 +52,15 @@ class Receipt(Workflow, ModelSQL, ModelView):
             If(Bool(Eval('cash_bank')),
                 [('cash_bank', '=', Eval('cash_bank'))],
                 [('id', '=', -1)]
-            ),
-        ],
+                ),
+            ],
         states=_STATES, depends=['cash_bank'])
     type_type = fields.Function(fields.Char('Type of Cash/Bank type',
         size=None), 'on_change_with_type_type')
     currency = fields.Many2One('currency.currency', 'Currency', required=True,
         states={
             'readonly': True,
-        },
+            },
         depends=['state'])
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
@@ -171,7 +170,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 action=action
             )
             logs.append(log)
-            
+
         pool = Pool()
         Log = pool.get('cash_bank.receipt.log_action')
         User = pool.get('res.user')
@@ -197,7 +196,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         cls._order = [
                 ('date', 'DESC'),
                 ('number', 'DESC'),
-            ]
+                ]
 
         cls._transitions |= set(
             (
@@ -206,7 +205,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 ('confirmed', 'cancel'),
                 ('cancel', 'draft'),
             )
-        )
+            )
 
         cls._buttons.update({
             'cancel': {
@@ -334,9 +333,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
     def get_total_detail(self, name):
         name = name[6:]  # Remove 'total_' from begining
-        total = self._get_total_details(
-            getattr(self, name)
-        )
+        total = self._get_total_details(getattr(self, name))
         return total
 
     def get_total(self, name=None):
@@ -394,7 +391,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
             origin=self,
             company=self.company,
             description=self.description,
-        )
+            )
         return move, period_id
 
     def _get_move_line(self, period):
@@ -496,7 +493,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
     def delete(cls, receipts):
         pool = Pool()
         Attachment = pool.get('ir.attachment')
-        
+
         atts = []
         for receipt in receipts:
             if receipt.state not in ['draft']:
@@ -599,21 +596,21 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             ('company', '=', Eval('_parent_receipt', {}).get('company', -1)),
             ('type', '!=', None),
             ('closed', '!=', True),
-        ],
+            ],
         states=_STATES_DET, depends=['receipt_state'])
     description = fields.Char('Description', states=_STATES_DET,
         depends=['receipt_state'])
     invoice = fields.Many2One('account.invoice', 'Invoice',
         domain=[
-                ('state', '=', 'posted'),
-                If(Bool(Eval('party')),
-                    [('party', '=', Eval('party'))],
-                    [('party', '!=', -1)],
-                ),
-                If(Bool(Eval('account')),
-                    [('account', '=', Eval('account'))],
-                    [('account', '!=', -1)],
-                ),
+            ('state', '=', 'posted'),
+            If(Bool(Eval('party')),
+                [('party', '=', Eval('party'))],
+                [('party', '!=', -1)],
+            ),
+            If(Bool(Eval('account')),
+                [('account', '=', Eval('account'))],
+                [('account', '!=', -1)],
+            ),
             ],
         states=_STATES_DET,
         depends=['party', 'account', 'receipt_state'])
@@ -676,7 +673,8 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             elif self.amount:
                 self.account = self._get_party_account(self.amount)
         if self.invoice:
-            if self.amount and self.receipt and self.receipt.cash_bank.journal_cash_bank:
+            if (self.amount and self.receipt
+                    and self.receipt.cash_bank.journal_cash_bank):
                 invoice = self.invoice
                 with Transaction().set_context(date=invoice.currency_date):
                     amount_to_pay = Currency.compute(invoice.currency,
@@ -745,9 +743,10 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                     self.amount, True)
 
                 raise UserError(
-                    gettext('cash_bank.msg_amount_greater_invoice_amount_to_pay_cash_bank',
-                        amount=amount
-                    ))
+                    gettext('cash_bank.msg_amount_greater_'
+                            'invoice_amount_to_pay_cash_bank',
+                            amount=amount
+                            ))
 
             with Transaction().set_context(date=self.invoice.currency_date):
                 amount = Currency.compute(self.receipt.currency,
@@ -830,6 +829,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
 
 class ReceiptLog(LogActionMixin):
     "Receipt Logs"
-    __name__ = "cash_bank.receipt.log_action" 
+    __name__ = "cash_bank.receipt.log_action"
     resource = fields.Many2One('cash_bank.receipt',
         'Receipt', ondelete='CASCADE', select=True)

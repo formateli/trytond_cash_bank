@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<!-- This file is part of Tryton cash_bank module. The COPYRIGHT file at the top level of
-this repository contains the full copyright notices and license terms. -->
+<!-- The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
 <tryton>
-    <data group="1">
+    <data>
         <record model="ir.message" id="msg_delete_document_cash_bank">
             <field name="text">Document %(doc_name)s "%(doc_number)s" must be in "%(state)s" state for deletion.</field>
         </record>

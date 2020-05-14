@@ -1,10 +1,9 @@
-# This file is part of trytond-cash_bank module.
-# The COPYRIGHT file at the top level of this repository
-# contains the full copyright notices and license terms.
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 from trytond.transaction import Transaction
 from trytond.pool import Pool
-from trytond.model import  Workflow, ModelView, ModelSQL, fields
-from trytond.pyson import Eval, If, Bool, Or
+from trytond.model import Workflow, ModelView, ModelSQL, fields
+from trytond.pyson import Eval, If, Or
 from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
@@ -22,7 +21,8 @@ STATES = [
     ('draft', 'Draft'),
     ('confirmed', 'Confirmed'),
     ('cancel', 'Canceled'),
-]
+    ]
+
 
 class Convertion(Workflow, ModelSQL, ModelView):
     "Cash/Bank Convert Documents to Cash"
@@ -41,9 +41,11 @@ class Convertion(Workflow, ModelSQL, ModelView):
         domain=[
             ('company', '=', Eval('company')),
             ('type', '=', 'cash'),
-        ], states={
+            ],
+        states={
             'readonly': Or(Eval('state') != 'draft', Eval('documents')),
-        }, depends=_DEPENDS + ['company', 'documents'])
+            },
+        depends=_DEPENDS + ['company', 'documents'])
     date = fields.Date('Date', required=True,
         states=_STATES, depends=_DEPENDS)
     description = fields.Char('Description', size=None)
@@ -75,7 +77,8 @@ class Convertion(Workflow, ModelSQL, ModelView):
             depends=['currency_digits']),
             'get_total_documents')
     state = fields.Selection(STATES, 'State', readonly=True, required=True)
-    logs = fields.One2Many('cash_bank.convertion.log_action', 'resource', 'Logs')
+    logs = fields.One2Many('cash_bank.convertion.log_action',
+                           'resource', 'Logs')
 
     @classmethod
     def __setup__(cls):
@@ -88,7 +91,7 @@ class Convertion(Workflow, ModelSQL, ModelView):
                 ('confirmed', 'cancel'),
                 ('cancel', 'draft'),
             )
-        )
+            )
 
         cls._buttons.update({
             'cancel': {
@@ -251,6 +254,6 @@ class DocumentConvertion(ModelSQL):
 
 class ConvertionLog(LogActionMixin):
     "Convertion Logs"
-    __name__ = "cash_bank.convertion.log_action" 
+    __name__ = "cash_bank.convertion.log_action"
     resource = fields.Many2One('cash_bank.convertion',
         'Receipt', ondelete='CASCADE', select=True)

@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
-<!-- This file is part of trytond-cash_bank module. 
-The COPYRIGHT file at the top level of this repository 
-contains the full copyright notices and license terms. -->
+<!-- The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
 <tryton>
     <data>
         <record model="res.group" id="group_cash_bank_admin">
@@ -25,7 +24,7 @@ contains the full copyright notices and license terms. -->
             <field name="name">cash-bank</field>
             <field name="path">icons/cash-bank.svg</field>
         </record>
-        <menuitem name="Cash &amp; Bank" sequence="30" 
+        <menuitem name="Cash &amp; Bank" sequence="30"
             id="menu_cash_bank" parent="account.menu_account"
             icon="cash-bank"/>
         <record model="ir.ui.menu-res.group"
@@ -87,7 +86,7 @@ contains the full copyright notices and license terms. -->
             <field name="perm_delete" eval="True"/>
         </record>
 
-        
+
         <!-- receipt type -->
 
         <record model="ir.ui.view" id="receipt_type_view_form">

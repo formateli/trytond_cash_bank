@@ -1,6 +1,5 @@
-# This file is part of trytond-cash_bank module.
-# The COPYRIGHT file at the top level of this repository
-# contains the full copyright notices and license terms.
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import ModelView, ModelSQL, fields, Check
@@ -13,7 +12,7 @@ __all__ = [
         'Document',
         'DocumentReceipt',
         'DocumentLog'
-    ]
+        ]
 
 _STATES = {
     'readonly': Bool(Eval('last_receipt')),
@@ -56,7 +55,8 @@ class Document(ModelSQL, ModelView):
         readonly=True)
     convertion = fields.Many2One('cash_bank.convertion', 'Convertion',
         readonly=True)
-    logs = fields.One2Many('cash_bank.document.log_action', 'resource', 'Logs')
+    logs = fields.One2Many('cash_bank.document.log_action',
+        'resource', 'Logs')
 
     @classmethod
     def __setup__(cls):
@@ -105,11 +105,11 @@ class Document(ModelSQL, ModelView):
 
         domain = [
             ('document', '=', self.id)
-        ]
+            ]
         if cur_receipt:
             domain.append(
                 ('receipt', '!=', cur_receipt.id)
-            )
+                )
 
         docs = Docs.search(domain, order=[('id', 'DESC')])
 
@@ -140,6 +140,6 @@ class DocumentReceipt(ModelSQL):
 
 class DocumentLog(LogActionMixin):
     "Document Logs"
-    __name__ = "cash_bank.document.log_action" 
+    __name__ = "cash_bank.document.log_action"
     resource = fields.Many2One('cash_bank.document',
         'Document', ondelete='CASCADE', select=True)

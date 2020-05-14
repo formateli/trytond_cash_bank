@@ -1,5 +1,5 @@
-# This file is part of cash_bank Tryton module.  The COPYRIGHT file at the top level of
-# this repository contains the full copyright notices and license terms.
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 import unittest
 import trytond.tests.test_tryton
 import datetime
@@ -18,7 +18,7 @@ __all__ = [
     'create_sequence',
     'create_journal',
     'create_fiscalyear'
-]
+    ]
 
 
 class CashBankTestCase(ModuleTestCase):
@@ -30,9 +30,7 @@ class CashBankTestCase(ModuleTestCase):
         pool = Pool()
         Account = pool.get('account.account')
         Config = pool.get('cash_bank.configuration')
-        CashBank = pool.get('cash_bank.cash_bank')
         Receipt = pool.get('cash_bank.receipt')
-        ReceiptType = pool.get('cash_bank.receipt_type')
         ReceiptLine = pool.get('cash_bank.receipt.line')
         DocumentType = pool.get('cash_bank.document.type')
         Document = pool.get('cash_bank.document')
@@ -63,7 +61,7 @@ class CashBankTestCase(ModuleTestCase):
                     ])
 
             journal = create_journal(company, 'journal_cash')
-    
+
             config = Config(
                 account_transfer=account_transfer)
             config.save()
@@ -86,7 +84,7 @@ class CashBankTestCase(ModuleTestCase):
             cash = create_cash_bank(
                 company, 'Main Cashier', 'cash',
                 journal, account_cash, sequence
-            )
+                )
             self.assertEqual(len(cash.receipt_types), 2)
 
             transaction.commit()
@@ -96,13 +94,13 @@ class CashBankTestCase(ModuleTestCase):
                 bank = create_cash_bank(
                     company, 'Main Bank', 'bank',
                     journal, account_cash, sequence
-                )
+                    )
             transaction.rollback()
 
             bank = create_cash_bank(
                 company, 'Main Bank', 'bank',
                 journal, account_revenue, sequence
-            )
+                )
             self.assertEqual(len(bank.receipt_types), 2)
 
             date = datetime.date.today()
@@ -121,9 +119,9 @@ class CashBankTestCase(ModuleTestCase):
                 receipt=receipt,
                 amount=Decimal('100.0'),
                 account=account_revenue
-            )
-            
-            receipt.lines = [line,]
+                )
+
+            receipt.lines = [line]
             receipt.save()
 
             self.assertEqual(len(receipt.lines), 1)
@@ -131,28 +129,29 @@ class CashBankTestCase(ModuleTestCase):
             self.assertEqual(receipt.state, 'draft')
             self.assertEqual(receipt.move, None)
 
-            Receipt.confirm([receipt,])
+            Receipt.confirm([receipt])
             self.assertEqual(receipt.state, 'confirmed')
             self.assertEqual(receipt.move.state, 'draft')
 
-            Receipt.cancel([receipt,])
+            Receipt.cancel([receipt])
             self.assertEqual(receipt.state, 'cancel')
             self.assertEqual(receipt.move, None)
 
-            Receipt.draft([receipt,])
+            Receipt.draft([receipt])
             self.assertEqual(receipt.state, 'draft')
             self.assertEqual(receipt.move, None)
 
-            Receipt.confirm([receipt,])
+            Receipt.confirm([receipt])
             self.assertEqual(receipt.state, 'confirmed')
             self.assertEqual(receipt.move.state, 'draft')
 
-            Receipt.post([receipt,])
+            Receipt.post([receipt])
             self.assertEqual(receipt.state, 'posted')
             self.assertEqual(receipt.move.state, 'posted')
 
-            # Nothing change because 'posted' to 'cancel' not in cls._transitions
-            Receipt.cancel([receipt,])
+            # Nothing change because 'posted' to 'cancel'
+            # not in cls._transitions
+            Receipt.cancel([receipt])
             self.assertEqual(receipt.state, 'posted')
             self.assertEqual(receipt.move.state, 'posted')
 
@@ -167,13 +166,13 @@ class CashBankTestCase(ModuleTestCase):
                 receipt=receipt,
                 amount=Decimal('100.0'),
                 account=account_expense
-            )
+                )
 
-            receipt.lines = [line,]
+            receipt.lines = [line]
             receipt.save()
 
-            Receipt.confirm([receipt,])
-            Receipt.post([receipt,])
+            Receipt.confirm([receipt])
+            Receipt.post([receipt])
 
             # 'out' receipts can not create documents
             receipt = create_receipt(
@@ -188,10 +187,10 @@ class CashBankTestCase(ModuleTestCase):
                         cheque_type, Decimal('30.0'), date, 'b'),
                     self._get_document(
                         cheque_type, Decimal('40.0'), date, 'c'),
-                ]
+                    ]
                 receipt.documents = docs
                 receipt.save()
-            Receipt.delete([receipt,])
+            Receipt.delete([receipt])
             Document.delete(Document.search([]))
 
             # Receipt IN with cash and documents
@@ -207,7 +206,7 @@ class CashBankTestCase(ModuleTestCase):
                     cheque_type, Decimal('30.0'), date, 'def'),
                 self._get_document(
                     cheque_type, Decimal('40.0'), date, 'ghi'),
-            ]
+                ]
             receipt.documents = docs
             receipt.save()
 
@@ -224,24 +223,24 @@ class CashBankTestCase(ModuleTestCase):
                 receipt=receipt,
                 amount=Decimal('100.0'),
                 account=account_revenue
-            )
-            receipt.lines = [line,]
+                )
+            receipt.lines = [line]
             receipt.save()
 
-            Receipt.confirm([receipt,])
+            Receipt.confirm([receipt])
 
             with self.assertRaises(UserError):
                 # Should be 'draft' state
-                Receipt.delete([receipt,])
+                Receipt.delete([receipt])
 
-            Receipt.cancel([receipt,])
-            Receipt.draft([receipt,])
-            Receipt.delete([receipt,])
+            Receipt.cancel([receipt])
+            Receipt.draft([receipt])
+            Receipt.delete([receipt])
 
-            docs = Docs.search([]) # cash_bank.document-cash_bank.receipt
+            docs = Docs.search([])  # cash_bank.document-cash_bank.receipt
             self.assertEqual(len(docs), 0)
 
-            docs = Document.search([]) # cash_bank.document
+            docs = Document.search([])  # cash_bank.document
             self.assertEqual(len(docs), 3)
             self._verify_document('abc', None)
             self._verify_document('def', None)
@@ -254,7 +253,7 @@ class CashBankTestCase(ModuleTestCase):
             receipt_1 = create_receipt(
                 company, cash, 'in', date)
             receipt_1.cash = Decimal('10.0')
-            receipt_1.lines  = [
+            receipt_1.lines = [
                 ReceiptLine(
                     amount=Decimal('100.0'),
                     account=account_expense
@@ -278,7 +277,7 @@ class CashBankTestCase(ModuleTestCase):
             receipt_1 = create_receipt(
                 company, cash, 'in', date)
             receipt_1.cash = Decimal('10.0')
-            receipt_1.lines  = [
+            receipt_1.lines = [
                 ReceiptLine(
                     amount=Decimal('100.0'),
                     account=account_expense
@@ -339,7 +338,7 @@ class CashBankTestCase(ModuleTestCase):
             cash_2 = create_cash_bank(
                 company, 'Cashier 2', 'cash',
                 journal, account_expense, sequence
-            )
+                )
 
             with self.assertRaises(UserError):
                 # Raise document domain error because
@@ -348,11 +347,11 @@ class CashBankTestCase(ModuleTestCase):
                     company=company,
                     date=date,
                     cash_bank_from=cash_2,
-                    type_from=cash_2.receipt_types[1], # out
+                    type_from=cash_2.receipt_types[1],  # out
                     cash_bank_to=cash,
-                    type_to=cash.receipt_types[0], # in
+                    type_to=cash.receipt_types[0],  # in
                     documents=Document.search([])
-                )
+                    )
                 transfer.save()
 
             transfer = Transfer(
@@ -360,11 +359,11 @@ class CashBankTestCase(ModuleTestCase):
                 date=date,
                 cash=Decimal('10.0'),
                 cash_bank_from=cash,
-                type_from=cash.receipt_types[1], # out
+                type_from=cash.receipt_types[1],  # out
                 cash_bank_to=cash_2,
-                type_to=cash_2.receipt_types[0], # in
+                type_to=cash_2.receipt_types[0],  # in
                 documents=Document.search([])
-            )
+                )
             transfer.save()
             self.assertEqual(transfer.total_documents, Decimal('90.0'))
             self.assertEqual(transfer.total, Decimal('100.0'))
@@ -429,19 +428,19 @@ class CashBankTestCase(ModuleTestCase):
             # Convertions
 
             with self.assertRaises(UserError):
-                #Documents are in cash_2
+                # Documents are in cash_2
                 convertion = Convertion(
                     cash_bank=cash,
                     date=date,
                     documents=Document.search([])
-                )
+                    )
                 convertion.save()
 
             convertion = Convertion(
                 cash_bank=cash_2,
                 date=date,
                 documents=Document.search([])
-            )
+                )
             convertion.save()
 
             Convertion.confirm([convertion])
@@ -490,7 +489,7 @@ class CashBankTestCase(ModuleTestCase):
 
         doc = Document.search([
             ('reference', '=', reference)
-        ])[0]
+            ])[0]
 
         docs = Docs.search(
             [('document', '=', doc.id)], order=[('id', 'ASC')])
@@ -509,7 +508,7 @@ class CashBankTestCase(ModuleTestCase):
             amount=amount,
             date=date,
             reference=reference
-        )
+            )
         return doc
 
     @classmethod
@@ -519,14 +518,15 @@ class CashBankTestCase(ModuleTestCase):
         Address = pool.get('party.address')
         addr = Address(
             name=name,
-        )
+            )
         party = Party(
             name=name,
             account_receivable=account,
-            addresses=[addr,],
-        )
+            addresses=[addr],
+            )
         party.save()
         return party
+
 
 def create_fiscalyear(company):
     pool = Pool()
@@ -543,19 +543,18 @@ def create_fiscalyear(company):
     seq.out_credit_note_sequence = invoice_seq
     seq.in_invoice_sequence = invoice_seq
     seq.in_credit_note_sequence = invoice_seq
-        
+
     fy = get_fiscalyear(company)
-    fy.invoice_sequences = [seq,]
+    fy.invoice_sequences = [seq]
     fy.save()
-    FiscalYear.create_period([fy,])
+    FiscalYear.create_period([fy])
 
 
 def create_journal(company, fs_id):
     pool = Pool()
     ModelData = pool.get('ir.model.data')
     Journal = pool.get('account.journal')
-    journal = Journal(ModelData.get_id(
-        'account', fs_id))
+    journal = Journal(ModelData.get_id('account', fs_id))
     return journal
 
 
@@ -590,7 +589,7 @@ def create_sequence(name, code, company, is_strict=False):
         code=code,
         company=company,
         type='incremental'
-    )
+        )
     seq.save()
     return seq
 
@@ -605,7 +604,7 @@ def create_cash_bank(
         journal_cash_bank=journal,
         account=account,
         receipt_types=create_receipt_types(name, receipt_sequence)
-    )
+        )
     cash.save()
     return cash
 
@@ -615,7 +614,7 @@ def create_receipt(
     pool = Pool()
     Receipt = pool.get('cash_bank.receipt')
     ReceiptType = pool.get('cash_bank.receipt_type')
-    
+
     type_ = ReceiptType.search([
         ('cash_bank', '=', cash_bank.id),
         ('type', '=', receipt_type)])[0]
@@ -626,7 +625,7 @@ def create_receipt(
         type=type_,
         date=date,
         party=party,
-    )
+        )
     return receipt
 
 

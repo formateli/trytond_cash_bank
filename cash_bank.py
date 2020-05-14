@@ -1,7 +1,5 @@
-# This file is part of trytond-cash_bank module.
-# The COPYRIGHT file at the top level of this repository
-# contains the full copyright notices and license terms.
-
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import ModelView, ModelSQL, fields, Unique
@@ -9,8 +7,8 @@ from trytond.pyson import Eval, If
 
 __all__ = [
     'CashBank',
-    'ReceiptType', 
-]
+    'ReceiptType',
+    ]
 
 
 class CashBank(ModelSQL, ModelView):
@@ -25,9 +23,10 @@ class CashBank(ModelSQL, ModelView):
     type = fields.Selection([
             ('cash', 'Cash'),
             ('bank', 'Bank')
-        ],
+            ],
         'Type', required=True, translate=True)
-    journal_cash_bank = fields.Many2One('account.journal', "Journal", required=True,
+    journal_cash_bank = fields.Many2One('account.journal',
+        "Journal", required=True,
         domain=[('type', '=', 'cash')])
     account = fields.Many2One('account.account', "Account",
         required=True,
@@ -45,10 +44,10 @@ class CashBank(ModelSQL, ModelView):
         super(CashBank, cls).__setup__()
         t = cls.__table__()
         cls._sql_constraints += [
-            ('cash_bank_account_uniq', 
+            ('cash_bank_account_uniq',
                 Unique(t, t.account),
                 'Account can not be shared between Cash/Bank.'),
-        ]
+            ]
 
     @classmethod
     def __register__(cls, module_name):
@@ -94,14 +93,14 @@ class ReceiptType(ModelSQL, ModelView):
     type = fields.Selection([
             ('in', 'IN'),
             ('out', 'OUT')
-        ],
+            ],
         'Type', required=True)
     sequence = fields.Many2One('ir.sequence', "Receipt Sequence",
         required=True,
         domain=[
             ('company', 'in', [Eval('context', {}).get('company', -1), None]),
             ('code', '=', 'cash_bank.receipt'),
-        ])
+            ])
     party_required = fields.Boolean('Party Required')
     active = fields.Boolean('Active')
 
