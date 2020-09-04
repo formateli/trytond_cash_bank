@@ -1,0 +1,939 @@
+#
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+#, fuzzy
+msgctxt "field:cash_bank.cash_bank,account:"
+msgid "Account"
+msgstr "Cuenta"
+
+msgctxt "field:cash_bank.cash_bank,company:"
+msgid "Company"
+msgstr "Empresa"
+
+#, fuzzy
+msgctxt "field:cash_bank.cash_bank,journal_cash_bank:"
+msgid "Journal"
+msgstr "Libro Diario"
+
+#, fuzzy
+msgctxt "field:cash_bank.cash_bank,name:"
+msgid "Name"
+msgstr "Nombre"
+
+msgctxt "field:cash_bank.cash_bank,receipt_types:"
+msgid "Receipt types"
+msgstr "Tipos de Recibos"
+
+msgctxt "field:cash_bank.cash_bank,type:"
+msgid "Type"
+msgstr "Tipo"
+
+msgctxt "field:cash_bank.configuration,account_transfer:"
+msgid "Account Transfer"
+msgstr "Cuenta de Transferencia"
+
+msgctxt "field:cash_bank.configuration,convertion_seq:"
+msgid "Cash and Bank Convertion Sequence"
+msgstr "Secuencia de Conversión de Efectivo y Banco"
+
+msgctxt "field:cash_bank.configuration.account,account_transfer:"
+msgid "Account Transfer"
+msgstr "Cuenta de Transferencia"
+
+msgctxt "field:cash_bank.configuration.account,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:cash_bank.configuration.sequences,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:cash_bank.configuration.sequences,convertion_seq:"
+msgid "Cash and Bank Convertion Sequence"
+msgstr "Secuencia de Conversión de Efectivo y Banco"
+
+msgctxt "field:cash_bank.convertion,cash_bank:"
+msgid "Cash"
+msgstr "Efectivo"
+
+msgctxt "field:cash_bank.convertion,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:cash_bank.convertion,currency:"
+msgid "Currency"
+msgstr "Moneda"
+
+msgctxt "field:cash_bank.convertion,currency_digits:"
+msgid "Currency Digits"
+msgstr "Dígitos de Moneda"
+
+msgctxt "field:cash_bank.convertion,date:"
+msgid "Date"
+msgstr "Fecha"
+
+msgctxt "field:cash_bank.convertion,description:"
+msgid "Description"
+msgstr "Descripción"
+
+msgctxt "field:cash_bank.convertion,documents:"
+msgid "Documents"
+msgstr "Documentos"
+
+msgctxt "field:cash_bank.convertion,logs:"
+msgid "Logs"
+msgstr "Registros"
+
+msgctxt "field:cash_bank.convertion,number:"
+msgid "Number"
+msgstr "Número"
+
+msgctxt "field:cash_bank.convertion,state:"
+msgid "State"
+msgstr "Estado"
+
+msgctxt "field:cash_bank.convertion,total_documents:"
+msgid "Total Documents"
+msgstr "Total de Documentos"
+
+msgctxt "field:cash_bank.convertion.log_action,action:"
+msgid "Action"
+msgstr "Acción"
+
+msgctxt "field:cash_bank.convertion.log_action,date:"
+msgid "Date"
+msgstr "Fecha"
+
+msgctxt "field:cash_bank.convertion.log_action,key:"
+msgid "Key"
+msgstr "Llave"
+
+msgctxt "field:cash_bank.convertion.log_action,message:"
+msgid "Message"
+msgstr "Mensaje"
+
+msgctxt "field:cash_bank.convertion.log_action,resource:"
+msgid "Receipt"
+msgstr "Recibo"
+
+msgctxt "field:cash_bank.convertion.log_action,user:"
+msgid "User"
+msgstr "Usuario"
+
+msgctxt "field:cash_bank.convertion.log_action,variables:"
+msgid "Variables"
+msgstr "Variables"
+
+msgctxt "field:cash_bank.document,amount:"
+msgid "Amount"
+msgstr "Monto"
+
+msgctxt "field:cash_bank.document,convertion:"
+msgid "Convertion"
+msgstr "Conversión"
+
+msgctxt "field:cash_bank.document,currency_digits:"
+msgid "Currency Digits"
+msgstr "Dígitos de Moneda"
+
+msgctxt "field:cash_bank.document,date:"
+msgid "Date"
+msgstr "Fecha"
+
+msgctxt "field:cash_bank.document,entity:"
+msgid "Entity"
+msgstr "Entidad"
+
+msgctxt "field:cash_bank.document,last_receipt:"
+msgid "Last Receipt"
+msgstr "Último Recibo"
+
+msgctxt "field:cash_bank.document,logs:"
+msgid "Logs"
+msgstr "Registros"
+
+msgctxt "field:cash_bank.document,party:"
+msgid "Party"
+msgstr "Tercero"
+
+msgctxt "field:cash_bank.document,reference:"
+msgid "Reference"
+msgstr "Referencia"
+
+msgctxt "field:cash_bank.document,type:"
+msgid "Type"
+msgstr "Tipo"
+
+msgctxt "field:cash_bank.document-cash_bank.convertion,convertion:"
+msgid "Convertion"
+msgstr "Conversión"
+
+msgctxt "field:cash_bank.document-cash_bank.convertion,document:"
+msgid "Document"
+msgstr "Documento"
+
+msgctxt "field:cash_bank.document-cash_bank.receipt,document:"
+msgid "Document"
+msgstr "Documento"
+
+msgctxt "field:cash_bank.document-cash_bank.receipt,receipt:"
+msgid "Receipt"
+msgstr "Recibo"
+
+msgctxt "field:cash_bank.document-cash_bank.transfer,document:"
+msgid "Document"
+msgstr "Documento"
+
+msgctxt "field:cash_bank.document-cash_bank.transfer,transfer:"
+msgid "Transfer"
+msgstr "Transferir"
+
+msgctxt "field:cash_bank.document.log_action,action:"
+msgid "Action"
+msgstr "Acción"
+
+msgctxt "field:cash_bank.document.log_action,date:"
+msgid "Date"
+msgstr "Fecha"
+
+msgctxt "field:cash_bank.document.log_action,key:"
+msgid "Key"
+msgstr "Llave"
+
+msgctxt "field:cash_bank.document.log_action,message:"
+msgid "Message"
+msgstr "Mensaje"
+
+msgctxt "field:cash_bank.document.log_action,resource:"
+msgid "Document"
+msgstr "Documento"
+
+msgctxt "field:cash_bank.document.log_action,user:"
+msgid "User"
+msgstr "Usuario"
+
+msgctxt "field:cash_bank.document.log_action,variables:"
+msgid "Variables"
+msgstr "Variables"
+
+msgctxt "field:cash_bank.document.type,active:"
+msgid "Active"
+msgstr "Activo"
+
+msgctxt "field:cash_bank.document.type,description:"
+msgid "Description"
+msgstr "Descripción"
+
+#, fuzzy
+msgctxt "field:cash_bank.document.type,name:"
+msgid "Name"
+msgstr "Nombre"
+
+msgctxt "field:cash_bank.receipt,attachments:"
+msgid "Attachments"
+msgstr "Adjuntos"
+
+msgctxt "field:cash_bank.receipt,cash:"
+msgid "Cash"
+msgstr "Efectivo"
+
+msgctxt "field:cash_bank.receipt,cash_bank:"
+msgid "Cash/Bank"
+msgstr "Efectivo/Banco"
+
+msgctxt "field:cash_bank.receipt,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:cash_bank.receipt,currency:"
+msgid "Currency"
+msgstr "Moneda"
+
+msgctxt "field:cash_bank.receipt,currency_digits:"
+msgid "Currency Digits"
+msgstr "Dígitos de Moneda"
+
+msgctxt "field:cash_bank.receipt,date:"
+msgid "Date"
+msgstr "Fecha"
+
+msgctxt "field:cash_bank.receipt,description:"
+msgid "Description"
+msgstr "Descripción"
+
+msgctxt "field:cash_bank.receipt,diff:"
+msgid "Diff"
+msgstr "Diferencia"
+
+msgctxt "field:cash_bank.receipt,document_allow:"
+msgid "Allow documents"
+msgstr "Permitir documentos"
+
+msgctxt "field:cash_bank.receipt,documents:"
+msgid "Documents"
+msgstr "Documentos"
+
+#, fuzzy
+msgctxt "field:cash_bank.receipt,line_move:"
+msgid "Account Move Line"
+msgstr "Línea de asiento contable"
+
+#, fuzzy
+msgctxt "field:cash_bank.receipt,lines:"
+msgid "Lines"
+msgstr "Líneas"
+
+msgctxt "field:cash_bank.receipt,logs:"
+msgid "Logs"
+msgstr "Registros"
+
+msgctxt "field:cash_bank.receipt,move:"
+msgid "Move"
+msgstr "Asiento"
+
+msgctxt "field:cash_bank.receipt,number:"
+msgid "Number"
+msgstr "Número"
+
+msgctxt "field:cash_bank.receipt,party:"
+msgid "Party"
+msgstr "Tercero"
+
+#, fuzzy
+msgctxt "field:cash_bank.receipt,party_required:"
+msgid "Party Required"
+msgstr "Tercero requerido"
+
+msgctxt "field:cash_bank.receipt,reference:"
+msgid "Reference"
+msgstr "Referencia"
+
+msgctxt "field:cash_bank.receipt,state:"
+msgid "State"
+msgstr "Estado"
+
+msgctxt "field:cash_bank.receipt,total:"
+msgid "Total"
+msgstr "Total"
+
+msgctxt "field:cash_bank.receipt,total_documents:"
+msgid "Total Documents"
+msgstr "Total de Documentos"
+
+msgctxt "field:cash_bank.receipt,total_lines:"
+msgid "Total Lines"
+msgstr "Total de Lineas"
+
+msgctxt "field:cash_bank.receipt,transfer:"
+msgid "Transfer"
+msgstr "Transferir"
+
+msgctxt "field:cash_bank.receipt,type:"
+msgid "Type"
+msgstr "Tipo"
+
+msgctxt "field:cash_bank.receipt,type_type:"
+msgid "Type of Cash/Bank type"
+msgstr "Tipo de Efectivo/tipo de Banco"
+
+#, fuzzy
+msgctxt "field:cash_bank.receipt.line,account:"
+msgid "Account"
+msgstr "Cuenta"
+
+msgctxt "field:cash_bank.receipt.line,amount:"
+msgid "Amount"
+msgstr "Monto"
+
+msgctxt "field:cash_bank.receipt.line,description:"
+msgid "Description"
+msgstr "Descripción"
+
+#, fuzzy
+msgctxt "field:cash_bank.receipt.line,invoice:"
+msgid "Invoice"
+msgstr "Factura"
+
+#, fuzzy
+msgctxt "field:cash_bank.receipt.line,line_move:"
+msgid "Account Move Line"
+msgstr "Línea de Asiento Contable"
+
+msgctxt "field:cash_bank.receipt.line,party:"
+msgid "Party"
+msgstr "Tercero"
+
+msgctxt "field:cash_bank.receipt.line,receipt:"
+msgid "Receipt"
+msgstr "Recibo"
+
+msgctxt "field:cash_bank.receipt.line,receipt_state:"
+msgid "Receipt State"
+msgstr "Estado del Recibo"
+
+msgctxt "field:cash_bank.receipt.log_action,action:"
+msgid "Action"
+msgstr "Acción"
+
+msgctxt "field:cash_bank.receipt.log_action,date:"
+msgid "Date"
+msgstr "Fecha"
+
+msgctxt "field:cash_bank.receipt.log_action,key:"
+msgid "Key"
+msgstr "Llave"
+
+msgctxt "field:cash_bank.receipt.log_action,message:"
+msgid "Message"
+msgstr "Mensaje"
+
+msgctxt "field:cash_bank.receipt.log_action,resource:"
+msgid "Receipt"
+msgstr "Recibo"
+
+msgctxt "field:cash_bank.receipt.log_action,user:"
+msgid "User"
+msgstr "Usuario"
+
+msgctxt "field:cash_bank.receipt.log_action,variables:"
+msgid "Variables"
+msgstr "Variables"
+
+msgctxt "field:cash_bank.receipt_type,active:"
+msgid "Active"
+msgstr "Activo"
+
+msgctxt "field:cash_bank.receipt_type,cash_bank:"
+msgid "Cash/Bank"
+msgstr "Efectivo/Banco"
+
+#, fuzzy
+msgctxt "field:cash_bank.receipt_type,name:"
+msgid "Name"
+msgstr "Nombre"
+
+#, fuzzy
+msgctxt "field:cash_bank.receipt_type,party_required:"
+msgid "Party Required"
+msgstr "Tercero Requerido"
+
+msgctxt "field:cash_bank.receipt_type,sequence:"
+msgid "Receipt Sequence"
+msgstr "Secuencia de Recibo"
+
+msgctxt "field:cash_bank.receipt_type,type:"
+msgid "Type"
+msgstr "Tipo"
+
+msgctxt "field:cash_bank.transfer,cash:"
+msgid "Cash"
+msgstr "Efectivo"
+
+msgctxt "field:cash_bank.transfer,cash_bank_from:"
+msgid "From"
+msgstr "Desde"
+
+msgctxt "field:cash_bank.transfer,cash_bank_to:"
+msgid "To"
+msgstr "A"
+
+msgctxt "field:cash_bank.transfer,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:cash_bank.transfer,currency:"
+msgid "Currency"
+msgstr "Moneda"
+
+msgctxt "field:cash_bank.transfer,currency_digits:"
+msgid "Currency Digits"
+msgstr "Dígitos de Moneda"
+
+msgctxt "field:cash_bank.transfer,date:"
+msgid "Date"
+msgstr "Fecha"
+
+msgctxt "field:cash_bank.transfer,description:"
+msgid "Description"
+msgstr "Descripción"
+
+msgctxt "field:cash_bank.transfer,documents:"
+msgid "Documents"
+msgstr "Documentos"
+
+msgctxt "field:cash_bank.transfer,logs:"
+msgid "Logs"
+msgstr "Registros"
+
+msgctxt "field:cash_bank.transfer,receipt_from:"
+msgid "Receipt From"
+msgstr "Recibo De"
+
+msgctxt "field:cash_bank.transfer,receipt_to:"
+msgid "Receipt To"
+msgstr "Recibo A"
+
+msgctxt "field:cash_bank.transfer,reference:"
+msgid "Reference"
+msgstr "Referencia"
+
+msgctxt "field:cash_bank.transfer,state:"
+msgid "State"
+msgstr "Estado"
+
+msgctxt "field:cash_bank.transfer,total:"
+msgid "Total"
+msgstr "Total"
+
+msgctxt "field:cash_bank.transfer,total_documents:"
+msgid "Total Documents"
+msgstr "Total de Documentos"
+
+msgctxt "field:cash_bank.transfer,type_from:"
+msgid "Type"
+msgstr "Tipo"
+
+msgctxt "field:cash_bank.transfer,type_to:"
+msgid "Type"
+msgstr "Tipo"
+
+msgctxt "field:cash_bank.transfer.log_action,action:"
+msgid "Action"
+msgstr "Acción"
+
+msgctxt "field:cash_bank.transfer.log_action,date:"
+msgid "Date"
+msgstr "Fecha"
+
+msgctxt "field:cash_bank.transfer.log_action,key:"
+msgid "Key"
+msgstr "Llave"
+
+msgctxt "field:cash_bank.transfer.log_action,message:"
+msgid "Message"
+msgstr "Mensaje"
+
+msgctxt "field:cash_bank.transfer.log_action,resource:"
+msgid "Receipt"
+msgstr "Recibo"
+
+msgctxt "field:cash_bank.transfer.log_action,user:"
+msgid "User"
+msgstr "Usuario"
+
+msgctxt "field:cash_bank.transfer.log_action,variables:"
+msgid "Variables"
+msgstr "Variables"
+
+msgctxt "model:cash_bank.cash_bank,name:"
+msgid "Cash and Bank"
+msgstr "Efectivo y Banco"
+
+msgctxt "model:cash_bank.configuration,name:"
+msgid "Cash / Bank Configuration"
+msgstr "Configuración de Efectivo / Banco"
+
+msgctxt "model:cash_bank.configuration.account,name:"
+msgid "Cash / Bank configuration Account"
+msgstr "Configuración de Cuenta de Efectivo / Banco"
+
+msgctxt "model:cash_bank.configuration.sequences,name:"
+msgid "Configuration Sequences"
+msgstr "Secuencias de Configuración"
+
+msgctxt "model:cash_bank.convertion,name:"
+msgid "Cash/Bank Convert Documents to Cash"
+msgstr "Efectivo/Banco Convertir Documentos a Efectivo"
+
+msgctxt "model:cash_bank.convertion.log_action,name:"
+msgid "Convertion Logs"
+msgstr "Registros de Conversión"
+
+msgctxt "model:cash_bank.document,name:"
+msgid "Cash/Bank Document"
+msgstr "Documento de Efectivo/Banco"
+
+msgctxt "model:cash_bank.document-cash_bank.convertion,name:"
+msgid "Convertion - Document"
+msgstr "Documento - Conversión"
+
+msgctxt "model:cash_bank.document-cash_bank.receipt,name:"
+msgid "Receipt - Document"
+msgstr "Documento - Recibo"
+
+msgctxt "model:cash_bank.document-cash_bank.transfer,name:"
+msgid "Transfer - Document"
+msgstr "Documento - Transferencia"
+
+msgctxt "model:cash_bank.document.log_action,name:"
+msgid "Document Logs"
+msgstr "Registros de Documentos"
+
+msgctxt "model:cash_bank.document.type,name:"
+msgid "Cash/Bank Document Type"
+msgstr "Tipo de Documento de Efectivo/Banco"
+
+msgctxt "model:cash_bank.receipt,name:"
+msgid "Cash/Bank Receipt"
+msgstr "Recibo de Efectivo/Banco"
+
+msgctxt "model:cash_bank.receipt.line,name:"
+msgid "Cash/Bank Receipt Line"
+msgstr "Línea de Recibo de Efectivo/Banco"
+
+msgctxt "model:cash_bank.receipt.log_action,name:"
+msgid "Receipt Logs"
+msgstr "Registros de Recibos"
+
+msgctxt "model:cash_bank.receipt_type,name:"
+msgid "Cash/Bank Receipt Type"
+msgstr "Tipo de Recibo de Efectivo/Banco"
+
+msgctxt "model:cash_bank.transfer,name:"
+msgid "Transfer between Cash/Bank"
+msgstr "Transferencia entre Efectivo/Banco"
+
+msgctxt "model:cash_bank.transfer.log_action,name:"
+msgid "Transfer Logs"
+msgstr "Transferencia de Registros"
+
+msgctxt "model:ir.action,name:act_cash_bank_configuration_form"
+msgid "Cash & Bank Configuration"
+msgstr "Configuración de Efectivo y Banco"
+
+msgctxt "model:ir.action,name:act_cash_bank_form"
+msgid "Cash & Banks"
+msgstr "Efectivo y Bancos"
+
+msgctxt "model:ir.action,name:act_convertion_form"
+msgid "Convert Documents to Cash"
+msgstr "Convertir Documentos a Efectivo"
+
+msgctxt "model:ir.action,name:act_document_type_form"
+msgid "Document Types"
+msgstr "Tipos de Documentos"
+
+msgctxt "model:ir.action,name:act_receipt_form"
+msgid "Receipt"
+msgstr "Recibo"
+
+msgctxt "model:ir.action,name:act_receipt_type_form"
+msgid "Receipt type"
+msgstr "Tipo de Recibo"
+
+msgctxt "model:ir.action,name:act_transfer_form"
+msgid "Transfer"
+msgstr "Transferencia"
+
+msgctxt ""
+"model:ir.action.act_window.domain,name:act_convertion_form_domain_all"
+msgid "All"
+msgstr "Todos"
+
+#, fuzzy
+msgctxt ""
+"model:ir.action.act_window.domain,name:act_convertion_form_domain_cancel"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt ""
+"model:ir.action.act_window.domain,name:act_convertion_form_domain_confirmed"
+msgid "Confirmed"
+msgstr "Confirmado"
+
+msgctxt ""
+"model:ir.action.act_window.domain,name:act_convertion_form_domain_draft"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "model:ir.action.act_window.domain,name:act_receipt_form_domain_all"
+msgid "All"
+msgstr "Todos"
+
+#, fuzzy
+msgctxt ""
+"model:ir.action.act_window.domain,name:act_receipt_form_domain_cancel"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt ""
+"model:ir.action.act_window.domain,name:act_receipt_form_domain_confirmed"
+msgid "Confirmed"
+msgstr "Confirmado"
+
+msgctxt "model:ir.action.act_window.domain,name:act_receipt_form_domain_draft"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "model:ir.action.act_window.domain,name:act_receipt_form_domain_post"
+msgid "Posted"
+msgstr "Contabilizado"
+
+msgctxt "model:ir.action.act_window.domain,name:act_transfer_form_domain_all"
+msgid "All"
+msgstr "Todos"
+
+#, fuzzy
+msgctxt ""
+"model:ir.action.act_window.domain,name:act_transfer_form_domain_cancel"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt ""
+"model:ir.action.act_window.domain,name:act_transfer_form_domain_confirmed"
+msgid "Confirmed"
+msgstr "Confirmado"
+
+msgctxt ""
+"model:ir.action.act_window.domain,name:act_transfer_form_domain_draft"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "model:ir.action.act_window.domain,name:act_transfer_form_domain_post"
+msgid "Posted"
+msgstr "Contabilizado"
+
+msgctxt ""
+"model:ir.message,text:msg_amount_greater_invoice_amount_to_pay_cash_bank"
+msgid "Amount \"%(amount)s\" is greater than the amount to pay of invoice."
+msgstr "El monto \"%(amount)s\" es mayor que el monto a pagar de la factura."
+
+msgctxt "model:ir.message,text:msg_delete_document_cash_bank"
+msgid ""
+"Document %(doc_name)s \"%(doc_number)s\" must be in \"%(state)s\" state for "
+"deletion."
+msgstr "El documento %(doc_name)s \"%(doc_number)s\" debe estar en el estado \"%(state)s\"  para "
+"eliminarse."
+
+msgctxt "model:ir.message,text:msg_diff_total_lines_cash_bank"
+msgid "Difference between \"Total\" and \"Total Lines\" must be zero."
+msgstr "La diferencia entre \"Total\" y \"Total Lines\" debe ser cero."
+
+msgctxt "model:ir.message,text:msg_party_required_cash_bank"
+msgid "Party is required."
+msgstr "El Tercero es requerido."
+
+msgctxt "model:ir.message,text:msg_receipt_no_lines"
+msgid "Receipt %(receipt)s has no lines."
+msgstr "El Recibo %(receipt)s no tiene líneas."
+
+msgctxt "model:ir.sequence.type,name:sequence_type_cash_bank_convertion"
+msgid "Cash and Bank Convertion"
+msgstr "Conversión de Efectivo y Banco"
+
+msgctxt "model:ir.sequence.type,name:sequence_type_cash_bank_receipt"
+msgid "Cash and Bank Receipt"
+msgstr "Recibo de Efectivo y Banco"
+
+msgctxt "model:ir.ui.menu,name:menu_cash_bank"
+msgid "Cash & Bank"
+msgstr "Efectivo y Banco"
+
+msgctxt "model:ir.ui.menu,name:menu_cash_bank_configuration"
+msgid "Configuration"
+msgstr "Configuración"
+
+msgctxt "model:ir.ui.menu,name:menu_cash_bank_tree"
+msgid "Cash & Banks"
+msgstr "Efectivo y Bancos"
+
+msgctxt "model:ir.ui.menu,name:menu_configuration"
+msgid "Cash & Bank Configuration"
+msgstr "Configuración de Efectivo y Banco"
+
+msgctxt "model:ir.ui.menu,name:menu_convertion_form"
+msgid "Convert Documents to Cash"
+msgstr "Convertir Documentos a Efectivo"
+
+msgctxt "model:ir.ui.menu,name:menu_document_type_tree"
+msgid "Document Types"
+msgstr "Tipos de Documentos"
+
+msgctxt "model:ir.ui.menu,name:menu_receipt_form"
+msgid "Receipt"
+msgstr "Recibo"
+
+msgctxt "model:ir.ui.menu,name:menu_receipt_type_tree"
+msgid "Receipt type"
+msgstr "Tipo de Recibo"
+
+msgctxt "model:ir.ui.menu,name:menu_transfer_form"
+msgid "Transfer"
+msgstr "Transferencia"
+
+msgctxt "model:res.group,name:group_cash_bank"
+msgid "Cash & Bank"
+msgstr "Efectivo y Banco"
+
+msgctxt "model:res.group,name:group_cash_bank_admin"
+msgid "Cash & Bank Administration"
+msgstr "Administración de Efectivo y Banco"
+
+msgctxt "selection:cash_bank.cash_bank,type:"
+msgid "Bank"
+msgstr "Banco"
+
+msgctxt "selection:cash_bank.cash_bank,type:"
+msgid "Cash"
+msgstr "Efectivo"
+
+msgctxt "selection:cash_bank.convertion,state:"
+msgid "Canceled"
+msgstr "Cancelado"
+
+msgctxt "selection:cash_bank.convertion,state:"
+msgid "Confirmed"
+msgstr "Confirmado"
+
+msgctxt "selection:cash_bank.convertion,state:"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "selection:cash_bank.receipt,state:"
+msgid "Canceled"
+msgstr "Cancelado"
+
+msgctxt "selection:cash_bank.receipt,state:"
+msgid "Confirmed"
+msgstr "Confirmado"
+
+msgctxt "selection:cash_bank.receipt,state:"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "selection:cash_bank.receipt,state:"
+msgid "Posted"
+msgstr "Contabilizado"
+
+msgctxt "selection:cash_bank.receipt.line,receipt_state:"
+msgid "Canceled"
+msgstr "Cancelado"
+
+msgctxt "selection:cash_bank.receipt.line,receipt_state:"
+msgid "Confirmed"
+msgstr "Confirmado"
+
+msgctxt "selection:cash_bank.receipt.line,receipt_state:"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "selection:cash_bank.receipt.line,receipt_state:"
+msgid "Posted"
+msgstr "Contabilizado"
+
+msgctxt "selection:cash_bank.receipt_type,type:"
+msgid "IN"
+msgstr "Ingreso"
+
+msgctxt "selection:cash_bank.receipt_type,type:"
+msgid "OUT"
+msgstr "Egreso"
+
+msgctxt "selection:cash_bank.transfer,state:"
+msgid "Canceled"
+msgstr "Cancelado"
+
+msgctxt "selection:cash_bank.transfer,state:"
+msgid "Confirmed"
+msgstr "Confirmado"
+
+msgctxt "selection:cash_bank.transfer,state:"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "selection:cash_bank.transfer,state:"
+msgid "Posted"
+msgstr "Contabilizado"
+
+msgctxt "view:cash_bank.cash_bank:"
+msgid "Receipt Types"
+msgstr "Tipos de Recibos"
+
+#, fuzzy
+msgctxt "view:cash_bank.configuration:"
+msgid "Account"
+msgstr "Cuenta"
+
+#, fuzzy
+msgctxt "view:cash_bank.configuration:"
+msgid "Sequences"
+msgstr "Secuencias"
+
+#, fuzzy
+msgctxt "view:cash_bank.convertion:"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "view:cash_bank.convertion:"
+msgid "Confirm"
+msgstr "Confirmar"
+
+msgctxt "view:cash_bank.convertion:"
+msgid "Documents"
+msgstr "Documentos"
+
+msgctxt "view:cash_bank.convertion:"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "view:cash_bank.convertion:"
+msgid "Info"
+msgstr "Información"
+
+#, fuzzy
+msgctxt "view:cash_bank.receipt:"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "view:cash_bank.receipt:"
+msgid "Confirm"
+msgstr "Confirmar"
+
+msgctxt "view:cash_bank.receipt:"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "view:cash_bank.receipt:"
+msgid "Info"
+msgstr "Información"
+
+#, fuzzy
+msgctxt "view:cash_bank.receipt:"
+msgid "Lines"
+msgstr "Líneas"
+
+#, fuzzy
+msgctxt "view:cash_bank.receipt:"
+msgid "Post"
+msgstr "Contabilizar"
+
+#, fuzzy
+msgctxt "view:cash_bank.transfer:"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "view:cash_bank.transfer:"
+msgid "Confirm"
+msgstr "Confirmar"
+
+msgctxt "view:cash_bank.transfer:"
+msgid "Documents"
+msgstr "Documentos"
+
+msgctxt "view:cash_bank.transfer:"
+msgid "Draft"
+msgstr "Borrador"
+
+msgctxt "view:cash_bank.transfer:"
+msgid "Info"
+msgstr "Información"
+
+#, fuzzy
+msgctxt "view:cash_bank.transfer:"
+msgid "Post"
+msgstr "Contabilizar"
+
+msgctxt "view:ir.attachment:"
+msgid "Time"
+msgstr "Hora"
