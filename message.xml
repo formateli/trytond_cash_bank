@@ -19,5 +19,8 @@ the full copyright notices and license terms. -->
         <record model="ir.message" id="msg_amount_greater_invoice_amount_to_pay_cash_bank">
             <field name="text">Amount "%(amount)s" is greater than the amount to pay of invoice.</field>
         </record>
+        <record model="ir.message" id="msg_no_total_cash_bank">
+            <field name="text">Total is zero.</field>
+        </record>
     </data>
 </tryton>

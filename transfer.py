@@ -387,7 +387,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
         for transfer in transfers:
             if transfer.total <= 0:
                 raise UserError(
-                    gettext('cash_bank.msg_no_totals_cash_bank'
+                    gettext('cash_bank.msg_no_total_cash_bank'
                     ))
             transfer.create_receipts()
             cls.set_transfer([
