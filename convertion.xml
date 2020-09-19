@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<!-- The COPYRIGHT file at the top level of this repository contains
+<!-- This file is part of Cash & Bank module.
+The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
 <tryton>
     <data>
@@ -18,24 +19,6 @@ the full copyright notices and license terms. -->
             id="sequence_type_cash_bank_convertion_group_cash_bank_admin">
             <field name="sequence_type" ref="sequence_type_cash_bank_convertion"/>
             <field name="group" ref="group_cash_bank_admin"/>
-        </record>
-
-        <!-- Logs -->
-
-        <record model="ir.model.access" id="access_group_convertion_log">
-            <field name="model" search="[('model', '=', 'cash_bank.convertion.log_action')]"/>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="False"/>
-            <field name="perm_create" eval="False"/>
-            <field name="perm_delete" eval="False"/>
-        </record>
-        <record model="ir.model.access" id="access_group_convertion_log_admin">
-            <field name="model" search="[('model', '=', 'cash_bank.convertion.log_action')]"/>
-            <field name="group" ref="res.group_admin"/>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="True"/>
-            <field name="perm_create" eval="True"/>
-            <field name="perm_delete" eval="True"/>
         </record>
 
         <!-- Convertion -->
@@ -152,6 +135,5 @@ the full copyright notices and license terms. -->
             <field name="button" ref="convertion_cancel_button"/>
             <field name="group" ref="group_cash_bank_admin"/>
         </record>
-
     </data>
 </tryton>

@@ -1,3 +1,4 @@
+# This file is part of Cash & Bank module.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.transaction import Transaction
@@ -8,8 +9,6 @@ from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from decimal import Decimal
-
-__all__ = ['Convertion', 'DocumentConvertion', 'ConvertionLog']
 
 _STATES = {
     'readonly': Eval('state') != 'draft',
@@ -78,7 +77,7 @@ class Convertion(Workflow, ModelSQL, ModelView):
             'get_total_documents')
     state = fields.Selection(STATES, 'State', readonly=True, required=True)
     logs = fields.One2Many('cash_bank.convertion.log_action',
-                           'resource', 'Logs')
+        'resource', 'Logs', readonly=True)
 
     @classmethod
     def __setup__(cls):

@@ -1,3 +1,4 @@
+# This file is part of Cash & Bank module.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.transaction import Transaction
@@ -6,13 +7,6 @@ from trytond.model import ModelView, ModelSQL, fields, Check
 from trytond.pyson import Eval, Bool
 from trytond.modules.log_action import LogActionMixin, write_log
 from decimal import Decimal
-
-__all__ = [
-        'DocumentType',
-        'Document',
-        'DocumentReceipt',
-        'DocumentLog'
-        ]
 
 _STATES = {
     'readonly': Bool(Eval('last_receipt')),
@@ -56,7 +50,7 @@ class Document(ModelSQL, ModelView):
     convertion = fields.Many2One('cash_bank.convertion', 'Convertion',
         readonly=True)
     logs = fields.One2Many('cash_bank.document.log_action',
-        'resource', 'Logs')
+        'resource', 'Logs', readonly=True)
 
     @classmethod
     def __setup__(cls):

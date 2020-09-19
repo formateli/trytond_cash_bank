@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<!-- The COPYRIGHT file at the top level of this repository contains
-the full copyright notices and license terms.. -->
+<!-- This file is part of Cash & Bank module.
+The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
 <tryton>
     <data>
         <!-- Sequence -->
@@ -26,24 +27,6 @@ the full copyright notices and license terms.. -->
             <field name="model">ir.attachment</field>
             <field name="type">tree</field>
             <field name="name">attachment_tree</field>
-        </record>
-
-        <!-- Logs -->
-
-        <record model="ir.model.access" id="access_group_receipt_log">
-            <field name="model" search="[('model', '=', 'cash_bank.receipt.log_action')]"/>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="False"/>
-            <field name="perm_create" eval="False"/>
-            <field name="perm_delete" eval="False"/>
-        </record>
-        <record model="ir.model.access" id="access_group_receipt_log_admin">
-            <field name="model" search="[('model', '=', 'cash_bank.receipt.log_action')]"/>
-            <field name="group" ref="res.group_admin"/>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="True"/>
-            <field name="perm_create" eval="True"/>
-            <field name="perm_delete" eval="True"/>
         </record>
 
         <!-- Receipt -->

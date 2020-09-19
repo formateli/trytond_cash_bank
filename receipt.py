@@ -1,3 +1,4 @@
+# This file is part of Cash & Bank module.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.transaction import Transaction
@@ -9,9 +10,6 @@ from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from decimal import Decimal
-
-
-__all__ = ['Receipt', 'Line', 'ReceiptLog']
 
 STATES = [
     ('draft', 'Draft'),
@@ -138,8 +136,8 @@ class Receipt(Workflow, ModelSQL, ModelView):
     transfer = fields.Many2One('cash_bank.transfer', 'Transfer',
             readonly=True)
     attachments = fields.One2Many('ir.attachment', 'resource', 'Attachments')
-    logs = fields.One2Many('cash_bank.receipt.log_action', 'resource', 'Logs',
-        readonly=True)
+    logs = fields.One2Many('cash_bank.receipt.log_action', 'resource',
+        'Logs', readonly=True)
 
     @classmethod
     def __register__(cls, module_name):

@@ -1,3 +1,4 @@
+# This file is part of Cash & Bank module.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.pyson import Eval
@@ -6,12 +7,6 @@ from trytond.model import (
     ModelSingleton, ModelView, ModelSQL, fields)
 from trytond.modules.company.model import (
     CompanyMultiValueMixin, CompanyValueMixin)
-
-__all__ = [
-        'Configuration',
-        'ConfigurationAccount',
-        'ConfigurationSequences'
-        ]
 
 
 class Configuration(

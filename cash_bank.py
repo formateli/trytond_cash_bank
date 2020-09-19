@@ -1,14 +1,10 @@
+# This file is part of Cash & Bank module.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import ModelView, ModelSQL, fields, Unique
 from trytond.pyson import Eval, If
-
-__all__ = [
-    'CashBank',
-    'ReceiptType',
-    ]
 
 
 class CashBank(ModelSQL, ModelView):
