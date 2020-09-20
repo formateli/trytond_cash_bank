@@ -501,7 +501,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         atts = []
         for receipt in receipts:
             if receipt.state not in ['draft']:
-                write_log('log_action.msg_deletion_attempt', receipts)
+                write_log('log_action.msg_deletion_attempt', [receipt])
                 raise UserError(
                     gettext('cash_bank.msg_delete_document_cash_bank',
                         doc_name='Receipt',
