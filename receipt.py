@@ -5,7 +5,7 @@ from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import (
     sequence_ordered, Workflow, ModelView, ModelSQL, fields, Check)
-from trytond.pyson import Eval, If, Bool
+from trytond.pyson import Eval, If, Bool, Not
 from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
@@ -18,18 +18,16 @@ STATES = [
     ('cancel', 'Canceled'),
     ]
 
-_STATES = {
-    'readonly': Eval('state') != 'draft',
-    }
-
-_STATES_DET = {
-    'readonly': Eval('receipt_state') != 'draft',
-}
-
 
 class Receipt(Workflow, ModelSQL, ModelView):
     "Cash/Bank Receipt"
     __name__ = "cash_bank.receipt"
+
+    _states = {
+        'readonly': Eval('state') != 'draft',
+        }
+    _depends = ['state']
+
     company = fields.Many2One('company.company', 'Company', required=True,
         states={
             'readonly': True,
@@ -37,14 +35,16 @@ class Receipt(Workflow, ModelSQL, ModelView):
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
-            ],
-        depends=['state'], select=True)
+            ], select=True)
     cash_bank = fields.Many2One(
-            'cash_bank.cash_bank', 'Cash/Bank', required=True,
-            domain=[
-                ('company', 'in',
-                    [Eval('context', {}).get('company', -1), None])
-            ], states=_STATES)
+        'cash_bank.cash_bank', 'Cash/Bank', required=True,
+        domain=[
+            ('company', 'in',
+                [Eval('context', {}).get('company', -1), None])
+        ],
+        states={
+            'readonly': Bool(Eval('lines')) | Bool(Eval('state') != 'draft')
+        }, depends=_depends + ['lines'])
     type = fields.Many2One('cash_bank.receipt_type', 'Type', required=True,
         domain=[
             If(Bool(Eval('cash_bank')),
@@ -52,28 +52,28 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 [('id', '=', -1)]
                 ),
             ],
-        states=_STATES, depends=['cash_bank'])
+        states={
+            'readonly': Bool(Eval('lines')) | Bool(Eval('state') != 'draft')
+        }, depends=_depends + ['cash_bank', 'lines'])
     type_type = fields.Function(fields.Char('Type of Cash/Bank type',
         size=None), 'on_change_with_type_type')
     currency = fields.Many2One('currency.currency', 'Currency', required=True,
-        states={
-            'readonly': True,
-            },
-        depends=['state'])
+        states={'readonly': True})
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
     number = fields.Char('Number', size=None, readonly=True, select=True)
     reference = fields.Char('Reference', size=None)
-    description = fields.Char('Description', size=None, states=_STATES)
+    description = fields.Char('Description', size=None,
+        states=_states, depends=_depends)
     date = fields.Date('Date', required=True,
-        states=_STATES)
+        states=_states, depends=_depends)
     party = fields.Many2One('party.party', 'Party',
-        states=_STATES, depends=['party_required'])
+        states=_states, depends=_depends)
     party_required = fields.Function(fields.Boolean('Party Required'),
         'on_change_with_party_required')
     cash = fields.Numeric('Cash',
         digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
-        states=_STATES)
+        states=_states, depends=_depends + ['currency_digits'])
     documents = fields.Many2Many('cash_bank.document-cash_bank.receipt',
         'receipt', 'document', 'Documents',
         domain=[
@@ -102,8 +102,8 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 [('id', '!=', -1)]
             )
         ],
-        states=_STATES,
-        depends=['id', 'type', 'type_type', 'state'])
+        states=_states,
+        depends=_depends + ['id', 'type', 'type_type'])
     total_documents = fields.Function(fields.Numeric('Total Documents',
         digits=(16, Eval('currency_digits', 2)),
         depends=['currency_digits']),
@@ -111,33 +111,39 @@ class Receipt(Workflow, ModelSQL, ModelView):
     document_allow = fields.Function(fields.Boolean('Allow documents'),
         'on_change_with_document_allow')
     lines = fields.One2Many('cash_bank.receipt.line', 'receipt',
-        'Lines', states=_STATES,
-        depends=['state', 'type'])
+        'Lines', states={
+            'readonly': (Not(Bool(Eval('cash_bank')))
+                            | Not(Bool(Eval('type')))
+                            | Bool(Eval('state') != 'draft'))
+        },
+        depends=_depends + ['cash_bank', 'type'])
     total_lines = fields.Function(fields.Numeric('Total Lines',
-            digits=(16, Eval('currency_digits', 2)),
-            depends=['currency_digits']),
-            'get_total_detail')
+        digits=(16, Eval('currency_digits', 2)),
+        depends=['currency_digits']),
+        'get_total_detail')
     total = fields.Function(fields.Numeric('Total',
-            digits=(16, Eval('currency_digits', 2)),
-            depends=['currency_digits']),
-            'get_total')
+        digits=(16, Eval('currency_digits', 2)),
+        depends=['currency_digits']),
+        'get_total')
     diff = fields.Function(fields.Numeric('Diff',
-            digits=(16, Eval('currency_digits', 2)),
-            depends=['currency_digits']),
-            'get_diff')
+        digits=(16, Eval('currency_digits', 2)),
+        depends=['currency_digits']),
+        'get_diff')
     move = fields.Many2One('account.move', 'Move', readonly=True,
         domain=[
             ('company', '=', Eval('company', -1)),
         ],
         depends=['company'])
     line_move = fields.Many2One('account.move.line', 'Account Move Line',
-            readonly=True)
+        readonly=True)
     state = fields.Selection(STATES, 'State', readonly=True, required=True)
     transfer = fields.Many2One('cash_bank.transfer', 'Transfer',
-            readonly=True)
+        readonly=True)
     attachments = fields.One2Many('ir.attachment', 'resource', 'Attachments')
     logs = fields.One2Many('cash_bank.receipt.log_action', 'resource',
         'Logs', readonly=True)
+
+    del _states, _depends
 
     @classmethod
     def __register__(cls, module_name):
@@ -433,7 +439,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @classmethod
     def create(cls, vlist):
         receipts = super(Receipt, cls).create(vlist)
-        write_log('Created', receipts)
+        write_log('log_action.msg_created', receipts)
         return receipts
 
     @classmethod
@@ -495,7 +501,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         atts = []
         for receipt in receipts:
             if receipt.state not in ['draft']:
-                write_log('Delete attempt', [receipt])
+                write_log('log_action.msg_deletion_attempt', receipts)
                 raise UserError(
                     gettext('cash_bank.msg_delete_document_cash_bank',
                         doc_name='Receipt',
@@ -515,7 +521,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @ModelView.button
     @Workflow.transition('draft')
     def draft(cls, receipts):
-        write_log('Draft', receipts)
+        write_log('log_action.msg_draft', receipts)
 
     @classmethod
     @ModelView.button
@@ -559,7 +565,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
             receipt.save()
 
         cls.set_number(receipts)
-        write_log('Confirmed', receipts)
+        write_log('log_action.msg_confirmed', receipts)
 
     @classmethod
     @ModelView.button
@@ -567,7 +573,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
     def post(cls, receipts):
         Move = Pool().get('account.move')
         Move.post([r.move for r in receipts])
-        write_log('Posted', receipts)
+        write_log('log_action.msg_posted', receipts)
 
     @classmethod
     @ModelView.button
@@ -575,29 +581,34 @@ class Receipt(Workflow, ModelSQL, ModelView):
     def cancel(cls, receipts):
         Move = Pool().get('account.move')
         Move.delete([r.move for r in receipts])
-        write_log('Cancelled', receipts)
+        write_log('log_action.msg_cancelled', receipts)
 
 
 class Line(sequence_ordered(), ModelSQL, ModelView):
     'Cash/Bank Receipt Line'
     __name__ = 'cash_bank.receipt.line'
+
+    _states = {
+        'readonly': Eval('receipt_state') != 'draft',
+        }
+    _depends = ['receipt_state']
+
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
-        required=True, ondelete='CASCADE',
-        states=_STATES_DET)
+        required=True, ondelete='CASCADE')
     amount = fields.Numeric('Amount', required=True,
         digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
-        states=_STATES_DET, depends=['receipt_state'])
+        states=_states, depends=_depends)
     party = fields.Many2One('party.party', 'Party',
-        states=_STATES_DET, depends=['receipt_state'])
+        states=_states, depends=_depends)
     account = fields.Many2One('account.account', 'Account', required=True,
         domain=[
             ('company', '=', Eval('_parent_receipt', {}).get('company', -1)),
             ('type', '!=', None),
             ('closed', '!=', True),
             ],
-        states=_STATES_DET, depends=['receipt_state'])
-    description = fields.Char('Description', states=_STATES_DET,
-        depends=['receipt_state'])
+        states=_states, depends=_depends)
+    description = fields.Char('Description', states=_states,
+        depends=_depends)
     invoice = fields.Many2One('account.invoice', 'Invoice',
         domain=[
             ('state', '=', 'posted'),
@@ -610,13 +621,15 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                 [('account', '!=', -1)],
             ),
             ],
-        states=_STATES_DET,
-        depends=['party', 'account', 'receipt_state'])
+        states=_states,
+        depends=_depends + ['party', 'account'])
     line_move = fields.Many2One('account.move.line', 'Account Move Line',
             readonly=True)
     receipt_state = fields.Function(
         fields.Selection(STATES, 'Receipt State'),
         'on_change_with_receipt_state')
+
+    del _states, _depends
 
     @classmethod
     def __register__(cls, module_name):
@@ -645,7 +658,8 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             return self.receipt.state
 
     @fields.depends('amount', 'party', 'invoice',
-        'receipt', '_parent_receipt.cash_bank')
+        'receipt', '_parent_receipt.cash_bank',
+        '_parent_receipt.type')
     def on_change_party(self):
         if self.party:
             if self.amount:
@@ -660,7 +674,8 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                 self.amount = Decimal('0.0')
 
     @fields.depends('amount', 'party', 'account', 'invoice', 'receipt',
-        '_parent_receipt.currency', '_parent_receipt.cash_bank')
+        '_parent_receipt.currency', '_parent_receipt.cash_bank',
+        '_parent_receipt.type')
     def on_change_amount(self):
         Currency = Pool().get('currency.currency')
         if self.party:
@@ -812,16 +827,17 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     def _get_party_account(self, amount):
         account = None
         zero = Decimal('0.0')
-        if self.receipt.type.type == 'in':
-            if amount > zero:
-                account = self.party.account_receivable
+        if self.receipt:
+            if self.receipt.type.type == 'in':
+                if amount > zero:
+                    account = self.party.account_receivable
+                else:
+                    account = self.party.account_payable
             else:
-                account = self.party.account_payable
-        else:
-            if amount > zero:
-                account = self.party.account_payable
-            else:
-                account = self.party.account_receivable
+                if amount > zero:
+                    account = self.party.account_payable
+                else:
+                    account = self.party.account_receivable
         return account
 
 
