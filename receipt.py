@@ -11,13 +11,6 @@ from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from decimal import Decimal
 
-STATES = [
-    ('draft', 'Draft'),
-    ('confirmed', 'Confirmed'),
-    ('posted', 'Posted'),
-    ('cancel', 'Canceled'),
-    ]
-
 
 class Receipt(Workflow, ModelSQL, ModelView):
     "Cash/Bank Receipt"
@@ -136,7 +129,12 @@ class Receipt(Workflow, ModelSQL, ModelView):
         depends=['company'])
     line_move = fields.Many2One('account.move.line', 'Account Move Line',
         readonly=True)
-    state = fields.Selection(STATES, 'State', readonly=True, required=True)
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('confirmed', 'Confirmed'),
+        ('posted', 'Posted'),
+        ('cancel', 'Canceled'),
+        ], 'State', readonly=True, required=True)
     transfer = fields.Many2One('cash_bank.transfer', 'Transfer',
         readonly=True)
     attachments = fields.One2Many('ir.attachment', 'resource', 'Attachments')
@@ -594,7 +592,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     _depends = ['receipt_state']
 
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
-        required=True, ondelete='CASCADE')
+        required=True, ondelete='CASCADE', select=True)
     amount = fields.Numeric('Amount', required=True,
         digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
         states=_states, depends=_depends)
@@ -626,7 +624,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     line_move = fields.Many2One('account.move.line', 'Account Move Line',
             readonly=True)
     receipt_state = fields.Function(
-        fields.Selection(STATES, 'Receipt State'),
+        fields.Selection('get_receipt_states', 'Receipt State'),
         'on_change_with_receipt_state')
 
     del _states, _depends
@@ -733,6 +731,12 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         default['invoice'] = None
         default['attachments'] = None
         return super(Line, cls).copy(lines, default=default)
+
+    @classmethod
+    def get_receipt_states(cls):
+        pool = Pool()
+        Receipt = pool.get('cash_bank.receipt')
+        return Receipt.fields_get(['state'])['state']['selection']
 
     def reconcile(self):
         pool = Pool()
