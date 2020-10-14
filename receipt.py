@@ -10,6 +10,7 @@ from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from decimal import Decimal
+import json
 
 
 class Receipt(Workflow, ModelSQL, ModelView):
@@ -61,9 +62,31 @@ class Receipt(Workflow, ModelSQL, ModelView):
     date = fields.Date('Date', required=True,
         states=_states, depends=_depends)
     party = fields.Many2One('party.party', 'Party',
-        states=_states, depends=_depends)
+        states={
+            'readonly': Eval('state') != 'draft',
+            'required': Bool(Eval('party_required'))
+        }, depends=_depends + ['party_required'])
     party_required = fields.Function(fields.Boolean('Party Required'),
         'on_change_with_party_required')
+    bank_account = fields.Many2One('bank.account', 'Bank Account',
+        states={
+            'readonly': Eval('state') != 'draft',
+            'invisible': Not(Bool(Eval('bank_account_show'))),
+            'required': Bool(Eval('bank_account_required'))
+        },
+        domain=[
+            ('id', 'in', Eval('bank_account_owners'))
+        ], depends=_depends + ['party', 'bank_account_show',
+            'bank_account_owners', 'bank_account_required'])
+    bank_account_show = fields.Function(fields.Boolean('Bank Account Show'),
+        'on_change_with_bank_account_show')
+    bank_account_owners = fields.Function(fields.One2Many('bank.account',
+        None, 'Bank Account Owners'),
+        'on_change_with_bank_account_owners',
+        setter='set_bank_account_owners')
+    bank_account_required = fields.Function(fields.Boolean(
+        'Bank Account Required'),
+        'on_change_with_bank_account_required')
     cash = fields.Numeric('Cash',
         digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
         states=_states, depends=_depends + ['currency_digits'])
@@ -297,6 +320,32 @@ class Receipt(Workflow, ModelSQL, ModelView):
     def on_change_with_party_required(self, name=None):
         if self.type:
             return self.type.party_required
+
+    @fields.depends('type', 'bank_account_show')
+    def on_change_with_bank_account_required(self, name=None):
+        if self.type and self.bank_account_show:
+            if self.bank_account_show == True:
+                return self.type.bank_account_required
+
+    @fields.depends('type', 'party_required')
+    def on_change_with_bank_account_show(self, name=None):
+        if self.type and self.party_required:
+            if self.party_required == True:
+                return self.type.bank_account
+
+    @fields.depends('type', 'party')
+    def on_change_with_bank_account_owners(self, name=None):
+        if self.type and self.party:
+            if self.party.bank_accounts:
+                res = []
+                for acc in self.party.bank_accounts:
+                    res.append(acc.id)
+                return res
+        return []
+
+    @classmethod
+    def set_bank_account_owners(cls, lines, name, value):
+        pass
 
     @fields.depends()
     def on_change_company(self):

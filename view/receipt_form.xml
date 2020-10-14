@@ -16,6 +16,9 @@ the full copyright notices and license terms. -->
         <field name="type"/>
         <label name="party"/>
         <field name="party"/>
+        <label name="bank_account"/>
+        <field name="bank_account"/>
+        <newline/>
         <label name="description"/>
         <field name="description" colspan="5"/>
     </group>

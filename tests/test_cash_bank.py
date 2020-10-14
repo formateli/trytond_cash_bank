@@ -11,7 +11,7 @@ from trytond.modules.account.tests import create_chart, get_fiscalyear
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.exceptions import UserError
-from trytond.model.modelsql import SQLConstraintError
+from trytond.model.modelsql import SQLConstraintError, RequiredValidationError
 
 __all__ = [
     'create_cash_bank',
@@ -38,6 +38,8 @@ class CashBankTestCase(ModuleTestCase):
         Docs = pool.get('cash_bank.document-cash_bank.receipt')
         Transfer = pool.get('cash_bank.transfer')
         Convertion = pool.get('cash_bank.convertion')
+        CashBank = pool.get('cash_bank.cash_bank')
+        ReceiptType = pool.get('cash_bank.receipt_type')
 
         party = self._create_party('Party test', None)
 
@@ -88,19 +90,33 @@ class CashBankTestCase(ModuleTestCase):
                 )
             self.assertEqual(len(cash.receipt_types), 2)
 
-            transaction.commit()
+            _, bank_account = create_bank_account(
+                party_bank=self._create_party('Party Bank', None),
+                party_owner=company.party)
 
             with self.assertRaises(SQLConstraintError):
                 # Must be a diferent account
                 bank = create_cash_bank(
                     company, 'Main Bank', 'bank',
-                    journal, account_cash, sequence
+                    journal, account_cash, sequence,
+                    bank_account
                     )
-            transaction.rollback()
+
+            with self.assertRaises(RequiredValidationError):
+                # Bank Account is required for type bank
+                bank = create_cash_bank(
+                    company, 'Main Bank', 'bank',
+                    journal, account_revenue, sequence
+                    )
+            ReceiptType.delete(ReceiptType.search(
+                [('cash_bank.type', '=', 'bank')]))
+            CashBank.delete(CashBank.search(
+                [('type', '=', 'bank')]))
 
             bank = create_cash_bank(
                 company, 'Main Bank', 'bank',
-                journal, account_revenue, sequence
+                journal, account_revenue, sequence,
+                bank_account
                 )
             self.assertEqual(len(bank.receipt_types), 2)
 
@@ -178,9 +194,9 @@ class CashBankTestCase(ModuleTestCase):
             # 'out' receipts can not create documents
             receipt = create_receipt(
                 company, cash, 'out', date)
+            receipt.cash = Decimal('10.0')
+            receipt.save()
             with self.assertRaises(UserError):
-                receipt.cash = Decimal('10.0')
-                receipt.save()
                 docs = [
                     self._get_document(
                         cheque_type, Decimal('20.0'), date, 'a'),
@@ -566,14 +582,10 @@ def create_receipt_types(name, sequence):
 
     res = []
     for t in types:
-        pr = None
-        if t == 'out':
-            pr = True
         rt = ReceiptType(
             name=name + ' ' + t,
             type=t,
             sequence=sequence,
-            party_required=pr
         )
         res.append(rt)
     return res
@@ -595,15 +607,48 @@ def create_sequence(name, code, company, is_strict=False):
     return seq
 
 
+def create_bank_account(party_bank, party_owner):
+    pool = Pool()
+    Bank = pool.get('bank')
+    Account = pool.get('bank.account')
+    Number = pool.get('bank.account.number')
+    PartyAccount = pool.get('bank.account-party.party')
+
+    bank = Bank(
+        party=party_bank,
+        )
+    bank.save()
+
+    account = Account(
+        bank=bank,
+        numbers=[Number(
+            type='other',
+            number='12345678'
+            )]
+        )
+    account.save()
+
+    party_account = PartyAccount(
+        owner=party_owner,
+        account=account
+        )
+    party_account.save()
+
+    return bank, account
+
+
 def create_cash_bank(
-        company, name, type_, journal, account, receipt_sequence):
+        company, name, type_, journal, account,
+        receipt_sequence, bank_account=None):
     CashBank = Pool().get('cash_bank.cash_bank')
+
     cash = CashBank(
         company=company,
         name=name,
         type=type_,
         journal_cash_bank=journal,
         account=account,
+        bank_account=bank_account,
         receipt_types=create_receipt_types(name, receipt_sequence)
         )
     cash.save()

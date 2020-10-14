@@ -13,6 +13,8 @@ the full copyright notices and license terms. -->
     <field name="journal_cash_bank"/>
     <label name="account"/>
     <field name="account"/>
+    <label name="bank_account"/>
+    <field name="bank_account"/>
     <notebook colspan="4">
         <page string="Receipt Types" id="receipt_types">
             <field name="receipt_types" colspan="4"

@@ -4,7 +4,7 @@ The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
 <form>
     <label name="cash_bank"/>
-    <field name="cash_bank" colspan="3"/>
+    <field name="cash_bank"/>
     <label name="name"/>
     <field name="name"/>
     <label name="type"/>
@@ -15,4 +15,8 @@ the full copyright notices and license terms. -->
     <field name="active"/>
     <label name="party_required"/>
     <field name="party_required"/>
+    <label name="bank_account"/>
+    <field name="bank_account"/>
+    <label name="bank_account_required"/>
+    <field name="bank_account_required"/>
 </form>

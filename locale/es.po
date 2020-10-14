@@ -6,6 +6,10 @@ msgctxt "field:cash_bank.cash_bank,account:"
 msgid "Account"
 msgstr "Cuenta"
 
+msgctxt "field:cash_bank.cash_bank,bank_account:"
+msgid "Bank Account"
+msgstr "Cuenta Bancaria"
+
 msgctxt "field:cash_bank.cash_bank,company:"
 msgid "Company"
 msgstr "Empresa"
@@ -298,6 +302,10 @@ msgctxt "field:cash_bank.receipt,party_required:"
 msgid "Party Required"
 msgstr "Tercero requerido"
 
+msgctxt "field:cash_bank.receipt,bank_account:"
+msgid "Bank Account"
+msgstr "Cuenta Bancaria"
+
 msgctxt "field:cash_bank.receipt,reference:"
 msgid "Reference"
 msgstr "Referencia"
@@ -405,6 +413,14 @@ msgstr "Nombre"
 msgctxt "field:cash_bank.receipt_type,party_required:"
 msgid "Party Required"
 msgstr "Tercero requerido"
+
+msgctxt "field:cash_bank.receipt_type,bank_account:"
+msgid "Bank Account"
+msgstr "Cuenta Bancaria"
+
+msgctxt "field:cash_bank.receipt_type,bank_account_required:"
+msgid "Bank Account Required"
+msgstr "Cuenta Bancaria Requerida"
 
 msgctxt "field:cash_bank.receipt_type,sequence:"
 msgid "Receipt Sequence"
