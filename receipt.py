@@ -61,7 +61,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         states=_states, depends=_depends)
     date = fields.Date('Date', required=True,
         states=_states, depends=_depends)
-    party = fields.Many2One('party.party', 'Party',
+    party = fields.Many2One('party.party', 'Party', ondelete='RESTRICT',
         states={
             'readonly': Eval('state') != 'draft',
             'required': Bool(Eval('party_required'))
@@ -645,7 +645,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     amount = fields.Numeric('Amount', required=True,
         digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
         states=_states, depends=_depends)
-    party = fields.Many2One('party.party', 'Party',
+    party = fields.Many2One('party.party', 'Party', ondelete='RESTRICT',
         states=_states, depends=_depends)
     account = fields.Many2One('account.account', 'Account', required=True,
         domain=[
