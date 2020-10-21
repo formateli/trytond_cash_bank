@@ -16,11 +16,14 @@ the full copyright notices and license terms. -->
         <record model="ir.message" id="msg_party_required_cash_bank">
             <field name="text">Party is required.</field>
         </record>
-        <record model="ir.message" id="msg_amount_greater_invoice_amount_to_pay_cash_bank">
-            <field name="text">Amount "%(amount)s" is greater than the amount to pay of invoice.</field>
+        <record model="ir.message" id="msg_total_less_zero">
+            <field name="text">Total is less than zero.</field>
         </record>
-        <record model="ir.message" id="msg_no_total_cash_bank">
-            <field name="text">Total is zero.</field>
+        <record model="ir.message" id="msg_invalid_amount_sign">
+            <field name="text">Amount "%(amount)s" has a different sign than document "%(document)s" amount.</field>
+        </record>
+        <record model="ir.message" id="msg_amount_greater_amount_to_apply">
+            <field name="text">Amount "%(amount)s" is greater than document "%(document)s" avaiable amount to apply.</field>
         </record>
     </data>
 </tryton>
