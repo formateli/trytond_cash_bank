@@ -871,6 +871,18 @@ msgctxt "selection:cash_bank.transfer,state:"
 msgid "Posted"
 msgstr "Posteado"
 
+msgctxt "selection:cash_bank.receipt.line,type:"
+msgid "Customer Invoice"
+msgstr "Factura Cliente"
+
+msgctxt "selection:cash_bank.receipt.line,type:"
+msgid "Supplier Invoice"
+msgstr "Factura Proveedor"
+
+msgctxt "selection:cash_bank.receipt.line,type:"
+msgid "Account Move Line"
+msgstr "Linea de Asiento Contable"
+
 msgctxt "view:cash_bank.cash_bank:"
 msgid "Receipt Types"
 msgstr ""

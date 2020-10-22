@@ -691,10 +691,10 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                 [('party', '=', Eval('party'))],
                 [('party', '!=', -1)],
             ),
-            If(Bool(Eval('account')),
-                [('account', '=', Eval('account'))],
-                [('account', '!=', -1)],
-            ),
+#            If(Bool(Eval('account')),
+#                [('account', '=', Eval('account'))],
+#                [('account', '!=', -1)],
+#            ),
         ],
         states={
             'readonly': Eval('receipt_state') != 'draft',
@@ -717,6 +717,25 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         # Migration 5.2.2:
         if table.column_exist('number'):
             table.drop_column('number')
+
+        # Migration 5.6.2:
+        cursor = Transaction().connection.cursor()
+        sql = "UPDATE cash_bank_receipt_line " \
+            "SET type = 'move_line' " \
+            "WHERE type IS NULL AND invoice IS NULL"
+        cursor.execute(sql)
+        sql = "UPDATE cash_bank_receipt_line " \
+            "SET type = 'invoice_customer' FROM account_invoice " \
+            "WHERE cash_bank_receipt_line.type IS NULL AND " \
+            "account_invoice.type = 'out' AND " \
+            "account_invoice.id = cash_bank_receipt_line.invoice"
+        cursor.execute(sql)
+        sql = "UPDATE cash_bank_receipt_line " \
+            "SET type = 'invoice_supplier' FROM account_invoice " \
+            "WHERE cash_bank_receipt_line.type IS NULL AND " \
+            "account_invoice.type = 'in' AND " \
+            "account_invoice.id = cash_bank_receipt_line.invoice"
+        cursor.execute(sql)
 
     @classmethod
     def __setup__(cls):
