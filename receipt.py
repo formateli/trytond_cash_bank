@@ -9,6 +9,7 @@ from trytond.pyson import Eval, If, Bool, Not, Or, In
 from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
+from sql import Null
 from decimal import Decimal
 
 
@@ -608,9 +609,6 @@ class Receipt(Workflow, ModelSQL, ModelView):
             move.lines = move_lines
             move.save()
 
-            #for line in receipt.lines:
-            #    line.validate_line()
-
             receipt.move = move
             receipt.line_move = receipt_line_move
             receipt.save()
@@ -683,6 +681,8 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     invoice = fields.Many2One('account.invoice', 'Invoice',
         domain=[
             ('state', '=', 'posted'),
+            ('currency', '=',
+                Eval('_parent_receipt', {}).get('currency', -1)),
             If(In(Eval('type'), ['invoice_customer']),
                 [('type', '=', 'out')],
                 [('type', '=', 'in')],
@@ -691,10 +691,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                 [('party', '=', Eval('party'))],
                 [('party', '!=', -1)],
             ),
-#            If(Bool(Eval('account')),
-#                [('account', '=', Eval('account'))],
-#                [('account', '!=', -1)],
-#            ),
         ],
         states={
             'readonly': Eval('receipt_state') != 'draft',
@@ -713,29 +709,48 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     @classmethod
     def __register__(cls, module_name):
         super(Line, cls).__register__(module_name)
+        pool = Pool()
+        Invoice = pool.get('account.invoice')
         table = cls.__table_handler__(module_name)
+        invoice_sql = Invoice.__table__()
+        sql_table = cls.__table__()
+
+        cursor = Transaction().connection.cursor()
+
         # Migration 5.2.2:
         if table.column_exist('number'):
             table.drop_column('number')
 
         # Migration 5.6.2:
-        cursor = Transaction().connection.cursor()
-        sql = "UPDATE cash_bank_receipt_line " \
-            "SET type = 'move_line' " \
-            "WHERE type IS NULL AND invoice IS NULL"
-        cursor.execute(sql)
-        sql = "UPDATE cash_bank_receipt_line " \
-            "SET type = 'invoice_customer' FROM account_invoice " \
-            "WHERE cash_bank_receipt_line.type IS NULL AND " \
-            "account_invoice.type = 'out' AND " \
-            "account_invoice.id = cash_bank_receipt_line.invoice"
-        cursor.execute(sql)
-        sql = "UPDATE cash_bank_receipt_line " \
-            "SET type = 'invoice_supplier' FROM account_invoice " \
-            "WHERE cash_bank_receipt_line.type IS NULL AND " \
-            "account_invoice.type = 'in' AND " \
-            "account_invoice.id = cash_bank_receipt_line.invoice"
-        cursor.execute(sql)
+        cursor.execute(*sql_table.select(sql_table.id,
+                where=sql_table.type == Null,
+                limit=1))
+        if cursor.fetchone():
+            cursor.execute(*sql_table.update(
+                    columns=[sql_table.type],
+                    values=['move_line'],
+                    where=(sql_table.type == Null)
+                    & (sql_table.invoice == Null)))
+            cursor.execute(*sql_table.update(
+                    columns=[sql_table.type],
+                    values=['invoice_customer'],
+                    where=(sql_table.type == Null)
+                    & (sql_table.invoice.in_(
+                            invoice_sql.select(invoice_sql.id,
+                            where=(
+                                invoice_sql.type == 'out')
+                            )))
+                    ))
+            cursor.execute(*sql_table.update(
+                    columns=[sql_table.type],
+                    values=['invoice_supplier'],
+                    where=(sql_table.type == Null)
+                    & (sql_table.invoice.in_(
+                            invoice_sql.select(invoice_sql.id,
+                            where=(
+                                invoice_sql.type == 'in')
+                            )))
+                    ))
 
     @classmethod
     def __setup__(cls):
@@ -766,55 +781,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         self.account = None
         self.amount = Decimal('0.0')
 
-#    @fields.depends('amount', 'party', 'invoice',
-#        'receipt', '_parent_receipt.cash_bank',
-#        '_parent_receipt.type')
-#    def on_change_party(self):
-#        if self.party:
-#            if self.amount:
-#                self.account = self._get_party_account(self.amount)
-#        if self.invoice:
-#            if self.party:
-#                if self.invoice.party != self.party:
-#                    self.invoice = None
-#            else:
-#                self.invoice = None
-#                self.account = None
-#                self.amount = Decimal('0.0')
-
-#    @fields.depends('amount', 'party', 'account', 'invoice', 'receipt',
-#        '_parent_receipt.currency', '_parent_receipt.cash_bank',
-#        '_parent_receipt.type')
-#    def on_change_amount(self):
-#        Currency = Pool().get('currency.currency')
-#        if self.party:
-#            if self.account and self.account not in (
-#                    self.party.account_receivable, self.party.account_payable):
-#                # The user has entered a non-default value, we keep it.
-#                pass
-#            elif self.amount:
-#                self.account = self._get_party_account(self.amount)
-#        if self.invoice:
-#            if (self.amount and self.receipt
-#                    and self.receipt.cash_bank.journal_cash_bank):
-#                invoice = self.invoice
-#                with Transaction().set_context(date=invoice.currency_date):
-#                    amount_to_pay = Currency.compute(invoice.currency,
-#                        invoice.amount_to_pay, self.receipt.currency)
-#                if abs(self.amount) > amount_to_pay:
-#                    self.invoice = None
-#            else:
-#                self.invoice = None
-
-    #@fields.depends('account', 'invoice')
-    #def on_change_account(self):
-    #    if self.invoice:
-    #        if self.account:
-    #            if self.invoice.account != self.account:
-    #                self.invoice = None
-    #        else:
-    #            self.invoice = None
-
     @fields.depends('invoice', 'description',
                     'receipt', '_parent_receipt.type')
     def on_change_invoice(self):
@@ -828,7 +794,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                         self.amount *= -1
                 else:
                     if self.invoice.type == 'out':
-                        self.amount *= -1  
+                        self.amount *= -1
             if not self.description and self.invoice.reference:
                 self.description = self.invoice.reference
 
@@ -901,7 +867,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                     amount_to_pay *= -1
             else:
                 if self.invoice.type == 'out':
-                    amount_to_pay *= -1  
+                    amount_to_pay *= -1
             self._check_invalid_amount(amount_to_pay, self.invoice.rec_name)
 
     def reconcile(self):
@@ -979,22 +945,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             second_currency=second_currency,
             amount_second_currency=amount_second_currency,
             )
-
-#    def _get_party_account(self, amount):
-#        account = None
-#        zero = Decimal('0.0')
-#        if self.receipt:
-#            if self.receipt.type.type == 'in':
-#                if amount > zero:
-#                    account = self.party.account_receivable
-#                else:
-#                    account = self.party.account_payable
-#            else:
-#                if amount > zero:
-#                    account = self.party.account_payable
-#                else:
-#                    account = self.party.account_receivable
-#        return account
 
 
 class ReceiptLog(LogActionMixin):
