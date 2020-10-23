@@ -649,21 +649,29 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
 
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
         required=True, ondelete='CASCADE', select=True)
+    currency = fields.Function(
+        fields.Many2One('currency.currency', 'Currency'),
+        'on_change_with_currency')
+    currency_digits = fields.Function(
+        fields.Integer('Currency Digits'),
+        'on_change_with_currency_digits')
     type = fields.Selection([
         ('invoice_customer', 'Customer Invoice'),
         ('invoice_supplier', 'Supplier Invoice'),
         ('move_line', 'Account Move Line'),
         ], 'Type', states=_states, depends=_depends)
     amount = fields.Numeric('Amount', required=True,
-        digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
-        states=_states, depends=_depends)
+        digits=(16, Eval('currency_digits', 2)),
+        states=_states, depends=_depends + ['currency_digits'])
     party = fields.Many2One('party.party', 'Party', ondelete='RESTRICT',
         states={
+            'required': Or(
+                        Bool(Eval('party_required')),
+                        Eval('type') != 'move_line'),
             'readonly': Or(
-                Eval('receipt_state') != 'draft',
-                Bool(Eval('invoice')),
-                )
-        }, depends=_depends + ['invoice'])
+                        Eval('receipt_state') != 'draft',
+                        Bool(Eval('invoice'))),
+        }, depends=_depends + ['party_required', 'invoice'])
     account = fields.Many2One('account.account', 'Account', required=True,
         domain=[
             ('company', '=', Eval('_parent_receipt', {}).get('company', -1)),
@@ -671,15 +679,19 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             ('closed', '!=', True),
         ],
         states={
+            'required': True,
             'readonly': Or(
                 Eval('receipt_state') != 'draft',
-                Bool(Eval('invoice')),
+                Eval('type') != 'move_line',
                 )
-        }, depends=_depends + ['invoice'])
+        }, depends=_depends + ['type'])
+    party_required = fields.Function(fields.Boolean('Party Required'),
+        'on_change_with_party_required')
     description = fields.Char('Description', states=_states,
         depends=_depends)
     invoice = fields.Many2One('account.invoice', 'Invoice',
         domain=[
+            ('company', '=', Eval('_parent_receipt', {}).get('company', -1)),
             ('state', '=', 'posted'),
             ('currency', '=',
                 Eval('_parent_receipt', {}).get('currency', -1)),
@@ -689,7 +701,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             ),
             If(Bool(Eval('party')),
                 [('party', '=', Eval('party'))],
-                [('party', '!=', -1)],
+                [('party', '=', -1)],
             ),
         ],
         states={
@@ -785,7 +797,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                     'receipt', '_parent_receipt.type')
     def on_change_invoice(self):
         if self.invoice:
-            self.party = self.invoice.party
             self.account = self.invoice.account
             self.amount = self.invoice.amount_to_pay
             if self.receipt:
@@ -797,6 +808,23 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                         self.amount *= -1
             if not self.description and self.invoice.reference:
                 self.description = self.invoice.reference
+
+    @fields.depends('receipt', 'type',
+                    '_parent_receipt.currency')
+    def on_change_with_currency(self, name=None):
+        if self.receipt:
+            return self.receipt.currency.id
+
+    @fields.depends('type', 'currency')
+    def on_change_with_currency_digits(self, name=None):
+        if self.currency:
+            return self.currency.digits
+        return 2
+
+    @fields.depends('account')
+    def on_change_with_party_required(self, name=None):
+        if self.account:
+            return self.account.party_required
 
     def get_rec_name(self, name):
         return self.receipt.rec_name
