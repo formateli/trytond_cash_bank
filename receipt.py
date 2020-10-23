@@ -860,7 +860,8 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             amount, True)
         return amount
 
-    def _check_invalid_amount(self, amount_to_check, document):
+    def _check_invalid_amount(self, amount_to_check,
+                document, check_greater=True):
         invalid = False
         if amount_to_check > 0 and self.amount < 0:
             invalid = True
@@ -874,12 +875,13 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                         document=document
                         ))
 
-        if abs(self.amount) > abs(amount_to_check):
-            raise UserError(
-                gettext('cash_bank.msg_amount_greater_amount_to_apply',
-                        amount=self._format_amount(self.amount),
-                        document=document
-                        ))
+        if check_greater:
+            if abs(self.amount) > abs(amount_to_check):
+                raise UserError(
+                    gettext('cash_bank.msg_amount_greater_amount_to_apply',
+                            amount=self._format_amount(self.amount),
+                            document=document
+                            ))
 
     def validate_line(self):
         pool = Pool()
