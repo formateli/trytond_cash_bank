@@ -827,7 +827,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             return self.account.party_required
 
     def get_rec_name(self, name):
-        return self.receipt.rec_name
+        return str(self.id) + '@' + self.receipt.rec_name
 
     @classmethod
     def search_rec_name(cls, name, clause):
