@@ -770,7 +770,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         t = cls.__table__()
         cls._sql_constraints += [
             ('check_receipt_line_amount', Check(t, t.amount != 0),
-                'Amount must be a positive or negative value.'),
+                'cash_bank.msg_line_amount_zero'),
             ]
 
     @staticmethod
@@ -886,6 +886,12 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     def validate_line(self):
         pool = Pool()
         Currency = pool.get('currency.currency')
+
+        if self.amount == 0:
+            raise UserError(
+                gettext('cash_bank.msg_line_amount_zero',
+                        ))
+
         if self.invoice:
             with Transaction().set_context(date=self.invoice.currency_date):
                 amount_to_pay = Currency.compute(self.invoice.currency,

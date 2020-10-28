@@ -20,10 +20,13 @@ the full copyright notices and license terms. -->
             <field name="text">Total is less than zero.</field>
         </record>
         <record model="ir.message" id="msg_invalid_amount_sign">
-            <field name="text">Amount "%(amount)s" has a different sign than document "%(document)s" amount.</field>
+            <field name="text">Amount "%(amount)s" has an invalid sign for "%(document)s"</field>
         </record>
         <record model="ir.message" id="msg_amount_greater_amount_to_apply">
             <field name="text">Amount "%(amount)s" is greater than document "%(document)s" avaiable amount to apply.</field>
+        </record>
+        <record model="ir.message" id="msg_line_amount_zero">
+            <field name="text">Line Amount is zero</field>
         </record>
     </data>
 </tryton>
