@@ -14,6 +14,7 @@ from trytond.exceptions import UserError
 from trytond.model.modelsql import SQLConstraintError, RequiredValidationError
 
 __all__ = [
+    'create_bank_account',
     'create_cash_bank',
     'create_receipt',
     'create_sequence',
