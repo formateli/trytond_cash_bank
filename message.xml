@@ -28,5 +28,11 @@ the full copyright notices and license terms. -->
         <record model="ir.message" id="msg_line_amount_zero">
             <field name="text">Line Amount is zero</field>
         </record>
+        <record model="ir.message" id="msg_cash_less_zero">
+            <field name="text">Cash amount is less than zero</field>
+        </record>
+        <record model="ir.message" id="msg_document_less_equal_zero">
+            <field name="text">Document amount is equal to zero or less than zero</field>
+        </record>
     </data>
 </tryton>

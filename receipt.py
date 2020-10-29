@@ -588,6 +588,15 @@ class Receipt(Workflow, ModelSQL, ModelView):
                 raise UserError(
                     gettext('cash_bank.msg_total_less_zero'
                     ))
+            if receipt.cash < 0:
+                raise UserError(
+                    gettext('cash_bank.msg_cash_less_zero'
+                    ))
+            for doc in receipt.documents:
+                if doc.amount <= 0:
+                    raise UserError(
+                        gettext('cash_bank.msg_document_less_equal_zero'
+                        ))
             if receipt.type.party_required and not receipt.party:
                 raise UserError(
                     gettext('cash_bank.msg_party_required_cash_bank'

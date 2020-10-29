@@ -236,7 +236,7 @@ msgstr "Adjuntos"
 
 msgctxt "field:cash_bank.receipt,cash:"
 msgid "Cash"
-msgstr "Caja"
+msgstr "Efectivo"
 
 msgctxt "field:cash_bank.receipt,cash_bank:"
 msgid "Cash/Bank"
@@ -722,6 +722,14 @@ msgstr ""
 msgctxt "model:ir.message,text:msg_line_amount_zero"
 msgid "Line Amount is zero"
 msgstr "El Monto de la Linea es cero"
+
+msgctxt "model:ir.message,text:msg_cash_less_zero"
+msgid "Cash amount is less than zero"
+msgstr "El Monto de Efectivo es menor que cero"
+
+msgctxt "model:ir.message,text:msg_document_less_equal_zero"
+msgid "Document amount is equal to zero or less than zero"
+msgstr "El Monto del Documento es igual o menor que cero"
 
 msgctxt "model:ir.message,text:msg_delete_document_cash_bank"
 msgid ""
