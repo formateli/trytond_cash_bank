@@ -668,7 +668,10 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         ('invoice_customer', 'Customer Invoice'),
         ('invoice_supplier', 'Supplier Invoice'),
         ('move_line', 'Account Move Line'),
-        ], 'Type', states=_states, depends=_depends)
+        ], 'Type', states={
+            'readonly': Eval('receipt_state') != 'draft',
+            'required': True,
+        }, depends=_depends)
     amount = fields.Numeric('Amount', required=True,
         digits=(16, Eval('currency_digits', 2)),
         states=_states, depends=_depends + ['currency_digits'])
@@ -749,11 +752,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         if cursor.fetchone():
             cursor.execute(*sql_table.update(
                     columns=[sql_table.type],
-                    values=['move_line'],
-                    where=(sql_table.type == Null)
-                    & (sql_table.invoice == Null)))
-            cursor.execute(*sql_table.update(
-                    columns=[sql_table.type],
                     values=['invoice_customer'],
                     where=(sql_table.type == Null)
                     & (sql_table.invoice.in_(
@@ -772,6 +770,10 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                                 invoice_sql.type == 'in')
                             )))
                     ))
+            cursor.execute(*sql_table.update(
+                    columns=[sql_table.type],
+                    values=['move_line'],
+                    where=sql_table.type == Null))
 
     @classmethod
     def __setup__(cls):
@@ -783,10 +785,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             ]
 
     @staticmethod
-    def default_type():
-        return 'move_line'
-
-    @staticmethod
     def default_amount():
         return Decimal('0.0')
 
@@ -794,6 +792,12 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     def on_change_with_receipt_state(self, name=None):
         if self.receipt:
             return self.receipt.state
+
+    @fields.depends('receipt', '_parent_receipt.type')
+    def on_change_with_type(self, name=None):
+        if self.receipt and self.receipt.type:
+            if self.receipt.type.default_receipt_line_type:
+                return self.receipt.type.default_receipt_line_type
 
     @fields.depends('type')
     def on_change_type(self):

@@ -123,6 +123,8 @@ class ReceiptType(ModelSQL, ModelView):
             ('company', 'in', [Eval('context', {}).get('company', -1), None]),
             ('code', '=', 'cash_bank.receipt'),
         ])
+    default_receipt_line_type = fields.Selection(
+        'get_receipt_line_type', 'Default Receipt Line Type')
     party_required = fields.Boolean('Party Required')
     bank_account = fields.Boolean('Bank Account',
         states={
@@ -140,6 +142,12 @@ class ReceiptType(ModelSQL, ModelView):
     @staticmethod
     def default_active():
         return True
+
+    @classmethod
+    def get_receipt_line_type(cls):
+        pool = Pool()
+        Line = pool.get('cash_bank.receipt.line')
+        return Line.fields_get(['type'])['type']['selection']
 
     @fields.depends('cash_bank', '_parent_cash_bank.type')
     def on_change_with_cash_bank_type(self, name=None):

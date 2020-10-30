@@ -11,6 +11,8 @@ the full copyright notices and license terms. -->
     <field name="type"/>
     <label name="sequence"/>
     <field name="sequence"/>
+    <label name="default_receipt_line_type"/>
+    <field name="default_receipt_line_type"/>
     <label name="active"/>
     <field name="active"/>
     <label name="party_required"/>
