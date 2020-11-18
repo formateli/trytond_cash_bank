@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<!-- The COPYRIGHT file at the top level of this repository contains
+<!-- This file is part of Cash & Bank module.
+The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
 <tryton>
     <data>
@@ -15,8 +16,23 @@ the full copyright notices and license terms. -->
         <record model="ir.message" id="msg_party_required_cash_bank">
             <field name="text">Party is required.</field>
         </record>
-        <record model="ir.message" id="msg_amount_greater_invoice_amount_to_pay_cash_bank">
-            <field name="text">Amount "%(amount)s" is greater than the amount to pay of invoice.</field>
+        <record model="ir.message" id="msg_total_less_zero">
+            <field name="text">Total is less than zero.</field>
+        </record>
+        <record model="ir.message" id="msg_invalid_amount_sign">
+            <field name="text">Amount "%(amount)s" has an invalid sign for "%(document)s"</field>
+        </record>
+        <record model="ir.message" id="msg_amount_greater_amount_to_apply">
+            <field name="text">Amount "%(amount)s" is greater than document "%(document)s" avaiable amount to apply.</field>
+        </record>
+        <record model="ir.message" id="msg_line_amount_zero">
+            <field name="text">Line Amount is zero</field>
+        </record>
+        <record model="ir.message" id="msg_cash_less_zero">
+            <field name="text">Cash amount is less than zero</field>
+        </record>
+        <record model="ir.message" id="msg_document_less_equal_zero">
+            <field name="text">Document amount is equal to zero or less than zero</field>
         </record>
     </data>
 </tryton>

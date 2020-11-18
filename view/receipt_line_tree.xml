@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
-<!-- The COPYRIGHT file at the top level of this repository contains
+<!-- This file is part of Cash & Bank module.
+The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
 <tree>
     <field name="receipt"/>
+    <field name="type"/>
     <field name="description"/>
     <field name="party"/>
     <field name="invoice"/>

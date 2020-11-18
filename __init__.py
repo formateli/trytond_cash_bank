@@ -8,6 +8,7 @@ from . import document
 from . import receipt
 from . import transfer
 from . import convertion
+from . import party
 
 
 def register():
@@ -32,3 +33,6 @@ def register():
         convertion.DocumentConvertion,
         convertion.ConvertionLog,
         module='cash_bank', type_='model')
+    Pool.register(
+        party.PartyReplace,
+        module='cash_bank', type_='wizard')

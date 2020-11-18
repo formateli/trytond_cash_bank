@@ -1,14 +1,10 @@
+# This file is part of Cash & Bank module.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import ModelView, ModelSQL, fields, Unique
-from trytond.pyson import Eval, If
-
-__all__ = [
-    'CashBank',
-    'ReceiptType',
-    ]
+from trytond.pyson import Eval, If, Bool, Not, Or
 
 
 class CashBank(ModelSQL, ModelView):
@@ -23,8 +19,7 @@ class CashBank(ModelSQL, ModelView):
     type = fields.Selection([
             ('cash', 'Cash'),
             ('bank', 'Bank')
-            ],
-        'Type', required=True, translate=True)
+        ], 'Type', required=True, translate=True)
     journal_cash_bank = fields.Many2One('account.journal',
         "Journal", required=True,
         domain=[('type', '=', 'cash')])
@@ -34,8 +29,20 @@ class CashBank(ModelSQL, ModelView):
             ('type', '!=', None),
             ('closed', '!=', True),
             ('company', '=', Eval('company')),
-            ],
-        depends=['company'])
+        ], depends=['company'])
+    bank_account = fields.Many2One('bank.account', "Bank Account",
+        ondelete='RESTRICT',
+        states={
+            'required': Bool(Eval('type') == 'bank'),
+            'invisible': Not(Bool(Eval('type') == 'bank')),
+        },
+        domain=[
+            ('id', 'in', Eval('bank_account_owners'))
+        ], depends=['type', 'bank_account_owners'])
+    bank_account_owners = fields.Function(fields.One2Many('bank.account',
+        None, 'Bank Account Owners'),
+        'on_change_with_bank_account_owners',
+        setter='set_bank_account_owners')
     receipt_types = fields.One2Many('cash_bank.receipt_type',
         'cash_bank', 'Receipt types')
 
@@ -79,31 +86,70 @@ class CashBank(ModelSQL, ModelView):
     def default_company():
         return Transaction().context.get('company')
 
+    @fields.depends('company')
+    def on_change_with_bank_account_owners(self, name=None):
+        if self.company:
+            if self.company.party.bank_accounts:
+                res = []
+                for acc in self.company.party.bank_accounts:
+                    res.append(acc.id)
+                return res
+        return []
+
+    @classmethod
+    def set_bank_account_owners(cls, lines, name, value):
+        pass
+
 
 class ReceiptType(ModelSQL, ModelView):
     "Cash/Bank Receipt Type"
     __name__ = "cash_bank.receipt_type"
     cash_bank = fields.Many2One(
-            'cash_bank.cash_bank', 'Cash/Bank', required=True,
-            domain=[
-                ('company', 'in',
-                    [Eval('context', {}).get('company', -1), None])
-            ])
+        'cash_bank.cash_bank', 'Cash/Bank', required=True,
+        domain=[
+            ('company', 'in',
+                [Eval('context', {}).get('company', -1), None])
+        ])
+    cash_bank_type = fields.Function(fields.Char('Cash/Bank type'),
+        'on_change_with_cash_bank_type')
     name = fields.Char('Name', required=True, translate=True)
     type = fields.Selection([
             ('in', 'IN'),
             ('out', 'OUT')
-            ],
-        'Type', required=True)
+        ], 'Type', required=True)
     sequence = fields.Many2One('ir.sequence', "Receipt Sequence",
         required=True,
         domain=[
             ('company', 'in', [Eval('context', {}).get('company', -1), None]),
             ('code', '=', 'cash_bank.receipt'),
-            ])
+        ])
+    default_receipt_line_type = fields.Selection(
+        'get_receipt_line_type', 'Default Receipt Line Type')
     party_required = fields.Boolean('Party Required')
+    bank_account = fields.Boolean('Bank Account',
+        states={
+            'invisible': Or(
+                    Bool(Eval('cash_bank_type') != 'bank'),
+                    Not(Bool(Eval('party_required')))
+                )
+        }, depends=['party_required', 'cash_bank_type'])
+    bank_account_required = fields.Boolean('Bank Account Required',
+        states={
+            'invisible': Not(Bool(Eval('bank_account'))),
+        }, depends=['bank_account'])
     active = fields.Boolean('Active')
 
     @staticmethod
     def default_active():
         return True
+
+    @classmethod
+    def get_receipt_line_type(cls):
+        pool = Pool()
+        Line = pool.get('cash_bank.receipt.line')
+        return Line.fields_get(['type'])['type']['selection']
+
+    @fields.depends('cash_bank', '_parent_cash_bank.type')
+    def on_change_with_cash_bank_type(self, name=None):
+        if self.cash_bank:
+            return self.cash_bank.type

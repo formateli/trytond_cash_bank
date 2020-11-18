@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<!-- The COPYRIGHT file at the top level of this repository contains
+<!-- This file is part of Cash & Bank module.
+The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
 <tryton>
     <data>
@@ -86,7 +87,6 @@ the full copyright notices and license terms. -->
             <field name="perm_delete" eval="True"/>
         </record>
 
-
         <!-- receipt type -->
 
         <record model="ir.ui.view" id="receipt_type_view_form">
@@ -134,4 +134,3 @@ the full copyright notices and license terms. -->
         </record>
     </data>
 </tryton>
-

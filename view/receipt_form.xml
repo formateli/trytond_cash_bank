@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<!-- The COPYRIGHT file at the top level of this repository contains
+<!-- This file is part of Cash & Bank module.
+The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
 <form>
     <group col="6" colspan="4" id="header">
@@ -15,6 +16,9 @@ the full copyright notices and license terms. -->
         <field name="type"/>
         <label name="party"/>
         <field name="party"/>
+        <label name="bank_account"/>
+        <field name="bank_account"/>
+        <newline/>
         <label name="description"/>
         <field name="description" colspan="5"/>
     </group>

@@ -1,3 +1,4 @@
+# This file is part of Cash & Bank module.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.pyson import Eval
@@ -6,12 +7,6 @@ from trytond.model import (
     ModelSingleton, ModelView, ModelSQL, fields)
 from trytond.modules.company.model import (
     CompanyMultiValueMixin, CompanyValueMixin)
-
-__all__ = [
-        'Configuration',
-        'ConfigurationAccount',
-        'ConfigurationSequences'
-        ]
 
 
 class Configuration(
@@ -22,6 +17,8 @@ class Configuration(
         'Account Transfer',
         domain=[
             ('company', '=', Eval('context', {}).get('company', -1)),
+            ('type', '!=', None),
+            ('closed', '!=', True),
             ]))
     convertion_seq = fields.MultiValue(fields.Many2One(
         'ir.sequence', "Cash and Bank Convertion Sequence", required=True,
@@ -34,7 +31,7 @@ class Configuration(
     @classmethod
     def multivalue_model(cls, field):
         pool = Pool()
-        if field == 'account_transfer':
+        if field in {'account_transfer',}:
             return pool.get('cash_bank.configuration.account')
         if field == 'convertion_seq':
             return pool.get('cash_bank.configuration.sequences')
@@ -44,11 +41,12 @@ class Configuration(
 class ConfigurationAccount(ModelSQL, CompanyValueMixin):
     "Cash / Bank configuration Account"
     __name__ = 'cash_bank.configuration.account'
-
     account_transfer = fields.Many2One('account.account',
         'Account Transfer',
         domain=[
             ('company', '=', Eval('context', {}).get('company', -1)),
+            ('type', '!=', None),
+            ('closed', '!=', True),
             ])
 
 

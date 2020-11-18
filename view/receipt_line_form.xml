@@ -1,15 +1,19 @@
 <?xml version="1.0"?>
-<!-- The COPYRIGHT file at the top level of this repository contains
+<!-- This file is part of Cash & Bank module.
+The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
-<form>
+<form col="8">
     <label name="receipt"/>
-    <field name="receipt" colspan="3"/>
+    <field name="receipt" colspan="7"/>
+    <label name="type"/>
+    <field name="type"/>
     <label name="description"/>
-    <field name="description" colspan="3"/>
+    <field name="description" colspan="5"/>
     <label name="party"/>
     <field name="party"/>
     <label name="invoice"/>
     <field name="invoice"/>
+    <newline/>
     <label name="account"/>
     <field name="account"/>
     <label name="amount"/>
