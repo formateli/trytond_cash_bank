@@ -784,10 +784,6 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                 'cash_bank.msg_line_amount_zero'),
             ]
 
-    @staticmethod
-    def default_amount():
-        return Decimal('0.0')
-
     @fields.depends('receipt', '_parent_receipt.state')
     def on_change_with_receipt_state(self, name=None):
         if self.receipt:
@@ -804,7 +800,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         self.party = None
         self.invoice = None
         self.account = None
-        self.amount = Decimal('0.0')
+        self.amount = None
 
     @fields.depends('invoice', 'description',
                     'receipt', '_parent_receipt.type')
