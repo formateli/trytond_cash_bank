@@ -295,10 +295,17 @@ class Transfer(Workflow, ModelSQL, ModelView):
 
     def _create_line(self, type_, amount, transfer_account):
         Line = Pool().get('cash_bank.receipt.line')
+
+        party = None
+        if transfer_account.party_required:
+            party = self.company.party
+
         line = Line()
+        line.type = 'move_line'
         line.description = 'Transfer'
         line.account = transfer_account
         line.amount = amount
+        line.party = party
         return line
 
     def _get_doc(self, receipt, docs):
