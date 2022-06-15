@@ -121,7 +121,7 @@ class ReceiptType(ModelSQL, ModelView):
         required=True,
         domain=[
             ('company', 'in', [Eval('context', {}).get('company', -1), None]),
-            ('code', '=', 'cash_bank.receipt'),
+            ('sequence_type.name', '=', 'Cash and Bank Receipt'),
         ])
     default_receipt_line_type = fields.Selection(
         'get_receipt_line_type', 'Default Receipt Line Type')

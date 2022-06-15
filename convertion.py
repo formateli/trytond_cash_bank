@@ -59,17 +59,18 @@ class Convertion(Workflow, ModelSQL, ModelView):
         'convertion', 'document', 'Documents',
         domain=[
             ('last_receipt', '!=', None),
-            ('last_receipt.cash_bank.id', '=', Eval('cash_bank')),
+            ('last_receipt.cash_bank.id', '=', Eval('cash_bank', -999)),
             If(Eval('state') == 'draft',
                 [
                     ('convertion', '=', None),
                 ],
                 [
                     ('convertion', '!=', None),
-                    ('convertion.id', '=', Eval('id')),
+                    ('convertion.id', '=', Eval('id', -999)),
                 ]
             )
-        ], states=_STATES,
+        ],
+        states=_STATES,
         depends=_DEPENDS + ['cash_bank', 'id'])
     total_documents = fields.Function(fields.Numeric('Total Documents',
             digits=(16, Eval('currency_digits', 2)),
@@ -172,7 +173,8 @@ class Convertion(Workflow, ModelSQL, ModelView):
         for convertion in convertions:
             if convertion.number:
                 continue
-            convertion.number = Sequence.get_id(config.convertion_seq.id)
+            convertion.number = config.get_multivalue(
+                'convertion_seq', company=convertion.company.id).get()
         cls.save(convertions)
 
     @classmethod

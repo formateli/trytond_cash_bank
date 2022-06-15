@@ -5,7 +5,7 @@ from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import (
     sequence_ordered, Workflow, ModelView, ModelSQL, fields, Check)
-from trytond.pyson import Eval, If, Bool, Not, Or, In
+from trytond.pyson import Eval, If, Bool, Not, And, Or, In
 from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
@@ -531,13 +531,10 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
     @classmethod
     def set_number(cls, receipts):
-        pool = Pool()
-        Sequence = pool.get('ir.sequence')
         for receipt in receipts:
             if receipt.number:
                 continue
-            receipt.number = \
-                Sequence.get_id(receipt.type.sequence.id)
+            receipt.number = receipt.type.sequence.get()
         cls.save(receipts)
 
     @classmethod
@@ -679,10 +676,12 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         states={
             'required': Or(
                         Bool(Eval('party_required')),
-                        Eval('type') != 'move_line'),
+                        Eval('type') != 'move_line'
+                        ),
             'readonly': Or(
                         Eval('receipt_state') != 'draft',
-                        Bool(Eval('invoice'))),
+                        Bool(Eval('invoice'))
+                        ),
         }, depends=_depends + ['party_required', 'invoice'])
     account = fields.Many2One('account.account', 'Account', required=True,
         domain=[

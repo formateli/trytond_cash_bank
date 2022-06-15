@@ -25,7 +25,7 @@ class Configuration(
         domain=[
             ('company', 'in',
                 [Eval('context', {}).get('company', -1), None]),
-            ('code', '=', 'cash_bank.convertion'),
+            ('sequence_type.name', '=', 'Cash and Bank Convertion'),
             ]))
 
     @classmethod
@@ -57,5 +57,5 @@ class ConfigurationSequences(ModelSQL, CompanyValueMixin):
         'ir.sequence', "Cash and Bank Convertion Sequence",
         domain=[
             ('company', 'in', [Eval('company', -1), None]),
-            ('code', '=', 'cash_bank.convertion'),
+            ('sequence_type.name', '=', 'Cash and Bank Convertion'),
             ], depends=['company'])

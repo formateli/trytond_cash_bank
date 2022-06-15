@@ -8,7 +8,6 @@ the full copyright notices and license terms. -->
 
         <record model="ir.sequence.type" id="sequence_type_cash_bank_receipt">
             <field name="name">Cash and Bank Receipt</field>
-            <field name="code">cash_bank.receipt</field>
         </record>
         <record model="ir.sequence.type-res.group"
             id="sequence_type_cash_bank_receipt_group_admin">

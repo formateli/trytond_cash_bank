@@ -8,7 +8,6 @@ the full copyright notices and license terms. -->
 
         <record model="ir.sequence.type" id="sequence_type_cash_bank_convertion">
             <field name="name">Cash and Bank Convertion</field>
-            <field name="code">cash_bank.convertion</field>
         </record>
         <record model="ir.sequence.type-res.group"
             id="sequence_type_cash_bank_convertion_group_admin">
