@@ -662,6 +662,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
     type = fields.Selection([
+        (None, ''),
         ('invoice_customer', 'Customer Invoice'),
         ('invoice_supplier', 'Supplier Invoice'),
         ('move_line', 'Account Move Line'),
