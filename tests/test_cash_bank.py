@@ -13,15 +13,6 @@ from trytond.transaction import Transaction
 from trytond.exceptions import UserError
 from trytond.model.modelsql import SQLConstraintError, RequiredValidationError
 
-__all__ = [
-    'create_bank_account',
-    'create_cash_bank',
-    'create_receipt',
-    'create_sequence',
-    'create_journal',
-    'create_fiscalyear'
-    ]
-
 
 class CashBankTestCase(ModuleTestCase):
     'Test CashBank module'
@@ -550,6 +541,36 @@ class CashBankTestCase(ModuleTestCase):
         return party
 
 
+def create_bank_account(party_bank, party_owner):
+    pool = Pool()
+    Bank = pool.get('bank')
+    Account = pool.get('bank.account')
+    Number = pool.get('bank.account.number')
+    PartyAccount = pool.get('bank.account-party.party')
+
+    bank = Bank(
+        party=party_bank,
+        )
+    bank.save()
+
+    account = Account(
+        bank=bank,
+        numbers=[Number(
+            type='other',
+            number='12345678'
+            )]
+        )
+    account.save()
+
+    party_account = PartyAccount(
+        owner=party_owner,
+        account=account
+        )
+    party_account.save()
+
+    return bank, account
+
+
 def create_fiscalyear(company):
     pool = Pool()
     FiscalYear = pool.get('account.fiscalyear')
@@ -612,36 +633,6 @@ def create_sequence(name, type_, company, is_strict=False):
         )
     seq.save()
     return seq
-
-
-def create_bank_account(party_bank, party_owner):
-    pool = Pool()
-    Bank = pool.get('bank')
-    Account = pool.get('bank.account')
-    Number = pool.get('bank.account.number')
-    PartyAccount = pool.get('bank.account-party.party')
-
-    bank = Bank(
-        party=party_bank,
-        )
-    bank.save()
-
-    account = Account(
-        bank=bank,
-        numbers=[Number(
-            type='other',
-            number='12345678'
-            )]
-        )
-    account.save()
-
-    party_account = PartyAccount(
-        owner=party_owner,
-        account=account
-        )
-    party_account.save()
-
-    return bank, account
 
 
 def create_cash_bank(

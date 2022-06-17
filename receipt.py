@@ -655,9 +655,9 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
 
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
         required=True, ondelete='CASCADE', select=True)
-    #currency = fields.Function(
-    #    fields.Many2One('currency.currency', 'Currency'),
-    #    'on_change_with_currency')
+    currency = fields.Function(
+        fields.Many2One('currency.currency', 'Currency'),
+        'on_change_with_currency')
     currency_digits = fields.Function(
         fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
@@ -817,6 +817,11 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
                         self.amount *= -1
             if not self.description and self.invoice.reference:
                 self.description = self.invoice.reference
+
+    @fields.depends('receipt', '_parent_receipt.currency')
+    def on_change_with_currency(self, name=None):
+        if self.receipt:
+            return self.receipt.currency.id
 
     @fields.depends('receipt', '_parent_receipt.currency',
             'type', 'account', 'party', 'invoice')
