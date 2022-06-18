@@ -1,7 +1,7 @@
 # This file is part of Cash & Bank module.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
-from trytond.pyson import Eval
+from trytond.pyson import Eval, Id
 from trytond.pool import Pool
 from trytond.model import (
     ModelSingleton, ModelView, ModelSQL, fields)
@@ -21,12 +21,14 @@ class Configuration(
             ('closed', '!=', True),
             ]))
     convertion_seq = fields.MultiValue(fields.Many2One(
-        'ir.sequence', "Cash and Bank Convertion Sequence", required=True,
-        domain=[
-            ('company', 'in',
-                [Eval('context', {}).get('company', -1), None]),
-            ('sequence_type.name', '=', 'Cash and Bank Convertion'),
-            ]))
+            'ir.sequence', "Cash and Bank Convertion Sequence", required=True,
+            domain=[
+                ('company', 'in',
+                    [Eval('context', {}).get('company', -1), None]),
+                ('sequence_type', '=',
+                    Id('cash_bank', 'sequence_type_cash_bank_convertion')),
+                ]))
+
 
     @classmethod
     def multivalue_model(cls, field):
@@ -54,8 +56,10 @@ class ConfigurationSequences(ModelSQL, CompanyValueMixin):
     'Configuration Sequences'
     __name__ = 'cash_bank.configuration.sequences'
     convertion_seq = fields.Many2One(
-        'ir.sequence', "Cash and Bank Convertion Sequence",
+        'ir.sequence', "Cash and Bank Convertion Sequence", required=True,
         domain=[
-            ('company', 'in', [Eval('company', -1), None]),
-            ('sequence_type.name', '=', 'Cash and Bank Convertion'),
-            ], depends=['company'])
+            ('company', 'in',
+                [Eval('context', {}).get('company', -1), None]),
+            ('sequence_type', '=',
+                Id('cash_bank', 'sequence_type_cash_bank_convertion')),
+            ])
