@@ -167,7 +167,6 @@ class Convertion(Workflow, ModelSQL, ModelView):
     @classmethod
     def set_number(cls, convertions):
         pool = Pool()
-        Sequence = pool.get('ir.sequence')
         Config = pool.get('cash_bank.configuration')
         config = Config(1)
         for convertion in convertions:

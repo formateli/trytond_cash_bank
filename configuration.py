@@ -21,7 +21,7 @@ class Configuration(
             ('closed', '!=', True),
             ]))
     convertion_seq = fields.MultiValue(fields.Many2One(
-            'ir.sequence', "Cash and Bank Convertion Sequence", required=True,
+            'ir.sequence', "Cash and Bank Convertion Sequence",
             domain=[
                 ('company', 'in',
                     [Eval('context', {}).get('company', -1), None]),
@@ -56,7 +56,7 @@ class ConfigurationSequences(ModelSQL, CompanyValueMixin):
     'Configuration Sequences'
     __name__ = 'cash_bank.configuration.sequences'
     convertion_seq = fields.Many2One(
-        'ir.sequence', "Cash and Bank Convertion Sequence", required=True,
+        'ir.sequence', "Cash and Bank Convertion Sequence",
         domain=[
             ('company', 'in',
                 [Eval('context', {}).get('company', -1), None]),
