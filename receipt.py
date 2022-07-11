@@ -495,6 +495,35 @@ class Receipt(Workflow, ModelSQL, ModelView):
         cls.set_document_receipt(receipts)
 
     @classmethod
+    def _validate_receipt(cls, receipt):
+        if not receipt.lines:
+            raise UserError(
+                gettext('cash_bank.msg_receipt_no_lines',
+                receipt=receipt.rec_name
+                ))
+        if receipt.diff != 0:
+            raise UserError(
+                gettext('cash_bank.msg_diff_total_lines_cash_bank'
+                ))
+        if receipt.total < 0:
+            raise UserError(
+                gettext('cash_bank.msg_total_less_zero'
+                ))
+        if receipt.cash < 0:
+            raise UserError(
+                gettext('cash_bank.msg_cash_less_zero'
+                ))
+        for doc in receipt.documents:
+            if doc.amount <= 0:
+                raise UserError(
+                    gettext('cash_bank.msg_document_less_equal_zero'
+                    ))
+        if receipt.type.party_required and not receipt.party:
+            raise UserError(
+                gettext('cash_bank.msg_party_required_cash_bank'
+                ))
+
+    @classmethod
     def set_document_receipt(cls, receipts):
         def doc_exists(id_, docs):
             for dc in docs:
@@ -572,32 +601,8 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @Workflow.transition('confirmed')
     def confirm(cls, receipts):
         for receipt in receipts:
-            if not receipt.lines:
-                raise UserError(
-                    gettext('cash_bank.msg_receipt_no_lines',
-                    receipt=receipt.rec_name
-                    ))
-            if receipt.diff != 0:
-                raise UserError(
-                    gettext('cash_bank.msg_diff_total_lines_cash_bank'
-                    ))
-            if receipt.total < 0:
-                raise UserError(
-                    gettext('cash_bank.msg_total_less_zero'
-                    ))
-            if receipt.cash < 0:
-                raise UserError(
-                    gettext('cash_bank.msg_cash_less_zero'
-                    ))
-            for doc in receipt.documents:
-                if doc.amount <= 0:
-                    raise UserError(
-                        gettext('cash_bank.msg_document_less_equal_zero'
-                        ))
-            if receipt.type.party_required and not receipt.party:
-                raise UserError(
-                    gettext('cash_bank.msg_party_required_cash_bank'
-                    ))
+            cls._validate_receipt(receipt)
+
             move, period = receipt._get_move()
             move.save()
             receipt_line_move = receipt._get_move_line(period)
@@ -629,6 +634,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         Move = Pool().get('account.move')
 
         for receipt in receipts:
+            cls._validate_receipt(receipt)
             for line in receipt.lines:
                 line.reconcile()
 

@@ -56,7 +56,7 @@ msgstr "Caja y Banco Secuencia de Conversión"
 
 msgctxt "field:cash_bank.convertion,cash_bank:"
 msgid "Cash"
-msgstr "Caja"
+msgstr "Efectivo"
 
 msgctxt "field:cash_bank.convertion,company:"
 msgid "Company"
@@ -730,6 +730,15 @@ msgstr "El Monto de Efectivo es menor que cero"
 msgctxt "model:ir.message,text:msg_document_less_equal_zero"
 msgid "Document amount is equal to zero or less than zero"
 msgstr "El Monto del Documento es igual o menor que cero"
+
+
+msgctxt "model:ir.message,text:msg_transfer_no_total"
+msgid "Transfer Total must be greater than zero"
+msgstr "El Total de la Transferencia debe ser mayor que cero"
+
+msgctxt "model:ir.message,text:msg_no_transfer_account"
+msgid "Transfer Account must be defined in Configuration"
+msgstr "La Cuenta de Transferencia debe ser definida en la Configuracion"
 
 msgctxt "model:ir.message,text:msg_delete_document_cash_bank"
 msgid ""

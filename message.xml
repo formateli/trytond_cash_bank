@@ -34,5 +34,11 @@ the full copyright notices and license terms. -->
         <record model="ir.message" id="msg_document_less_equal_zero">
             <field name="text">Document amount is equal to zero or less than zero</field>
         </record>
+        <record model="ir.message" id="msg_transfer_no_total">
+            <field name="text">Transfer Total must be greater than zero</field>
+        </record>
+        <record model="ir.message" id="msg_no_transfer_account">
+            <field name="text">Transfer Account must be defined in Configuration</field>
+        </record>
     </data>
 </tryton>

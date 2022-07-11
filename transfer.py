@@ -276,7 +276,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
         if self.total_documents:
             self.total += self.total_documents
 
-    def _new_receipt(self, cash_bank, type_):
+    def _new_receipt(self, cash_bank, cash, type_):
         Receipt = Pool().get('cash_bank.receipt')
         party = None
         if type_.party_required:
@@ -290,23 +290,27 @@ class Transfer(Workflow, ModelSQL, ModelView):
             party=party,
             reference=self.reference,
             description=self.description,
-            cash=self.cash
+            cash=cash
         )
 
-    def _create_line(self, type_, amount, transfer_account):
+    def _create_line(self, type_, receipt, transfer_account):
         Line = Pool().get('cash_bank.receipt.line')
 
         party = None
         if transfer_account.party_required:
             party = self.company.party
 
+        description = 'Transfer'
+        if self.description:
+            description += ' ' + self.description
+
         line = Line()
         line.type = 'move_line'
-        line.description = 'Transfer'
+        line.description = description
         line.account = transfer_account
-        line.amount = amount
+        line.amount = receipt.total
         line.party = party
-        return line
+        return [line]
 
     def _get_doc(self, receipt, docs):
         Docs = Pool().get('cash_bank.document')
@@ -315,16 +319,22 @@ class Transfer(Workflow, ModelSQL, ModelView):
         Docs.save(docs)
         return docs
 
-    def _create_receipt(self, cash_bank, type_, trasnfer_account, docs):
-        receipt = self._new_receipt(cash_bank, type_)
+    def _create_receipt(self, cash_bank, cash, type_, trasnfer_account, docs):
+        receipt = self._new_receipt(cash_bank, cash, type_)
         receipt.documents = self._get_doc(receipt, docs)
         receipt.save()
-        receipt.lines = [
-            self._create_line(
-                type_, receipt.total, trasnfer_account),
-            ]
+        receipt.lines = self._create_line(
+                type_, receipt, trasnfer_account)
         receipt.save()
         return receipt
+
+    def _create_receipt_from(self, cash_bank, type_, trasnfer_account, docs):
+        return self._create_receipt(
+                cash_bank, self.cash, type_, trasnfer_account, docs)
+
+    def _create_receipt_to(self, cash_bank, type_, trasnfer_account, docs):
+        return self._create_receipt(
+                cash_bank, self.cash, type_, trasnfer_account, docs)
 
     def create_receipts(self):
         pool = Pool()
@@ -334,14 +344,23 @@ class Transfer(Workflow, ModelSQL, ModelView):
         config = Config(1)
         transfer_account = config.account_transfer
 
-        receipt_from = self._create_receipt(self.cash_bank_from,
-                                            self.type_from,
-                                            transfer_account,
-                                            self.documents)
+        if not transfer_account:
+            raise UserError(
+                gettext('cash_bank.msg_no_transfer_account'
+                ))
+
+        receipt_from = self._create_receipt_from(
+                    self.cash_bank_from,
+                    self.type_from,
+                    transfer_account,
+                    self.documents)
         Receipt.confirm([receipt_from])
 
-        receipt_to = self._create_receipt(
-            self.cash_bank_to, self.type_to, transfer_account, self.documents)
+        receipt_to = self._create_receipt_to(
+                    self.cash_bank_to,
+                    self.type_to,
+                    transfer_account,
+                    self.documents)
         Receipt.confirm([receipt_to])
 
         self.receipt_from = receipt_from
@@ -376,14 +395,25 @@ class Transfer(Workflow, ModelSQL, ModelView):
     @Workflow.transition('draft')
     def draft(cls, transfers):
         Receipt = Pool().get('cash_bank.receipt')
+        rcps = []
+        rcps_to = []
+        rcps_from = []
         for transfer in transfers:
-            receipt_from = transfer.receipt_from
-            receipt_to = transfer.receipt_to
+            rcps += [
+                transfer.receipt_from,
+                transfer.receipt_to
+            ]
+            rcps_to.append(transfer.receipt_to)
+            rcps_from.append(transfer.receipt_from)
+
             transfer.receipt_from = None
             transfer.receipt_to = None
-            Receipt.draft([receipt_from, receipt_to])
-            Receipt.delete([receipt_to])
-            Receipt.delete([receipt_from])
+
+        Receipt.draft(rcps)
+        # Deletion order is important for Documents update
+        Receipt.delete(rcps_to)
+        Receipt.delete(rcps_from)
+
         cls.save(transfers)
         write_log('Draft', transfers)
 
@@ -394,7 +424,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
         for transfer in transfers:
             if transfer.total <= 0:
                 raise UserError(
-                    gettext('cash_bank.msg_no_total_cash_bank'
+                    gettext('cash_bank.msg_transfer_no_total'
                     ))
             transfer.create_receipts()
             cls.set_transfer([
@@ -412,6 +442,10 @@ class Transfer(Workflow, ModelSQL, ModelView):
         Receipt = Pool().get('cash_bank.receipt')
         rcps = []
         for transfer in transfers:
+            if transfer.total <= 0:
+                raise UserError(
+                    gettext('cash_bank.msg_transfer_no_total'
+                    ))
             rcps += [
                 transfer.receipt_from,
                 transfer.receipt_to
