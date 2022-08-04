@@ -28,6 +28,21 @@ class Configuration(
                 ('sequence_type', '=',
                     Id('cash_bank', 'sequence_type_cash_bank_convertion')),
                 ]))
+    month_allow = fields.MultiValue(fields.Selection([
+        (None, ''),
+        ('1', 'January'),
+        ('2', 'Febrary'),
+        ('3', 'March'),
+        ('4', 'April'),
+        ('5', 'May'),
+        ('6', 'June'),
+        ('7', 'July'),
+        ('8', 'August'),
+        ('9', 'September'),
+        ('10', 'October'),
+        ('11', 'November'),
+        ('12', 'December'),
+        ], 'Month Allowed', sort=False))
 
 
     @classmethod
@@ -37,6 +52,8 @@ class Configuration(
             return pool.get('cash_bank.configuration.account')
         if field == 'convertion_seq':
             return pool.get('cash_bank.configuration.sequences')
+        if field == 'month_allow':
+            return pool.get('cash_bank.configuration.other')
         return super(Configuration, cls).multivalue_model(field)
 
 
@@ -63,3 +80,23 @@ class ConfigurationSequences(ModelSQL, CompanyValueMixin):
             ('sequence_type', '=',
                 Id('cash_bank', 'sequence_type_cash_bank_convertion')),
             ])
+
+
+class ConfigurationOther(ModelSQL, CompanyValueMixin):
+    'Configuration Other'
+    __name__ = 'cash_bank.configuration.other'
+    month_allow = fields.Selection([
+        (None, ''),
+        ('1', 'January'),
+        ('2', 'Febrary'),
+        ('3', 'March'),
+        ('4', 'April'),
+        ('5', 'May'),
+        ('6', 'June'),
+        ('7', 'July'),
+        ('8', 'August'),
+        ('9', 'September'),
+        ('10', 'October'),
+        ('11', 'November'),
+        ('12', 'December'),
+        ], 'Month Allowed', sort=False)

@@ -496,6 +496,18 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
     @classmethod
     def _validate_receipt(cls, receipt):
+        pool = Pool()
+        Config = pool.get('cash_bank.configuration')
+
+        config = Config(1)
+
+        if config.month_allow:
+            month = int(config.month_allow)
+            if month != receipt.date.month:
+                raise UserError(
+                    gettext('cash_bank.msg_receipt_month_not_allow',
+                    receipt=receipt.rec_name
+                    ))
         if not receipt.lines:
             raise UserError(
                 gettext('cash_bank.msg_receipt_no_lines',

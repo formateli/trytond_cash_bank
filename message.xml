@@ -40,5 +40,8 @@ the full copyright notices and license terms. -->
         <record model="ir.message" id="msg_no_transfer_account">
             <field name="text">Transfer Account must be defined in Configuration</field>
         </record>
+        <record model="ir.message" id="msg_receipt_month_not_allow">
+            <field name="text">Month of receipt "%(receipt)s" date is not allowed.</field>
+        </record>
     </data>
 </tryton>
