@@ -26,7 +26,7 @@ the full copyright notices and license terms. -->
             <field name="path">icons/cash-bank.svg</field>
         </record>
         <menuitem name="Cash &amp; Bank" sequence="30"
-            id="menu_cash_bank" parent="account.menu_account"
+            id="menu_cash_bank" parent="bank.menu_banking"
             icon="cash-bank"/>
         <record model="ir.ui.menu-res.group"
             id="menu_cash_bank_group_cash_bank">

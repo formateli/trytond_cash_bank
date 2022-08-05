@@ -12,6 +12,7 @@ from trytond.exceptions import UserError
 from sql import Null
 from decimal import Decimal
 
+#TODO Use Monetary
 
 class Receipt(Workflow, ModelSQL, ModelView):
     "Cash/Bank Receipt"
