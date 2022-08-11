@@ -18,6 +18,7 @@ def register():
         configuration.ConfigurationSequences,
         configuration.ConfigurationOther,
         account.Move,
+        account.MoveLine,
         cash_bank.CashBank,
         cash_bank.ReceiptType,
         document.DocumentType,
