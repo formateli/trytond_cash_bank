@@ -580,6 +580,26 @@ class Receipt(Workflow, ModelSQL, ModelView):
         cls.save(receipts)
 
     @classmethod
+    def copy(cls, receipts, default=None):
+        Date = Pool().get('ir.date')
+
+        if default is None:
+            default = {}
+        else:
+            default = default.copy()
+        default.setdefault('date', Date.today())
+        default.setdefault('number', None)
+        default.setdefault('reference', None)
+        default.setdefault('description', None)
+        default.setdefault('logs', None)
+        default.setdefault('documents', None)
+        default.setdefault('move', None)
+        default.setdefault('line_move', None)
+        default.setdefault('transfer', None)
+        default.setdefault('attachments', None)
+        return super(Receipt, cls).copy(receipts, default=default)
+
+    @classmethod
     def delete(cls, receipts):
         pool = Pool()
         Attachment = pool.get('ir.attachment')
@@ -865,11 +885,11 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     def copy(cls, lines, default=None):
         if default is None:
             default = {}
-        default = default.copy()
-        default['move'] = None
-        default['invoice'] = None
-        default['attachments'] = None
-        return super(Line, cls).copy(lines, default=default)
+        else:
+            default = default.copy()
+        default.setdefault('line_move', None)
+        default.setdefault('invoice', None)
+        return super().copy(lines, default=default)
 
     @classmethod
     def get_receipt_states(cls):
