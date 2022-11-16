@@ -13,6 +13,7 @@ from sql import Null
 from decimal import Decimal
 
 #TODO Use Monetary
+# CAche total for tree displaying
 
 class Receipt(Workflow, ModelSQL, ModelView):
     "Cash/Bank Receipt"
