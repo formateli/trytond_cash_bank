@@ -15,7 +15,7 @@ class CashBank(ModelSQL, ModelView):
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
-        ], select=True)
+        ])
     type = fields.Selection([
             ('cash', 'Cash'),
             ('bank', 'Bank')

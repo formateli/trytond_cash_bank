@@ -34,7 +34,7 @@ class Transfer(Workflow, ModelSQL, ModelView):
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
-            ], select=True)
+            ])
     date = fields.Date('Date', required=True,
         states=_STATES, depends=_DEPENDS)
     reference = fields.Char('Reference', size=None)
@@ -472,13 +472,13 @@ class DocumentTransfer(ModelSQL):
     'Transfer - Document'
     __name__ = 'cash_bank.document-cash_bank.transfer'
     document = fields.Many2One('cash_bank.document', 'Document',
-        ondelete='CASCADE', select=True, required=True)
+        ondelete='CASCADE', required=True)
     transfer = fields.Many2One('cash_bank.transfer', 'Transfer',
-        ondelete='CASCADE', select=True, required=True)
+        ondelete='CASCADE', required=True)
 
 
 class TransferLog(LogActionMixin):
     "Transfer Logs"
     __name__ = "cash_bank.transfer.log_action"
     resource = fields.Many2One('cash_bank.transfer',
-        'Receipt', ondelete='CASCADE', select=True)
+        'Receipt', ondelete='CASCADE')

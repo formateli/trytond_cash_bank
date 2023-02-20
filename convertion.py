@@ -33,8 +33,8 @@ class Convertion(Workflow, ModelSQL, ModelView):
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
-            ], select=True)
-    number = fields.Char('Number', size=None, readonly=True, select=True)
+            ])
+    number = fields.Char('Number', size=None, readonly=True)
     cash_bank = fields.Many2One('cash_bank.cash_bank',
         'Cash', required=True,
         domain=[
@@ -247,13 +247,13 @@ class DocumentConvertion(ModelSQL):
     'Convertion - Document'
     __name__ = 'cash_bank.document-cash_bank.convertion'
     document = fields.Many2One('cash_bank.document', 'Document',
-        ondelete='CASCADE', select=True, required=True)
+        ondelete='CASCADE', required=True)
     convertion = fields.Many2One('cash_bank.convertion', 'Convertion',
-        ondelete='CASCADE', select=True, required=True)
+        ondelete='CASCADE', required=True)
 
 
 class ConvertionLog(LogActionMixin):
     "Convertion Logs"
     __name__ = "cash_bank.convertion.log_action"
     resource = fields.Many2One('cash_bank.convertion',
-        'Receipt', ondelete='CASCADE', select=True)
+        'Receipt', ondelete='CASCADE')

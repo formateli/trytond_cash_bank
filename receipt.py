@@ -31,7 +31,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
-            ], select=True)
+            ])
     cash_bank = fields.Many2One(
         'cash_bank.cash_bank', 'Cash/Bank', required=True,
         domain=[
@@ -57,7 +57,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         states={'readonly': True})
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
-    number = fields.Char('Number', size=None, readonly=True, select=True)
+    number = fields.Char('Number', size=None, readonly=True)
     reference = fields.Char('Reference', size=None)
     description = fields.Char('Description', size=None,
         states=_states, depends=_depends)
@@ -694,7 +694,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     _depends = ['receipt_state']
 
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
-        required=True, ondelete='CASCADE', select=True)
+        required=True, ondelete='CASCADE')
     currency = fields.Function(
         fields.Many2One('currency.currency', 'Currency'),
         'on_change_with_currency')
@@ -1036,4 +1036,4 @@ class ReceiptLog(LogActionMixin):
     "Receipt Logs"
     __name__ = "cash_bank.receipt.log_action"
     resource = fields.Many2One('cash_bank.receipt',
-        'Receipt', ondelete='CASCADE', select=True)
+        'Receipt', ondelete='CASCADE')
