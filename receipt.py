@@ -679,7 +679,17 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @ModelView.button
     @Workflow.transition('cancel')
     def cancel(cls, receipts):
-        Move = Pool().get('account.move')
+        pool = Pool()
+        Move = pool.get('account.move')
+        Line = pool.get('cash_bank.receipt.line')
+        lines_to_del = []
+        for receipt in receipts:
+            for line in receipt.lines:
+                # It is necessary if invoice has been paid
+                # in any other process
+                if line.invoice and line.invoice.state != 'posted':
+                    lines_to_del.append(line)
+        Line.delete(lines_to_del)
         Move.delete([r.move for r in receipts])
         write_log('log_action.msg_cancelled', receipts)
 
