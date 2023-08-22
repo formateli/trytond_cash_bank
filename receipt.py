@@ -987,7 +987,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
 
             reconcile_lines, remainder = \
                 self.invoice.get_reconcile_lines_for_amount(
-                    amount_to_reconcile)
+                    amount_to_reconcile, self.currency)
 
             assert self.line_move.account == self.invoice.account
 
