@@ -90,7 +90,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         'Bank Account Required'),
         'on_change_with_bank_account_required')
     cash = fields.Numeric('Cash',
-        digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
+        digits=(16, Eval('currency_digits', 2)),
         states=_states, depends=_depends + ['currency_digits'])
     documents = fields.Many2Many('cash_bank.document-cash_bank.receipt',
         'receipt', 'document', 'Documents',
