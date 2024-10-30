@@ -72,7 +72,9 @@ the full copyright notices and license terms. -->
             <label name="currency"/>
             <field name="currency"/>
             <label name="move"/>
-            <field name="move"/>
+	    <field name="move"/>
+            <label name="transfer"/>
+            <field name="transfer"/>
             <newline />
             <field name="logs" colspan="4"
                 view_ids="log_action.log_view_tree,log_action.log_view_form"/>

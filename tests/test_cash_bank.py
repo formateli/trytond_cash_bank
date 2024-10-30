@@ -13,15 +13,6 @@ from trytond.transaction import Transaction
 from trytond.exceptions import UserError
 from trytond.model.modelsql import SQLConstraintError, RequiredValidationError
 
-__all__ = [
-    'create_bank_account',
-    'create_cash_bank',
-    'create_receipt',
-    'create_sequence',
-    'create_journal',
-    'create_fiscalyear'
-    ]
-
 
 class CashBankTestCase(ModuleTestCase):
     'Test CashBank module'
@@ -43,7 +34,6 @@ class CashBankTestCase(ModuleTestCase):
         ReceiptType = pool.get('cash_bank.receipt_type')
 
         party = self._create_party('Party test', None)
-
         transaction = Transaction()
 
         company = create_company()
@@ -74,12 +64,12 @@ class CashBankTestCase(ModuleTestCase):
             cheque_type.save()
 
             sequence = create_sequence(
-                'Cash/Bank Sequence',
-                'cash_bank.receipt',
+                'Cash/Bank Receipt Sequence',
+                'Cash and Bank Receipt',
                 company)
             sequence_convertion = create_sequence(
                 'Cash/Bank Convertion',
-                'cash_bank.convertion',
+                'Cash and Bank Convertion',
                 company)
 
             config.convertion_seq = sequence_convertion
@@ -136,9 +126,10 @@ class CashBankTestCase(ModuleTestCase):
             line = ReceiptLine(
                 receipt=receipt,
                 amount=Decimal('100.0'),
-                account=account_revenue
+                account=account_revenue,
+                type='move_line',
                 )
-
+            
             receipt.lines = [line]
             receipt.save()
 
@@ -183,7 +174,8 @@ class CashBankTestCase(ModuleTestCase):
             line = ReceiptLine(
                 receipt=receipt,
                 amount=Decimal('100.0'),
-                account=account_expense
+                account=account_expense,
+                type='move_line'
                 )
 
             receipt.lines = [line]
@@ -240,7 +232,8 @@ class CashBankTestCase(ModuleTestCase):
             line = ReceiptLine(
                 receipt=receipt,
                 amount=Decimal('100.0'),
-                account=account_revenue
+                account=account_revenue,
+                type='move_line',
                 )
             receipt.lines = [line]
             receipt.save()
@@ -274,7 +267,8 @@ class CashBankTestCase(ModuleTestCase):
             receipt_1.lines = [
                 ReceiptLine(
                     amount=Decimal('100.0'),
-                    account=account_expense
+                    account=account_expense,
+                    type='move_line'
                 )]
             receipt_1.documents = Document.search([])
             receipt_1.save()
@@ -298,7 +292,8 @@ class CashBankTestCase(ModuleTestCase):
             receipt_1.lines = [
                 ReceiptLine(
                     amount=Decimal('100.0'),
-                    account=account_expense
+                    account=account_expense,
+                    type='move_line'
                 )]
             receipt_1.documents = Document.search([])
             receipt_1.save()
@@ -546,6 +541,36 @@ class CashBankTestCase(ModuleTestCase):
         return party
 
 
+def create_bank_account(party_bank, party_owner):
+    pool = Pool()
+    Bank = pool.get('bank')
+    Account = pool.get('bank.account')
+    Number = pool.get('bank.account.number')
+    PartyAccount = pool.get('bank.account-party.party')
+
+    bank = Bank(
+        party=party_bank,
+        )
+    bank.save()
+
+    account = Account(
+        bank=bank,
+        numbers=[Number(
+            type='other',
+            number='12345678'
+            )]
+        )
+    account.save()
+
+    party_account = PartyAccount(
+        owner=party_owner,
+        account=account
+        )
+    party_account.save()
+
+    return bank, account
+
+
 def create_fiscalyear(company):
     pool = Pool()
     FiscalYear = pool.get('account.fiscalyear')
@@ -553,7 +578,7 @@ def create_fiscalyear(company):
         'account.fiscalyear.invoice_sequence')
 
     invoice_seq = create_sequence(
-        'Invoice Sequence', 'account.invoice', company.id, True)
+        'Invoice Sequence', 'Invoice', company.id, True)
 
     seq = InvoiceSequence()
     seq.company = company
@@ -587,55 +612,27 @@ def create_receipt_types(name, sequence):
             name=name + ' ' + t,
             type=t,
             sequence=sequence,
+            default_receipt_line_type='move_line'
         )
         res.append(rt)
     return res
 
 
-def create_sequence(name, code, company, is_strict=False):
+def create_sequence(name, type_, company, is_strict=False):
     pool = Pool()
+    Type_ = pool.get('ir.sequence.type')
     if is_strict:
         Sequence = pool.get('ir.sequence.strict')
     else:
         Sequence = pool.get('ir.sequence')
     seq = Sequence(
         name=name,
-        code=code,
+        sequence_type=Type_.search([('name', '=', type_)])[0],
         company=company,
         type='incremental'
         )
     seq.save()
     return seq
-
-
-def create_bank_account(party_bank, party_owner):
-    pool = Pool()
-    Bank = pool.get('bank')
-    Account = pool.get('bank.account')
-    Number = pool.get('bank.account.number')
-    PartyAccount = pool.get('bank.account-party.party')
-
-    bank = Bank(
-        party=party_bank,
-        )
-    bank.save()
-
-    account = Account(
-        bank=bank,
-        numbers=[Number(
-            type='other',
-            number='12345678'
-            )]
-        )
-    account.save()
-
-    party_account = PartyAccount(
-        owner=party_owner,
-        account=account
-        )
-    party_account.save()
-
-    return bank, account
 
 
 def create_cash_bank(
@@ -676,8 +673,4 @@ def create_receipt(
     return receipt
 
 
-def suite():
-    suite = trytond.tests.test_tryton.suite()
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(
-        CashBankTestCase))
-    return suite
+del ModuleTestCase

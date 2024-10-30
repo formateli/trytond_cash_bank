@@ -8,7 +8,6 @@ the full copyright notices and license terms. -->
 
         <record model="ir.sequence.type" id="sequence_type_cash_bank_receipt">
             <field name="name">Cash and Bank Receipt</field>
-            <field name="code">cash_bank.receipt</field>
         </record>
         <record model="ir.sequence.type-res.group"
             id="sequence_type_cash_bank_receipt_group_admin">
@@ -119,7 +118,7 @@ the full copyright notices and license terms. -->
 
         <record model="ir.model.access" id="access_receipt">
             <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
-            <field name="perm_read" eval="False"/>
+            <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>
@@ -135,7 +134,7 @@ the full copyright notices and license terms. -->
 
         <record model="ir.model.access" id="access_receipt_line">
             <field name="model" search="[('model', '=', 'cash_bank.receipt.line')]"/>
-            <field name="perm_read" eval="False"/>
+            <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>
@@ -149,14 +148,48 @@ the full copyright notices and license terms. -->
             <field name="perm_delete" eval="True"/>
         </record>
 
+
+        <record model="res.group" id="group_cash_bank_btn_confirm">
+            <field name="name">Cash &amp; Bank Button Confirm</field>
+        </record>
+        <record model="res.user-res.group"
+            id="user_admin_group_cash_bank_btn_confirm">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cash_bank_btn_confirm"/>
+        </record>
+        <record model="res.group" id="group_cash_bank_btn_post">
+            <field name="name">Cash &amp; Bank Button Post</field>
+        </record>
+        <record model="res.user-res.group"
+            id="user_admin_group_cash_bank_btn_post">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cash_bank_btn_post"/>
+        </record>
+        <record model="res.group" id="group_cash_bank_btn_cancel">
+            <field name="name">Cash &amp; Bank Button Cancel</field>
+        </record>
+        <record model="res.user-res.group"
+            id="user_admin_group_cash_bank_btn_cancel">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cash_bank_btn_cancel"/>
+        </record>
+        <record model="res.group" id="group_cash_bank_btn_draft">
+            <field name="name">Cash &amp; Bank Button Draft</field>
+        </record>
+        <record model="res.user-res.group"
+            id="user_admin_group_cash_bank_btn_draft">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cash_bank_btn_draft"/>
+        </record>
+
         <record model="ir.model.button" id="receipt_draft_button">
             <field name="name">draft</field>
             <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
         </record>
         <record model="ir.model.button-res.group"
-                id="receipt_draft_button_group_cash_bank_admin">
+                id="receipt_draft_button_group_cash_bank_btn_draft">
             <field name="button" ref="receipt_draft_button"/>
-            <field name="group" ref="group_cash_bank_admin"/>
+            <field name="group" ref="group_cash_bank_btn_draft"/>
         </record>
 
         <record model="ir.model.button" id="receipt_confirm_button">
@@ -164,9 +197,9 @@ the full copyright notices and license terms. -->
             <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
         </record>
         <record model="ir.model.button-res.group"
-                id="receipt_confirm_button_group_cash_bank_admin">
+                id="receipt_confirm_button_group_cash_bank_btn_confirm">
             <field name="button" ref="receipt_confirm_button"/>
-            <field name="group" ref="group_cash_bank_admin"/>
+            <field name="group" ref="group_cash_bank_btn_confirm"/>
         </record>
 
         <record model="ir.model.button" id="receipt_post_button">
@@ -174,9 +207,9 @@ the full copyright notices and license terms. -->
             <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
         </record>
         <record model="ir.model.button-res.group"
-                id="receipt_post_button_group_cash_bank_admin">
+                id="receipt_post_button_group_cash_bank_btn_post">
             <field name="button" ref="receipt_post_button"/>
-            <field name="group" ref="group_cash_bank_admin"/>
+            <field name="group" ref="group_cash_bank_btn_post"/>
         </record>
 
         <record model="ir.model.button" id="receipt_cancel_button">
@@ -184,9 +217,9 @@ the full copyright notices and license terms. -->
             <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
         </record>
         <record model="ir.model.button-res.group"
-                id="receipt_cancel_button_group_cash_bank_admin">
+                id="receipt_cancel_button_group_cash_bank_btn_cancel">
             <field name="button" ref="receipt_cancel_button"/>
-            <field name="group" ref="group_cash_bank_admin"/>
+            <field name="group" ref="group_cash_bank_btn_cancel"/>
         </record>
     </data>
 </tryton>

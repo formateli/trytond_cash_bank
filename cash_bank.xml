@@ -26,7 +26,7 @@ the full copyright notices and license terms. -->
             <field name="path">icons/cash-bank.svg</field>
         </record>
         <menuitem name="Cash &amp; Bank" sequence="30"
-            id="menu_cash_bank" parent="account.menu_account"
+            id="menu_cash_bank" parent="bank.menu_banking"
             icon="cash-bank"/>
         <record model="ir.ui.menu-res.group"
             id="menu_cash_bank_group_cash_bank">
@@ -56,6 +56,9 @@ the full copyright notices and license terms. -->
         <record model="ir.action.act_window" id="act_cash_bank_form">
             <field name="name">Cash &amp; Banks</field>
             <field name="res_model">cash_bank.cash_bank</field>
+            <field name="domain"
+                eval="[('company', '=', Eval('context', {}).get('company', -1))]"
+                pyson="1"/>
         </record>
         <record model="ir.action.act_window.view" id="act_cash_bank_form_view1">
             <field name="sequence" eval="10"/>

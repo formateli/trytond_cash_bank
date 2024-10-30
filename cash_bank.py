@@ -4,7 +4,7 @@
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import ModelView, ModelSQL, fields, Unique
-from trytond.pyson import Eval, If, Bool, Not, Or
+from trytond.pyson import Eval, If, Bool, Not, Or, Id
 
 
 class CashBank(ModelSQL, ModelView):
@@ -15,7 +15,7 @@ class CashBank(ModelSQL, ModelView):
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
-        ], select=True)
+        ])
     type = fields.Selection([
             ('cash', 'Cash'),
             ('bank', 'Bank')
@@ -121,7 +121,8 @@ class ReceiptType(ModelSQL, ModelView):
         required=True,
         domain=[
             ('company', 'in', [Eval('context', {}).get('company', -1), None]),
-            ('code', '=', 'cash_bank.receipt'),
+            ('sequence_type', '=',
+                Id('cash_bank', 'sequence_type_cash_bank_receipt')),
         ])
     default_receipt_line_type = fields.Selection(
         'get_receipt_line_type', 'Default Receipt Line Type')

@@ -3,11 +3,15 @@
 The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
 <tree>
+    <field name="company" expand="1" optional="1"/>
     <field name="date"/>
     <field name="cash_bank"/>
     <field name="type"/>
+    <field name="reference" expand="1" optional="0"/>
+    <field name="description" expand="1" optional="1"/>
     <field name="number"/>
     <field name="party"/>
     <field name="total"/>
+    <field name="state" expand="1" optional="1"/>
 </tree>
 

@@ -38,6 +38,10 @@ msgctxt "field:cash_bank.configuration.account,account_transfer:"
 msgid "Account Transfer"
 msgstr "Cuenta de Transferencia"
 
+msgctxt "field:cash_bank.configuration,month_allow:"
+msgid "Month Allowed"
+msgstr "Mes Permitido"
+
 msgctxt "field:cash_bank.configuration,convertion_seq:"
 msgid "Cash and Bank Convertion Sequence"
 msgstr "Caja y Banco Secuencia de Conversión"
@@ -56,7 +60,7 @@ msgstr "Caja y Banco Secuencia de Conversión"
 
 msgctxt "field:cash_bank.convertion,cash_bank:"
 msgid "Cash"
-msgstr "Caja"
+msgstr "Efectivo"
 
 msgctxt "field:cash_bank.convertion,company:"
 msgid "Company"
@@ -731,6 +735,19 @@ msgctxt "model:ir.message,text:msg_document_less_equal_zero"
 msgid "Document amount is equal to zero or less than zero"
 msgstr "El Monto del Documento es igual o menor que cero"
 
+
+msgctxt "model:ir.message,text:msg_transfer_no_total"
+msgid "Transfer Total must be greater than zero"
+msgstr "El Total de la Transferencia debe ser mayor que cero"
+
+msgctxt "model:ir.message,text:msg_no_transfer_account"
+msgid "Transfer Account must be defined in Configuration"
+msgstr "La Cuenta de Transferencia debe ser definida en la Configuracion"
+
+msgctxt "model:ir.message,text:msg_receipt_month_not_allow"
+msgid "Month of receipt \"%(receipt)s\" date is not allowed."
+msgstr "El mes de la fecha del recibo \"%(receipt)s\" no esta permitido."
+
 msgctxt "model:ir.message,text:msg_delete_document_cash_bank"
 msgid ""
 "Document %(doc_name)s \"%(doc_number)s\" must be in \"%(state)s\" state for "
@@ -818,6 +835,54 @@ msgstr "Caja"
 msgctxt "selection:cash_bank.convertion,state:"
 msgid "Canceled"
 msgstr "Cancelado"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "January"
+msgstr "Enero"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "Febrary"
+msgstr "Febrero"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "March"
+msgstr "Marzo"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "April"
+msgstr "Abril"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "May"
+msgstr "Mayo"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "June"
+msgstr "Junio"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "July"
+msgstr "Julio"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "August"
+msgstr "Agosto"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "September"
+msgstr "Septiembre"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "October"
+msgstr "Octubre"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "November"
+msgstr "Noviembre"
+
+msgctxt "selection:cash_bank.configuration,month_allow:"
+msgid "December"
+msgstr "Diciembre"
 
 msgctxt "selection:cash_bank.convertion,state:"
 msgid "Confirmed"

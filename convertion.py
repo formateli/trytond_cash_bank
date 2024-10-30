@@ -33,8 +33,8 @@ class Convertion(Workflow, ModelSQL, ModelView):
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
-            ], select=True)
-    number = fields.Char('Number', size=None, readonly=True, select=True)
+            ])
+    number = fields.Char('Number', size=None, readonly=True)
     cash_bank = fields.Many2One('cash_bank.cash_bank',
         'Cash', required=True,
         domain=[
@@ -59,17 +59,18 @@ class Convertion(Workflow, ModelSQL, ModelView):
         'convertion', 'document', 'Documents',
         domain=[
             ('last_receipt', '!=', None),
-            ('last_receipt.cash_bank.id', '=', Eval('cash_bank')),
+            ('last_receipt.cash_bank.id', '=', Eval('cash_bank', -999)),
             If(Eval('state') == 'draft',
                 [
                     ('convertion', '=', None),
                 ],
                 [
                     ('convertion', '!=', None),
-                    ('convertion.id', '=', Eval('id')),
+                    ('convertion.id', '=', Eval('id', -999)),
                 ]
             )
-        ], states=_STATES,
+        ],
+        states=_STATES,
         depends=_DEPENDS + ['cash_bank', 'id'])
     total_documents = fields.Function(fields.Numeric('Total Documents',
             digits=(16, Eval('currency_digits', 2)),
@@ -166,13 +167,13 @@ class Convertion(Workflow, ModelSQL, ModelView):
     @classmethod
     def set_number(cls, convertions):
         pool = Pool()
-        Sequence = pool.get('ir.sequence')
         Config = pool.get('cash_bank.configuration')
         config = Config(1)
         for convertion in convertions:
             if convertion.number:
                 continue
-            convertion.number = Sequence.get_id(config.convertion_seq.id)
+            convertion.number = config.get_multivalue(
+                'convertion_seq', company=convertion.company.id).get()
         cls.save(convertions)
 
     @classmethod
@@ -246,13 +247,13 @@ class DocumentConvertion(ModelSQL):
     'Convertion - Document'
     __name__ = 'cash_bank.document-cash_bank.convertion'
     document = fields.Many2One('cash_bank.document', 'Document',
-        ondelete='CASCADE', select=True, required=True)
+        ondelete='CASCADE', required=True)
     convertion = fields.Many2One('cash_bank.convertion', 'Convertion',
-        ondelete='CASCADE', select=True, required=True)
+        ondelete='CASCADE', required=True)
 
 
 class ConvertionLog(LogActionMixin):
     "Convertion Logs"
     __name__ = "cash_bank.convertion.log_action"
     resource = fields.Many2One('cash_bank.convertion',
-        'Receipt', ondelete='CASCADE', select=True)
+        'Receipt', ondelete='CASCADE')

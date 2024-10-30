@@ -67,7 +67,7 @@ the full copyright notices and license terms. -->
             <field name="domain"
                 eval="[('state', '=', 'posted'), ('company', If( And (Eval('context', {}).contains('company'), Eval('context', {}).get('company', None) != None), '=', '!=') , Eval('context', {}).get('company', -1))]"
                 pyson="1"/>
-            <field name="count" eval="True"/>
+            <field name="count" eval="False"/>
             <field name="act_window" ref="act_transfer_form"/>
         </record>
         <record model="ir.action.act_window.domain" id="act_transfer_form_domain_all">
@@ -108,6 +108,15 @@ the full copyright notices and license terms. -->
             <field name="group" ref="group_cash_bank_admin"/>
         </record>
 
+        <record model="res.group" id="group_cash_bank_transfer_btn_confirm">
+            <field name="name">Cash &amp; Bank Transfer Button Confirm</field>
+        </record>
+        <record model="res.user-res.group"
+            id="user_admin_group_cash_bank_transfer_btn_confirm">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cash_bank_transfer_btn_confirm"/>
+        </record>
+
         <record model="ir.model.button" id="transfer_confirm_button">
             <field name="name">confirm</field>
             <field name="model" search="[('model', '=', 'cash_bank.transfer')]"/>
@@ -116,6 +125,20 @@ the full copyright notices and license terms. -->
                 id="transfer_confirm_button_group_cash_bank_admin">
             <field name="button" ref="transfer_confirm_button"/>
             <field name="group" ref="group_cash_bank_admin"/>
+        </record>
+        <record model="ir.model.button-res.group"
+                id="transfer_confirm_button_group_cash_bank_transfer_btn_confirm">
+            <field name="button" ref="transfer_confirm_button"/>
+            <field name="group" ref="group_cash_bank_transfer_btn_confirm"/>
+        </record>
+
+        <record model="res.group" id="group_cash_bank_transfer_btn_post">
+            <field name="name">Cash &amp; Bank Transfer Button Post</field>
+        </record>
+        <record model="res.user-res.group"
+            id="user_admin_group_cash_bank_transfer_btn_post">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cash_bank_transfer_btn_post"/>
         </record>
 
         <record model="ir.model.button" id="transfer_post_button">
@@ -127,6 +150,12 @@ the full copyright notices and license terms. -->
             <field name="button" ref="transfer_post_button"/>
             <field name="group" ref="group_cash_bank_admin"/>
         </record>
+        <record model="ir.model.button-res.group"
+                id="transfer_post_button_group_cash_bank_transfer_btn_post">
+            <field name="button" ref="transfer_post_button"/>
+            <field name="group" ref="group_cash_bank_transfer_btn_post"/>
+        </record>
+
 
         <record model="ir.model.button" id="transfer_cancel_button">
             <field name="name">cancel</field>

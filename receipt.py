@@ -5,13 +5,15 @@ from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond.model import (
     sequence_ordered, Workflow, ModelView, ModelSQL, fields, Check)
-from trytond.pyson import Eval, If, Bool, Not, Or, In
+from trytond.pyson import Eval, If, Bool, Not, And, Or, In
 from trytond.modules.log_action import LogActionMixin, write_log
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from sql import Null
 from decimal import Decimal
 
+#TODO Use Monetary
+# CAche total for tree displaying
 
 class Receipt(Workflow, ModelSQL, ModelView):
     "Cash/Bank Receipt"
@@ -29,7 +31,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         domain=[
             ('id', If(Eval('context', {}).contains('company'), '=', '!='),
                 Eval('context', {}).get('company', -1)),
-            ], select=True)
+            ])
     cash_bank = fields.Many2One(
         'cash_bank.cash_bank', 'Cash/Bank', required=True,
         domain=[
@@ -55,7 +57,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         states={'readonly': True})
     currency_digits = fields.Function(fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
-    number = fields.Char('Number', size=None, readonly=True, select=True)
+    number = fields.Char('Number', size=None, readonly=True)
     reference = fields.Char('Reference', size=None)
     description = fields.Char('Description', size=None,
         states=_states, depends=_depends)
@@ -88,7 +90,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         'Bank Account Required'),
         'on_change_with_bank_account_required')
     cash = fields.Numeric('Cash',
-        digits=(16, Eval('_parent_receipt', {}).get('currency_digits', 2)),
+        digits=(16, Eval('currency_digits', 2)),
         states=_states, depends=_depends + ['currency_digits'])
     documents = fields.Many2Many('cash_bank.document-cash_bank.receipt',
         'receipt', 'document', 'Documents',
@@ -495,6 +497,47 @@ class Receipt(Workflow, ModelSQL, ModelView):
         cls.set_document_receipt(receipts)
 
     @classmethod
+    def _validate_receipt(cls, receipt):
+        pool = Pool()
+        Config = pool.get('cash_bank.configuration')
+
+        config = Config(1)
+
+        if config.month_allow:
+            month = int(config.month_allow)
+            if month != receipt.date.month:
+                raise UserError(
+                    gettext('cash_bank.msg_receipt_month_not_allow',
+                    receipt=receipt.rec_name
+                    ))
+        if not receipt.lines:
+            raise UserError(
+                gettext('cash_bank.msg_receipt_no_lines',
+                receipt=receipt.rec_name
+                ))
+        if receipt.diff != 0:
+            raise UserError(
+                gettext('cash_bank.msg_diff_total_lines_cash_bank'
+                ))
+        if receipt.total < 0:
+            raise UserError(
+                gettext('cash_bank.msg_total_less_zero'
+                ))
+        if receipt.cash < 0:
+            raise UserError(
+                gettext('cash_bank.msg_cash_less_zero'
+                ))
+        for doc in receipt.documents:
+            if doc.amount <= 0:
+                raise UserError(
+                    gettext('cash_bank.msg_document_less_equal_zero'
+                    ))
+        if receipt.type.party_required and not receipt.party:
+            raise UserError(
+                gettext('cash_bank.msg_party_required_cash_bank'
+                ))
+
+    @classmethod
     def set_document_receipt(cls, receipts):
         def doc_exists(id_, docs):
             for dc in docs:
@@ -531,14 +574,31 @@ class Receipt(Workflow, ModelSQL, ModelView):
 
     @classmethod
     def set_number(cls, receipts):
-        pool = Pool()
-        Sequence = pool.get('ir.sequence')
         for receipt in receipts:
             if receipt.number:
                 continue
-            receipt.number = \
-                Sequence.get_id(receipt.type.sequence.id)
+            receipt.number = receipt.type.sequence.get()
         cls.save(receipts)
+
+    @classmethod
+    def copy(cls, receipts, default=None):
+        Date = Pool().get('ir.date')
+
+        if default is None:
+            default = {}
+        else:
+            default = default.copy()
+        default.setdefault('date', Date.today())
+        default.setdefault('number', None)
+        default.setdefault('reference', None)
+        default.setdefault('description', None)
+        default.setdefault('logs', None)
+        default.setdefault('documents', None)
+        default.setdefault('move', None)
+        default.setdefault('line_move', None)
+        default.setdefault('transfer', None)
+        default.setdefault('attachments', None)
+        return super(Receipt, cls).copy(receipts, default=default)
 
     @classmethod
     def delete(cls, receipts):
@@ -575,32 +635,8 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @Workflow.transition('confirmed')
     def confirm(cls, receipts):
         for receipt in receipts:
-            if not receipt.lines:
-                raise UserError(
-                    gettext('cash_bank.msg_receipt_no_lines',
-                    receipt=receipt.rec_name
-                    ))
-            if receipt.diff != 0:
-                raise UserError(
-                    gettext('cash_bank.msg_diff_total_lines_cash_bank'
-                    ))
-            if receipt.total < 0:
-                raise UserError(
-                    gettext('cash_bank.msg_total_less_zero'
-                    ))
-            if receipt.cash < 0:
-                raise UserError(
-                    gettext('cash_bank.msg_cash_less_zero'
-                    ))
-            for doc in receipt.documents:
-                if doc.amount <= 0:
-                    raise UserError(
-                        gettext('cash_bank.msg_document_less_equal_zero'
-                        ))
-            if receipt.type.party_required and not receipt.party:
-                raise UserError(
-                    gettext('cash_bank.msg_party_required_cash_bank'
-                    ))
+            cls._validate_receipt(receipt)
+
             move, period = receipt._get_move()
             move.save()
             receipt_line_move = receipt._get_move_line(period)
@@ -632,6 +668,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         Move = Pool().get('account.move')
 
         for receipt in receipts:
+            cls._validate_receipt(receipt)
             for line in receipt.lines:
                 line.reconcile()
 
@@ -642,7 +679,17 @@ class Receipt(Workflow, ModelSQL, ModelView):
     @ModelView.button
     @Workflow.transition('cancel')
     def cancel(cls, receipts):
-        Move = Pool().get('account.move')
+        pool = Pool()
+        Move = pool.get('account.move')
+        Line = pool.get('cash_bank.receipt.line')
+        lines_to_del = []
+        for receipt in receipts:
+            for line in receipt.lines:
+                # It is necessary if invoice has been paid
+                # in any other process
+                if line.invoice and line.invoice.state != 'posted':
+                    lines_to_del.append(line)
+        Line.delete(lines_to_del)
         Move.delete([r.move for r in receipts])
         write_log('log_action.msg_cancelled', receipts)
 
@@ -657,7 +704,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     _depends = ['receipt_state']
 
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
-        required=True, ondelete='CASCADE', select=True)
+        required=True, ondelete='CASCADE')
     currency = fields.Function(
         fields.Many2One('currency.currency', 'Currency'),
         'on_change_with_currency')
@@ -665,6 +712,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         fields.Integer('Currency Digits'),
         'on_change_with_currency_digits')
     type = fields.Selection([
+        (None, ''),
         ('invoice_customer', 'Customer Invoice'),
         ('invoice_supplier', 'Supplier Invoice'),
         ('move_line', 'Account Move Line'),
@@ -679,10 +727,12 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
         states={
             'required': Or(
                         Bool(Eval('party_required')),
-                        Eval('type') != 'move_line'),
+                        Eval('type') != 'move_line'
+                        ),
             'readonly': Or(
                         Eval('receipt_state') != 'draft',
-                        Bool(Eval('invoice'))),
+                        Bool(Eval('invoice'))
+                        ),
         }, depends=_depends + ['party_required', 'invoice'])
     account = fields.Many2One('account.account', 'Account', required=True,
         domain=[
@@ -818,16 +868,16 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
             if not self.description and self.invoice.reference:
                 self.description = self.invoice.reference
 
-    @fields.depends('receipt', 'type',
-                    '_parent_receipt.currency')
+    @fields.depends('receipt', '_parent_receipt.currency')
     def on_change_with_currency(self, name=None):
         if self.receipt:
             return self.receipt.currency.id
 
-    @fields.depends('type', 'currency')
+    @fields.depends('receipt', '_parent_receipt.currency',
+            'type', 'account', 'party', 'invoice')
     def on_change_with_currency_digits(self, name=None):
-        if self.currency:
-            return self.currency.digits
+        if self.receipt and self.receipt.currency:
+            return self.receipt.currency.digits
         return 2
 
     @fields.depends('account')
@@ -846,11 +896,11 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     def copy(cls, lines, default=None):
         if default is None:
             default = {}
-        default = default.copy()
-        default['move'] = None
-        default['invoice'] = None
-        default['attachments'] = None
-        return super(Line, cls).copy(lines, default=default)
+        else:
+            default = default.copy()
+        default.setdefault('line_move', None)
+        default.setdefault('invoice', None)
+        return super().copy(lines, default=default)
 
     @classmethod
     def get_receipt_states(cls):
@@ -937,7 +987,7 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
 
             reconcile_lines, remainder = \
                 self.invoice.get_reconcile_lines_for_amount(
-                    amount_to_reconcile)
+                    amount_to_reconcile, self.currency)
 
             assert self.line_move.account == self.invoice.account
 
@@ -996,4 +1046,4 @@ class ReceiptLog(LogActionMixin):
     "Receipt Logs"
     __name__ = "cash_bank.receipt.log_action"
     resource = fields.Many2One('cash_bank.receipt',
-        'Receipt', ondelete='CASCADE', select=True)
+        'Receipt', ondelete='CASCADE')

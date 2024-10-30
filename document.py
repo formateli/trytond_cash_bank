@@ -127,13 +127,13 @@ class DocumentReceipt(ModelSQL):
     'Receipt - Document'
     __name__ = 'cash_bank.document-cash_bank.receipt'
     document = fields.Many2One('cash_bank.document', 'Document',
-        ondelete='CASCADE', select=True, required=True)
+        ondelete='CASCADE', required=True)
     receipt = fields.Many2One('cash_bank.receipt', 'Receipt',
-        ondelete='CASCADE', select=True, required=True)
+        ondelete='CASCADE', required=True)
 
 
 class DocumentLog(LogActionMixin):
     "Document Logs"
     __name__ = "cash_bank.document.log_action"
     resource = fields.Many2One('cash_bank.document',
-        'Document', ondelete='CASCADE', select=True)
+        'Document', ondelete='CASCADE')

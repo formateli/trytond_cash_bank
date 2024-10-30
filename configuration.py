@@ -1,7 +1,7 @@
 # This file is part of Cash & Bank module.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
-from trytond.pyson import Eval
+from trytond.pyson import Eval, Id
 from trytond.pool import Pool
 from trytond.model import (
     ModelSingleton, ModelView, ModelSQL, fields)
@@ -21,12 +21,29 @@ class Configuration(
             ('closed', '!=', True),
             ]))
     convertion_seq = fields.MultiValue(fields.Many2One(
-        'ir.sequence', "Cash and Bank Convertion Sequence", required=True,
-        domain=[
-            ('company', 'in',
-                [Eval('context', {}).get('company', -1), None]),
-            ('code', '=', 'cash_bank.convertion'),
-            ]))
+            'ir.sequence', "Cash and Bank Convertion Sequence",
+            domain=[
+                ('company', 'in',
+                    [Eval('context', {}).get('company', -1), None]),
+                ('sequence_type', '=',
+                    Id('cash_bank', 'sequence_type_cash_bank_convertion')),
+                ]))
+    month_allow = fields.MultiValue(fields.Selection([
+        (None, ''),
+        ('1', 'January'),
+        ('2', 'Febrary'),
+        ('3', 'March'),
+        ('4', 'April'),
+        ('5', 'May'),
+        ('6', 'June'),
+        ('7', 'July'),
+        ('8', 'August'),
+        ('9', 'September'),
+        ('10', 'October'),
+        ('11', 'November'),
+        ('12', 'December'),
+        ], 'Month Allowed', sort=False))
+
 
     @classmethod
     def multivalue_model(cls, field):
@@ -35,6 +52,8 @@ class Configuration(
             return pool.get('cash_bank.configuration.account')
         if field == 'convertion_seq':
             return pool.get('cash_bank.configuration.sequences')
+        if field == 'month_allow':
+            return pool.get('cash_bank.configuration.other')
         return super(Configuration, cls).multivalue_model(field)
 
 
@@ -56,6 +75,28 @@ class ConfigurationSequences(ModelSQL, CompanyValueMixin):
     convertion_seq = fields.Many2One(
         'ir.sequence', "Cash and Bank Convertion Sequence",
         domain=[
-            ('company', 'in', [Eval('company', -1), None]),
-            ('code', '=', 'cash_bank.convertion'),
-            ], depends=['company'])
+            ('company', 'in',
+                [Eval('context', {}).get('company', -1), None]),
+            ('sequence_type', '=',
+                Id('cash_bank', 'sequence_type_cash_bank_convertion')),
+            ])
+
+
+class ConfigurationOther(ModelSQL, CompanyValueMixin):
+    'Configuration Other'
+    __name__ = 'cash_bank.configuration.other'
+    month_allow = fields.Selection([
+        (None, ''),
+        ('1', 'January'),
+        ('2', 'Febrary'),
+        ('3', 'March'),
+        ('4', 'April'),
+        ('5', 'May'),
+        ('6', 'June'),
+        ('7', 'July'),
+        ('8', 'August'),
+        ('9', 'September'),
+        ('10', 'October'),
+        ('11', 'November'),
+        ('12', 'December'),
+        ], 'Month Allowed', sort=False)
