@@ -4,6 +4,11 @@
 from trytond.pool import PoolMeta
 from trytond.model import fields
 
+class Account(metaclass=PoolMeta):
+    __name__ = 'account.account'
+    party_is_required = fields.Boolean('Party Required')
+
+
 class Move(metaclass=PoolMeta):
     __name__ = 'account.move'
 

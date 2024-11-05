@@ -883,7 +883,10 @@ class Line(sequence_ordered(), ModelSQL, ModelView):
     @fields.depends('account')
     def on_change_with_party_required(self, name=None):
         if self.account:
-            return self.account.party_required
+            if self.account.party_required:
+                return True
+            if self.account.party_is_required:
+                return True
 
     def get_rec_name(self, name):
         return str(self.id) + '@' + self.receipt.rec_name
