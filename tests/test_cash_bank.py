@@ -11,7 +11,7 @@ from trytond.modules.account.tests import create_chart, get_fiscalyear
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.exceptions import UserError
-from trytond.model.modelsql import SQLConstraintError, RequiredValidationError
+from trytond.model.modelsql import RequiredValidationError
 
 
 class CashBankTestCase(ModuleTestCase):
@@ -85,7 +85,7 @@ class CashBankTestCase(ModuleTestCase):
                 party_bank=self._create_party('Party Bank', None),
                 party_owner=company.party)
 
-            with self.assertRaises(SQLConstraintError):
+            with self.assertRaises(KeyError):
                 # Must be a diferent account
                 bank = create_cash_bank(
                     company, 'Main Bank', 'bank',
