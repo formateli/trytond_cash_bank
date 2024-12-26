@@ -24,7 +24,7 @@ the full copyright notices and license terms. -->
             id="menu_configuration" sequence="5" icon="tryton-list"/>
 
         <record model="ir.model.access" id="access_configuration">
-            <field name="model" search="[('model', '=', 'cash_bank.configuration')]"/>
+	    <field name="model">cash_bank.configuration</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
@@ -32,7 +32,7 @@ the full copyright notices and license terms. -->
         </record>
 
         <record model="ir.model.access" id="access_configuration_admin">
-            <field name="model" search="[('model', '=', 'cash_bank.configuration')]"/>
+	    <field name="model">cash_bank.configuration</field>
             <field name="group" ref="group_cash_bank_admin"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>

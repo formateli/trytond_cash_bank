@@ -117,14 +117,14 @@ the full copyright notices and license terms. -->
         </record>
 
         <record model="ir.model.access" id="access_receipt">
-            <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
+	    <field name="model">cash_bank.receipt</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>
         </record>
         <record model="ir.model.access" id="access_receipt_group_cash_bank">
-            <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
+	    <field name="model">cash_bank.receipt</field>
             <field name="group" ref="group_cash_bank"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -133,14 +133,14 @@ the full copyright notices and license terms. -->
         </record>
 
         <record model="ir.model.access" id="access_receipt_line">
-            <field name="model" search="[('model', '=', 'cash_bank.receipt.line')]"/>
+	    <field name="model">cash_bank.receipt.line</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>
         </record>
         <record model="ir.model.access" id="access_receipt_line_group_cash_bank">
-            <field name="model" search="[('model', '=', 'cash_bank.receipt.line')]"/>
+	    <field name="model">cash_bank.receipt.line</field>
             <field name="group" ref="group_cash_bank"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -184,7 +184,7 @@ the full copyright notices and license terms. -->
 
         <record model="ir.model.button" id="receipt_draft_button">
             <field name="name">draft</field>
-            <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
+	    <field name="model">cash_bank.receipt</field>
         </record>
         <record model="ir.model.button-res.group"
                 id="receipt_draft_button_group_cash_bank_btn_draft">
@@ -194,7 +194,7 @@ the full copyright notices and license terms. -->
 
         <record model="ir.model.button" id="receipt_confirm_button">
             <field name="name">confirm</field>
-            <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
+	    <field name="model">cash_bank.receipt</field>
         </record>
         <record model="ir.model.button-res.group"
                 id="receipt_confirm_button_group_cash_bank_btn_confirm">
@@ -204,7 +204,7 @@ the full copyright notices and license terms. -->
 
         <record model="ir.model.button" id="receipt_post_button">
             <field name="name">post</field>
-            <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
+	    <field name="model">cash_bank.receipt</field>
         </record>
         <record model="ir.model.button-res.group"
                 id="receipt_post_button_group_cash_bank_btn_post">
@@ -214,7 +214,7 @@ the full copyright notices and license terms. -->
 
         <record model="ir.model.button" id="receipt_cancel_button">
             <field name="name">cancel</field>
-            <field name="model" search="[('model', '=', 'cash_bank.receipt')]"/>
+	    <field name="model">cash_bank.receipt</field>
         </record>
         <record model="ir.model.button-res.group"
                 id="receipt_cancel_button_group_cash_bank_btn_cancel">

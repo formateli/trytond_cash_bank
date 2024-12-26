@@ -75,14 +75,14 @@ the full copyright notices and license terms. -->
             action="act_cash_bank_form" id="menu_cash_bank_tree"/>
 
         <record model="ir.model.access" id="access_cash_bank">
-            <field name="model" search="[('model', '=', 'cash_bank.cash_bank')]"/>
+	    <field name="model">cash_bank.cash_bank</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>
         </record>
         <record model="ir.model.access" id="access_cash_bank_admin">
-            <field name="model" search="[('model', '=', 'cash_bank.cash_bank')]"/>
+	    <field name="model">cash_bank.cash_bank</field>
             <field name="group" ref="group_cash_bank_admin"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -121,14 +121,14 @@ the full copyright notices and license terms. -->
             action="act_receipt_type_form" id="menu_receipt_type_tree"/>
 
         <record model="ir.model.access" id="access_receipt_type">
-            <field name="model" search="[('model', '=', 'cash_bank.receipt_type')]"/>
+	    <field name="model">cash_bank.receipt_type</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>
         </record>
         <record model="ir.model.access" id="access_receipt_type_group_admin">
-            <field name="model" search="[('model', '=', 'cash_bank.receipt_type')]"/>
+	    <field name="model">cash_bank.receipt_type</field>
             <field name="group" ref="group_cash_bank_admin"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>

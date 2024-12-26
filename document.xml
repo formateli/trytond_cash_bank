@@ -35,14 +35,14 @@ the full copyright notices and license terms. -->
             action="act_document_type_form" id="menu_document_type_tree"/>
 
         <record model="ir.model.access" id="access_document_type">
-            <field name="model" search="[('model', '=', 'cash_bank.document.type')]"/>
+	    <field name="model">cash_bank.document.type</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>
         </record>
         <record model="ir.model.access" id="access_document_type_cash_bank_admin">
-            <field name="model" search="[('model', '=', 'cash_bank.document.type')]"/>
+	    <field name="model">cash_bank.document.type</field>
             <field name="group" ref="group_cash_bank_admin"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -71,14 +71,14 @@ the full copyright notices and license terms. -->
         </record>
 
         <record model="ir.model.access" id="access_document">
-            <field name="model" search="[('model', '=', 'cash_bank.document')]"/>
+	    <field name="model">cash_bank.document</field>
             <field name="perm_read" eval="False"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_delete" eval="False"/>
         </record>
         <record model="ir.model.access" id="access_document_group_cash_bank">
-            <field name="model" search="[('model', '=', 'cash_bank.document')]"/>
+	    <field name="model">cash_bank.document</field>
             <field name="group" ref="group_cash_bank"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
