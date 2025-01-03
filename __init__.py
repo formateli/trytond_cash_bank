@@ -17,6 +17,7 @@ def register():
         configuration.ConfigurationAccount,
         configuration.ConfigurationSequences,
         configuration.ConfigurationOther,
+        account.Account,
         account.Move,
         account.MoveLine,
         cash_bank.CashBank,
