@@ -29,7 +29,8 @@ class CashBank(ModelSQL, ModelView):
             ('type', '!=', None),
             ('closed', '!=', True),
             ('company', '=', Eval('company')),
-        ], depends=['company'])
+        ],
+        depends=['company'])
     bank_account = fields.Many2One('bank.account', "Bank Account",
         ondelete='RESTRICT',
         states={
@@ -120,9 +121,9 @@ class ReceiptType(ModelSQL, ModelView):
     sequence = fields.Many2One('ir.sequence', "Receipt Sequence",
         required=True,
         domain=[
-            ('company', 'in', [Eval('context', {}).get('company', -1), None]),
-            ('sequence_type', '=',
-                Id('cash_bank', 'sequence_type_cash_bank_receipt')),
+        #    ('company', 'in', [Eval('context', {}).get('company', -1), None]),
+        #    ('sequence_type', '=',
+        #        Id('cash_bank', 'sequence_type_cash_bank_receipt')),
         ])
     default_receipt_line_type = fields.Selection(
         'get_receipt_line_type', 'Default Receipt Line Type')

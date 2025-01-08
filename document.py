@@ -119,7 +119,7 @@ class Document(ModelSQL, ModelView):
     @classmethod
     def create(cls, vlist):
         documents = super(Document, cls).create(vlist)
-        write_log('Created', documents)
+        write_log('log_action.msg_created', documents)
         return documents
 
 
