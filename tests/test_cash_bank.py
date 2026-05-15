@@ -537,13 +537,13 @@ class CashBankTestCase(ModuleTestCase):
         pool = Pool()
         Party = pool.get('party.party')
         Address = pool.get('party.address')
-        addr = Address(
-            name=name,
-            )
+        #addr = Address(
+        #    name=name,
+        #    )
         party = Party(
             name=name,
             account_receivable=account,
-            addresses=[addr],
+        #    addresses=[addr],
             )
         party.save()
         return party
