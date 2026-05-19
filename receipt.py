@@ -222,7 +222,7 @@ class Receipt(Workflow, ModelSQL, ModelView):
         super(Receipt, cls).__setup__()
         cls._order = [
                 ('date', 'DESC'),
-                ('number', 'DESC'),
+                ('id', 'DESC')
                 ]
 
         cls._transitions |= set(
